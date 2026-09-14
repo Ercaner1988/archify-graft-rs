@@ -2,7 +2,9 @@
 
 use archify_bridge::GraftToArchifyBridge;
 use archify_delta::DeltaEngine;
-use archify_ir::{ArchitectureDiagram, Component, Connection, DiagramMeta, SemanticRole, VisualPreset};
+use archify_ir::{
+    ArchitectureDiagram, Component, Connection, DiagramMeta, SemanticRole, VisualPreset,
+};
 use archify_render::SvgRenderer;
 use graft_model::{CodeGraph, EdgeRelation, EdgeV1, NodeKind, NodeV1};
 
@@ -18,24 +20,66 @@ fn test_delta_svg_rendering_and_legend() {
     let before = ArchitectureDiagram {
         meta: meta.clone(),
         components: vec![
-            Component { id: "auth".into(), label: "AuthService".into(), sublabel: None, role: SemanticRole::Security, x: 50.0, y: 50.0, width: 140.0, height: 60.0 },
-            Component { id: "legacy_db".into(), label: "LegacyDB".into(), sublabel: None, role: SemanticRole::Database, x: 250.0, y: 50.0, width: 140.0, height: 60.0 },
+            Component {
+                id: "auth".into(),
+                label: "AuthService".into(),
+                sublabel: None,
+                role: SemanticRole::Security,
+                x: 50.0,
+                y: 50.0,
+                width: 140.0,
+                height: 60.0,
+            },
+            Component {
+                id: "legacy_db".into(),
+                label: "LegacyDB".into(),
+                sublabel: None,
+                role: SemanticRole::Database,
+                x: 250.0,
+                y: 50.0,
+                width: 140.0,
+                height: 60.0,
+            },
         ],
-        connections: vec![
-            Connection { from: "auth".into(), to: "legacy_db".into(), label: None, line_style: "default".into() },
-        ],
+        connections: vec![Connection {
+            from: "auth".into(),
+            to: "legacy_db".into(),
+            label: None,
+            line_style: "default".into(),
+        }],
         story_beats: vec![],
     };
 
     let after = ArchitectureDiagram {
         meta,
         components: vec![
-            Component { id: "auth".into(), label: "AuthServiceV2".into(), sublabel: None, role: SemanticRole::Security, x: 50.0, y: 50.0, width: 140.0, height: 60.0 },
-            Component { id: "cloud_db".into(), label: "CloudPostgres".into(), sublabel: None, role: SemanticRole::Database, x: 250.0, y: 50.0, width: 140.0, height: 60.0 },
+            Component {
+                id: "auth".into(),
+                label: "AuthServiceV2".into(),
+                sublabel: None,
+                role: SemanticRole::Security,
+                x: 50.0,
+                y: 50.0,
+                width: 140.0,
+                height: 60.0,
+            },
+            Component {
+                id: "cloud_db".into(),
+                label: "CloudPostgres".into(),
+                sublabel: None,
+                role: SemanticRole::Database,
+                x: 250.0,
+                y: 50.0,
+                width: 140.0,
+                height: 60.0,
+            },
         ],
-        connections: vec![
-            Connection { from: "auth".into(), to: "cloud_db".into(), label: None, line_style: "default".into() },
-        ],
+        connections: vec![Connection {
+            from: "auth".into(),
+            to: "cloud_db".into(),
+            label: None,
+            line_style: "default".into(),
+        }],
         story_beats: vec![],
     };
 
@@ -89,10 +133,25 @@ fn test_sequence_diagram_compilation_and_svg() {
     graph.add_node(auth);
     graph.add_node(db);
 
-    graph.add_edge(EdgeV1 { source: "main.rs:handle_request".to_string(), target: "auth.rs:authenticate".to_string(), relation: EdgeRelation::Calls, confidence: 1.0 });
-    graph.add_edge(EdgeV1 { source: "main.rs:handle_request".to_string(), target: "db.rs:query_data".to_string(), relation: EdgeRelation::Calls, confidence: 1.0 });
+    graph.add_edge(EdgeV1 {
+        source: "main.rs:handle_request".to_string(),
+        target: "auth.rs:authenticate".to_string(),
+        relation: EdgeRelation::Calls,
+        confidence: 1.0,
+    });
+    graph.add_edge(EdgeV1 {
+        source: "main.rs:handle_request".to_string(),
+        target: "db.rs:query_data".to_string(),
+        relation: EdgeRelation::Calls,
+        confidence: 1.0,
+    });
 
-    let seq = GraftToArchifyBridge::compile_sequence(&graph, "handle_request", "Request Call Sequence", "en");
+    let seq = GraftToArchifyBridge::compile_sequence(
+        &graph,
+        "handle_request",
+        "Request Call Sequence",
+        "en",
+    );
     assert_eq!(seq.participants.len(), 3);
     assert_eq!(seq.messages.len(), 2);
 
@@ -101,7 +160,10 @@ fn test_sequence_diagram_compilation_and_svg() {
     assert!(svg.contains("Request Call Sequence"));
     assert!(svg.contains("calls authenticate()"));
     assert!(svg.contains("calls query_data()"));
-    assert!(svg.contains("stroke-dasharray=\"4,4\""), "Vertical lifelines");
+    assert!(
+        svg.contains("stroke-dasharray=\"4,4\""),
+        "Vertical lifelines"
+    );
     assert!(svg.ends_with("</svg>\n"));
 }
 
@@ -130,7 +192,12 @@ fn test_dataflow_diagram_compilation_and_svg() {
 
     graph.add_node(node_in);
     graph.add_node(node_out);
-    graph.add_edge(EdgeV1 { source: "stream_in".to_string(), target: "stream_out".to_string(), relation: EdgeRelation::Calls, confidence: 0.95 });
+    graph.add_edge(EdgeV1 {
+        source: "stream_in".to_string(),
+        target: "stream_out".to_string(),
+        relation: EdgeRelation::Calls,
+        confidence: 0.95,
+    });
 
     let df = GraftToArchifyBridge::compile_dataflow(&graph, "Data Streaming Map", "en");
     assert_eq!(df.nodes.len(), 2);

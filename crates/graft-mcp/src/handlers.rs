@@ -1,12 +1,12 @@
 //! MCP Tool definitions and execution handlers.
 
-use serde_json::{json, Value};
+use archify_bridge::GraftToArchifyBridge;
+use archify_delta::DeltaEngine;
+use archify_render::SvgRenderer;
 use graft_model::{CodeGraph, EdgeRelation};
 use graft_parser::CodeExtractor;
 use graft_search::{Bm25Index, GraphRank};
-use archify_bridge::GraftToArchifyBridge;
-use archify_render::SvgRenderer;
-use archify_delta::DeltaEngine;
+use serde_json::{json, Value};
 
 pub struct ToolHandler;
 
@@ -82,11 +82,19 @@ impl ToolHandler {
                 });
                 (Ok((g, bm25_idx)), resp)
             }
-            Err(e) => (Err(e.to_string()), json!({ "isError": true, "content": [{ "type": "text", "text": e.to_string() }] })),
+            Err(e) => (
+                Err(e.to_string()),
+                json!({ "isError": true, "content": [{ "type": "text", "text": e.to_string() }] }),
+            ),
         }
     }
 
-    pub fn execute_ask(query: &str, limit: usize, bm25: Option<&Bm25Index>, graph: Option<&CodeGraph>) -> Value {
+    pub fn execute_ask(
+        query: &str,
+        limit: usize,
+        bm25: Option<&Bm25Index>,
+        graph: Option<&CodeGraph>,
+    ) -> Value {
         if let (Some(bm25), Some(graph)) = (bm25, graph) {
             let bm25_results = bm25.search(query, limit * 2);
             let ranked = GraphRank::compute(graph, &bm25_results, 0.25, 20);
@@ -131,14 +139,24 @@ impl ToolHandler {
 
     pub fn execute_render_diagram(args: &Value, graph: Option<&CodeGraph>) -> Value {
         if let Some(graph) = graph {
-            let title = args.get("title").and_then(|t| t.as_str()).unwrap_or("System Architecture");
+            let title = args
+                .get("title")
+                .and_then(|t| t.as_str())
+                .unwrap_or("System Architecture");
             let locale = args.get("locale").and_then(|l| l.as_str()).unwrap_or("tr");
-            let diag_type = args.get("diagram_type").and_then(|d| d.as_str()).unwrap_or("architecture");
-            let entrypoint = args.get("entrypoint").and_then(|e| e.as_str()).unwrap_or("main");
+            let diag_type = args
+                .get("diagram_type")
+                .and_then(|d| d.as_str())
+                .unwrap_or("architecture");
+            let entrypoint = args
+                .get("entrypoint")
+                .and_then(|e| e.as_str())
+                .unwrap_or("main");
 
             let svg = match diag_type {
                 "sequence" => {
-                    let seq = GraftToArchifyBridge::compile_sequence(graph, entrypoint, title, locale);
+                    let seq =
+                        GraftToArchifyBridge::compile_sequence(graph, entrypoint, title, locale);
                     SvgRenderer::render_sequence(&seq)
                 }
                 "dataflow" => {
@@ -146,7 +164,8 @@ impl ToolHandler {
                     SvgRenderer::render_dataflow(&df)
                 }
                 "delta" => {
-                    let delta = DeltaEngine::compute_graph_delta(&CodeGraph::new(), graph, title, locale);
+                    let delta =
+                        DeltaEngine::compute_graph_delta(&CodeGraph::new(), graph, title, locale);
                     SvgRenderer::render_delta(&delta)
                 }
                 _ => {

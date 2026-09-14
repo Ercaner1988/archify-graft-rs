@@ -1,8 +1,8 @@
 //! Interactive Archify & Graft Desktop Studio Application using egui.
 
-use egui::{Color32, Pos2, Rect, Sense, Vec2};
-use archify_ir::{ArchitectureDiagram, VisualPreset};
 use crate::{CanvasRenderer, NeonPainter, TrilingualUi};
+use archify_ir::{ArchitectureDiagram, VisualPreset};
+use egui::{Color32, Pos2, Rect, Sense, Vec2};
 
 pub struct ArchifyApp {
     pub diagram: Option<ArchitectureDiagram>,
@@ -69,7 +69,9 @@ impl ArchifyApp {
                         ui.label("📖 Story:");
                         if ui.button("◀").clicked() {
                             let curr = self.active_story_beat.unwrap_or(0);
-                            if curr > 0 { self.active_story_beat = Some(curr - 1); }
+                            if curr > 0 {
+                                self.active_story_beat = Some(curr - 1);
+                            }
                         }
                         if let Some(idx) = self.active_story_beat {
                             if let Some(beat) = diag.story_beats.get(idx) {
@@ -80,7 +82,9 @@ impl ArchifyApp {
                         }
                         if ui.button("▶").clicked() {
                             let curr = self.active_story_beat.map_or(0, |c| c + 1);
-                            if curr < diag.story_beats.len() { self.active_story_beat = Some(curr); }
+                            if curr < diag.story_beats.len() {
+                                self.active_story_beat = Some(curr);
+                            }
                         }
                         if self.active_story_beat.is_some() && ui.button("⏹").clicked() {
                             self.active_story_beat = None;
@@ -98,16 +102,43 @@ impl ArchifyApp {
 
                 // Language Switcher
                 ui.label("🌐");
-                if ui.selectable_label(self.locale == "tr", "Türkçe").clicked() { self.locale = "tr".to_string(); }
-                if ui.selectable_label(self.locale == "ar", "العربية").clicked() { self.locale = "ar".to_string(); }
-                if ui.selectable_label(self.locale == "en", "English").clicked() { self.locale = "en".to_string(); }
+                if ui.selectable_label(self.locale == "tr", "Türkçe").clicked() {
+                    self.locale = "tr".to_string();
+                }
+                if ui
+                    .selectable_label(self.locale == "ar", "العربية")
+                    .clicked()
+                {
+                    self.locale = "ar".to_string();
+                }
+                if ui
+                    .selectable_label(self.locale == "en", "English")
+                    .clicked()
+                {
+                    self.locale = "en".to_string();
+                }
 
                 ui.separator();
 
                 // Preset Selector
-                if ui.selectable_label(self.preset == VisualPreset::SignalFlow, "⚡ Neon").clicked() { self.preset = VisualPreset::SignalFlow; }
-                if ui.selectable_label(self.preset == VisualPreset::Classic, "🌙 Classic").clicked() { self.preset = VisualPreset::Classic; }
-                if ui.selectable_label(self.preset == VisualPreset::Blueprint, "📐 Blueprint").clicked() { self.preset = VisualPreset::Blueprint; }
+                if ui
+                    .selectable_label(self.preset == VisualPreset::SignalFlow, "⚡ Neon")
+                    .clicked()
+                {
+                    self.preset = VisualPreset::SignalFlow;
+                }
+                if ui
+                    .selectable_label(self.preset == VisualPreset::Classic, "🌙 Classic")
+                    .clicked()
+                {
+                    self.preset = VisualPreset::Classic;
+                }
+                if ui
+                    .selectable_label(self.preset == VisualPreset::Blueprint, "📐 Blueprint")
+                    .clicked()
+                {
+                    self.preset = VisualPreset::Blueprint;
+                }
 
                 ui.separator();
 
@@ -125,7 +156,8 @@ impl ArchifyApp {
 
         // Central Interactive Canvas
         egui::CentralPanel::default().show(ctx, |ui| {
-            let (response, painter) = ui.allocate_painter(ui.available_size(), Sense::click_and_drag());
+            let (response, painter) =
+                ui.allocate_painter(ui.available_size(), Sense::click_and_drag());
 
             if response.dragged() {
                 self.pan += response.drag_delta();
@@ -148,13 +180,23 @@ impl ArchifyApp {
                     )
                 };
 
-                CanvasRenderer::draw_connections(&painter, diagram, to_screen, self.active_route.as_deref());
+                CanvasRenderer::draw_connections(
+                    &painter,
+                    diagram,
+                    to_screen,
+                    self.active_route.as_deref(),
+                );
 
                 let pointer_pos = ctx.input(|i| i.pointer.hover_pos());
                 let mut newly_selected = None;
 
                 for comp in &diagram.components {
-                    if !self.search_text.is_empty() && !comp.label.to_lowercase().contains(&self.search_text.to_lowercase()) {
+                    if !self.search_text.is_empty()
+                        && !comp
+                            .label
+                            .to_lowercase()
+                            .contains(&self.search_text.to_lowercase())
+                    {
                         continue;
                     }
 
@@ -162,7 +204,7 @@ impl ArchifyApp {
                     let size = Vec2::new(comp.width * self.zoom, comp.height * self.zoom);
                     let rect = Rect::from_min_size(min_pos, size);
 
-                    let is_hovered = pointer_pos.map_or(false, |pos| rect.contains(pos));
+                    let is_hovered = pointer_pos.is_some_and(|pos| rect.contains(pos));
                     if is_hovered && response.clicked() {
                         newly_selected = Some(comp.id.clone());
                         if self.route_start.is_none() {
@@ -184,14 +226,29 @@ impl ArchifyApp {
                     }
 
                     let is_selected = self.selected_id.as_deref() == Some(&comp.id);
-                    let is_in_route = self.active_route.as_ref().map_or(false, |r| r.contains(&comp.id))
+                    let is_in_route = self
+                        .active_route
+                        .as_ref()
+                        .is_some_and(|r| r.contains(&comp.id))
                         || self.route_start.as_deref() == Some(&comp.id);
 
-                    let is_beat_active = self.active_story_beat.and_then(|idx| {
-                        diagram.story_beats.get(idx).map(|b| b.highlighted_nodes.contains(&comp.id))
-                    }).unwrap_or(true);
+                    let is_beat_active = self
+                        .active_story_beat
+                        .and_then(|idx| {
+                            diagram
+                                .story_beats
+                                .get(idx)
+                                .map(|b| b.highlighted_nodes.contains(&comp.id))
+                        })
+                        .unwrap_or(true);
 
-                    NeonPainter::paint_neon_rect(&painter, rect, comp.role, 6.0 * self.zoom, (is_hovered || is_selected || is_in_route) && is_beat_active);
+                    NeonPainter::paint_neon_rect(
+                        &painter,
+                        rect,
+                        comp.role,
+                        6.0 * self.zoom,
+                        (is_hovered || is_selected || is_in_route) && is_beat_active,
+                    );
 
                     let text_alpha = if is_beat_active { 255 } else { 70 };
                     let text_color = Color32::from_rgba_unmultiplied(0xf8, 0xfa, 0xfc, text_alpha);
@@ -205,7 +262,8 @@ impl ArchifyApp {
                     );
 
                     if let Some(sub) = &comp.sublabel {
-                        let sub_color = Color32::from_rgba_unmultiplied(0x94, 0xa3, 0xb8, text_alpha);
+                        let sub_color =
+                            Color32::from_rgba_unmultiplied(0x94, 0xa3, 0xb8, text_alpha);
                         painter.text(
                             Pos2::new(rect.center().x, rect.center().y + 10.0 * self.zoom),
                             egui::Align2::CENTER_CENTER,

@@ -78,7 +78,9 @@ impl CodeGraph {
     }
 
     pub fn get_node_by_id(&self, id: &str) -> Option<&NodeV1> {
-        self.node_index_map.get(id).and_then(|&idx| self.nodes.get(idx))
+        self.node_index_map
+            .get(id)
+            .and_then(|&idx| self.nodes.get(idx))
     }
 
     pub fn rebuild_index(&mut self) {

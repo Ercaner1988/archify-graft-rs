@@ -25,10 +25,15 @@ impl AstExtractor {
         for line in content.lines() {
             let trimmed = line.trim();
 
-            if trimmed.starts_with("pub struct ") || trimmed.starts_with("struct ") || trimmed.starts_with("class ") {
+            if trimmed.starts_with("pub struct ")
+                || trimmed.starts_with("struct ")
+                || trimmed.starts_with("class ")
+            {
                 let parts: Vec<&str> = trimmed.split_whitespace().collect();
                 if parts.len() >= 2 {
-                    let name = parts[parts.len() - 1].trim_end_matches('{').trim_end_matches(';');
+                    let name = parts[parts.len() - 1]
+                        .trim_end_matches('{')
+                        .trim_end_matches(';');
                     let class_id = format!("{}:{}", path_str, name);
                     current_class = Some(class_id.clone());
 
@@ -54,7 +59,9 @@ impl AstExtractor {
             if trimmed.starts_with("pub enum ") || trimmed.starts_with("enum ") {
                 let parts: Vec<&str> = trimmed.split_whitespace().collect();
                 if parts.len() >= 2 {
-                    let name = parts[parts.len() - 1].trim_end_matches('{').trim_end_matches(';');
+                    let name = parts[parts.len() - 1]
+                        .trim_end_matches('{')
+                        .trim_end_matches(';');
                     let enum_id = format!("{}:{}", path_str, name);
 
                     graph.add_node(NodeV1 {
@@ -76,10 +83,15 @@ impl AstExtractor {
                 }
             }
 
-            if trimmed.starts_with("pub trait ") || trimmed.starts_with("trait ") || trimmed.starts_with("interface ") {
+            if trimmed.starts_with("pub trait ")
+                || trimmed.starts_with("trait ")
+                || trimmed.starts_with("interface ")
+            {
                 let parts: Vec<&str> = trimmed.split_whitespace().collect();
                 if parts.len() >= 2 {
-                    let name = parts[parts.len() - 1].trim_end_matches('{').trim_end_matches(';');
+                    let name = parts[parts.len() - 1]
+                        .trim_end_matches('{')
+                        .trim_end_matches(';');
                     let iface_id = format!("{}:{}", path_str, name);
 
                     graph.add_node(NodeV1 {

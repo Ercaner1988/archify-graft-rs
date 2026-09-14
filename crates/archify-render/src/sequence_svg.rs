@@ -15,7 +15,10 @@ impl SequenceSvgRenderer {
 
         let mut svg = String::new();
         svg.push_str("<svg xmlns=\"http://www.w3.org/2000/svg\" ");
-        svg.push_str(&format!("viewBox=\"0 0 {} {}\" width=\"100%\" height=\"100%\" ", canvas_w, canvas_h));
+        svg.push_str(&format!(
+            "viewBox=\"0 0 {} {}\" width=\"100%\" height=\"100%\" ",
+            canvas_w, canvas_h
+        ));
         svg.push_str("style=\"background:#020617;font-family:system-ui, sans-serif;\"");
         if is_rtl {
             svg.push_str(" dir=\"rtl\"");
@@ -28,7 +31,10 @@ impl SequenceSvgRenderer {
         svg.push_str("  </marker>\n");
         svg.push_str("</defs>\n");
 
-        svg.push_str(&format!("<rect width=\"100%\" height=\"{}\" fill=\"#020617\"/>\n\n", canvas_h));
+        svg.push_str(&format!(
+            "<rect width=\"100%\" height=\"{}\" fill=\"#020617\"/>\n\n",
+            canvas_h
+        ));
 
         // Title
         let text_x = if is_rtl { canvas_w - 40.0 } else { 40.0 };
@@ -41,7 +47,8 @@ impl SequenceSvgRenderer {
         let part_count = seq.participants.len().max(1);
         let part_width = 130.0f32;
         let margin_x = 80.0f32;
-        let part_step = (canvas_w - margin_x * 2.0 - part_width) / (part_count.saturating_sub(1).max(1) as f32);
+        let part_step =
+            (canvas_w - margin_x * 2.0 - part_width) / (part_count.saturating_sub(1).max(1) as f32);
 
         let mut part_x_map = HashMap::new();
 
@@ -61,7 +68,8 @@ impl SequenceSvgRenderer {
 
             // Participant Box
             svg.push_str(&format!(
-                "<g style=\"filter:drop-shadow(0 0 6px {});\">\n", stroke
+                "<g style=\"filter:drop-shadow(0 0 6px {});\">\n",
+                stroke
             ));
             svg.push_str(&format!(
                 "  <rect x=\"{}\" y=\"60\" width=\"{}\" height=\"40\" rx=\"6\" fill=\"#090d16\" stroke=\"{}\" stroke-width=\"1.8\"/>\n",
@@ -80,11 +88,16 @@ impl SequenceSvgRenderer {
             let to_x = part_x_map.get(msg.to.as_str()).copied().unwrap_or(200.0);
             let y = start_y + idx as f32 * msg_spacing;
 
-            let dash = if msg.is_async { " stroke-dasharray=\"3,3\"" } else { "" };
+            let dash = if msg.is_async {
+                " stroke-dasharray=\"3,3\""
+            } else {
+                ""
+            };
             let color = if msg.is_async { "#a78bfa" } else { "#22d3ee" };
 
             svg.push_str(&format!(
-                "<g style=\"filter:drop-shadow(0 0 4px {});\">\n", color
+                "<g style=\"filter:drop-shadow(0 0 4px {});\">\n",
+                color
             ));
             svg.push_str(&format!(
                 "  <line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"{}\" stroke-width=\"1.8\" marker-end=\"url(#seq-arrow)\"{}/>\n",

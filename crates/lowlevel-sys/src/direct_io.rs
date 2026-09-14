@@ -24,7 +24,10 @@ impl AlignedBuffer {
             .expect("Invalid layout for AlignedBuffer");
         let ptr = unsafe { alloc(layout) };
         if ptr.is_null() {
-            panic!("Out of memory allocating aligned buffer of {} bytes", aligned_cap);
+            panic!(
+                "Out of memory allocating aligned buffer of {} bytes",
+                aligned_cap
+            );
         }
         Self {
             ptr,

@@ -8,7 +8,7 @@ fn test_turkish_advanced_morphology_and_locale_safety() {
     // Test dotted/dotless I across varying cases
     let input = "İSTANBUL ılık ışık İpek İŞLEM";
     let tokens = TrilingualTokenizer::tokenize(input);
-    
+
     // Turkish 'İ' must fold to 'i', 'I' must fold to 'ı'
     assert!(tokens.contains(&"istanbul".to_string()));
     assert!(tokens.contains(&"ılık".to_string()));
@@ -29,7 +29,7 @@ fn test_arabic_diacritics_and_alef_variations() {
     // Multi-harakat sentence: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
     let bismillah = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
     let tokens = TrilingualTokenizer::tokenize(bismillah);
-    
+
     assert!(tokens.contains(&"بسم".to_string()));
     assert!(tokens.contains(&"الله".to_string()));
     assert!(tokens.contains(&"الرحمن".to_string()));
@@ -50,6 +50,10 @@ fn test_english_acronyms_and_identifier_boundaries() {
     let tokens = TrilingualTokenizer::tokenize(code_line);
 
     assert!(tokens.contains(&"parse".to_string()));
-    assert!(tokens.contains(&"xmlhttprequest".to_string()) || tokens.contains(&"xml".to_string()) || tokens.contains(&"http".to_string()));
+    assert!(
+        tokens.contains(&"xmlhttprequest".to_string())
+            || tokens.contains(&"xml".to_string())
+            || tokens.contains(&"http".to_string())
+    );
     assert!(tokens.contains(&"async".to_string()));
 }

@@ -8,11 +8,11 @@ pub use extractor::AstExtractor;
 pub use incremental::HashIndex;
 pub use resolver::CallResolver;
 
-use std::collections::HashSet;
-use std::path::{Path, PathBuf};
-use rayon::prelude::*;
 use graft_model::CodeGraph;
 use lowlevel_sys::DirectReader;
+use rayon::prelude::*;
+use std::collections::HashSet;
+use std::path::{Path, PathBuf};
 
 pub struct CodeExtractor;
 
@@ -72,8 +72,12 @@ impl CodeExtractor {
 
                 let file_prefix = format!("{}:", path_str);
                 let file_node_id = format!("file:{}", path_str);
-                graph.nodes.retain(|n| n.id != file_node_id && !n.id.starts_with(&file_prefix));
-                graph.edges.retain(|e| !e.source.starts_with(&path_str) && !e.target.starts_with(&path_str));
+                graph
+                    .nodes
+                    .retain(|n| n.id != file_node_id && !n.id.starts_with(&file_prefix));
+                graph.edges.retain(|e| {
+                    !e.source.starts_with(&path_str) && !e.target.starts_with(&path_str)
+                });
 
                 let file_name = path.file_name().unwrap_or_default().to_string_lossy();
                 let fresh = AstExtractor::extract_content(&path_str, &file_name, &bytes);
@@ -92,8 +96,12 @@ impl CodeExtractor {
                 hash_index.remove(&known);
                 let file_prefix = format!("{}:", known);
                 let file_node_id = format!("file:{}", known);
-                graph.nodes.retain(|n| n.id != file_node_id && !n.id.starts_with(&file_prefix));
-                graph.edges.retain(|e| !e.source.starts_with(&known) && !e.target.starts_with(&known));
+                graph
+                    .nodes
+                    .retain(|n| n.id != file_node_id && !n.id.starts_with(&file_prefix));
+                graph
+                    .edges
+                    .retain(|e| !e.source.starts_with(&known) && !e.target.starts_with(&known));
             }
         }
 
@@ -133,8 +141,17 @@ impl CodeExtractor {
     fn is_supported_extension(path: &Path) -> bool {
         matches!(
             path.extension().and_then(|s| s.to_str()),
-            Some("rs") | Some("ts") | Some("js") | Some("py") | Some("go") | Some("java")
-                | Some("c") | Some("cpp") | Some("h") | Some("hpp") | Some("json")
+            Some("rs")
+                | Some("ts")
+                | Some("js")
+                | Some("py")
+                | Some("go")
+                | Some("java")
+                | Some("c")
+                | Some("cpp")
+                | Some("h")
+                | Some("hpp")
+                | Some("json")
         )
     }
 

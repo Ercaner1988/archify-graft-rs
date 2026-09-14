@@ -1,9 +1,9 @@
-use clap::{Parser, Subcommand};
-use graft_parser::CodeExtractor;
-use graft_search::{Bm25Index, GraphRank, GraphStorage};
 use archify_bridge::GraftToArchifyBridge;
 use archify_render::SvgRenderer;
+use clap::{Parser, Subcommand};
 use graft_mcp::McpServer;
+use graft_parser::CodeExtractor;
+use graft_search::{Bm25Index, GraphRank, GraphStorage};
 use lowlevel_sys::{cache_line_size, HardwareTimer};
 use std::fs;
 use std::path::Path;
@@ -86,17 +86,29 @@ async fn main() -> anyhow::Result<()> {
 
     match cli.command {
         Commands::Index { path, cache } => {
-            println!("⚡ [Hardware-Sys] Detected CPU cache line: {} bytes", cache_line_size());
-            println!("🚀 [Graft-Core] Indexing codebase at '{}' using direct DMA buffers...", path);
-            
+            println!(
+                "⚡ [Hardware-Sys] Detected CPU cache line: {} bytes",
+                cache_line_size()
+            );
+            println!(
+                "🚀 [Graft-Core] Indexing codebase at '{}' using direct DMA buffers...",
+                path
+            );
+
             let hash_file = Path::new(&cache).with_extension("hashes.json");
             let timer = HardwareTimer::start();
 
             let (graph, changed) = if Path::new(&cache).exists() && hash_file.exists() {
-                println!("⚡ [Graft-Core] Found existing index. Performing incremental change scan...");
+                println!(
+                    "⚡ [Graft-Core] Found existing index. Performing incremental change scan..."
+                );
                 let mut prev_graph = GraphStorage::load_mmap(&cache)?;
                 let mut hash_index = graft_parser::HashIndex::load_from_file(&hash_file)?;
-                let changed = CodeExtractor::index_directory_incremental(&path, &mut prev_graph, &mut hash_index)?;
+                let changed = CodeExtractor::index_directory_incremental(
+                    &path,
+                    &mut prev_graph,
+                    &mut hash_index,
+                )?;
                 let _ = hash_index.save_to_file(&hash_file);
                 (prev_graph, changed)
             } else {
@@ -106,7 +118,10 @@ async fn main() -> anyhow::Result<()> {
                 let _ = CodeExtractor::collect_files(Path::new(&path), &mut file_paths);
                 for fp in file_paths {
                     if let Ok(bytes) = lowlevel_sys::DirectReader::read_file(&fp) {
-                        hash_index.update(fp.to_string_lossy().to_string(), graft_parser::HashIndex::hash_bytes(&bytes));
+                        hash_index.update(
+                            fp.to_string_lossy().to_string(),
+                            graft_parser::HashIndex::hash_bytes(&bytes),
+                        );
                     }
                 }
                 if let Some(parent) = hash_file.parent() {
@@ -126,15 +141,28 @@ async fn main() -> anyhow::Result<()> {
             }
 
             GraphStorage::save(&graph, &cache)?;
-            println!("💾 [Graft-Core] Saved memory-mapped graph index to '{}'.", cache);
+            println!(
+                "💾 [Graft-Core] Saved memory-mapped graph index to '{}'.",
+                cache
+            );
         }
-        Commands::Ask { query, limit, cache } => {
+        Commands::Ask {
+            query,
+            limit,
+            cache,
+        } => {
             if !Path::new(&cache).exists() {
-                eprintln!("❌ Cache not found at '{}'. Run 'archify-graft index' first.", cache);
+                eprintln!(
+                    "❌ Cache not found at '{}'. Run 'archify-graft index' first.",
+                    cache
+                );
                 std::process::exit(1);
             }
 
-            println!("📖 [Graft-Core] Loading memory-mapped graph from '{}'...", cache);
+            println!(
+                "📖 [Graft-Core] Loading memory-mapped graph from '{}'...",
+                cache
+            );
             let graph = GraphStorage::load_mmap(&cache)?;
 
             println!("🔍 [Graft-Core] Building trilingual lexical index (TR/AR/EN)...");
@@ -144,7 +172,10 @@ async fn main() -> anyhow::Result<()> {
                 bm25.add_document(node.id.clone(), &content);
             }
 
-            println!("⚡ [Graft-Core] Searching query '{}' with BM25 + GraphRank...", query);
+            println!(
+                "⚡ [Graft-Core] Searching query '{}' with BM25 + GraphRank...",
+                query
+            );
             let bm25_results = bm25.search(&query, limit * 3);
             let ranked = GraphRank::compute(&graph, &bm25_results, 0.25, 25);
 
@@ -153,9 +184,20 @@ async fn main() -> anyhow::Result<()> {
                 println!("  {:2}. [{:.4}] {}", idx + 1, score, id);
             }
         }
-        Commands::Diagram { diagram_type, entrypoint, compare, output, title, locale, cache } => {
+        Commands::Diagram {
+            diagram_type,
+            entrypoint,
+            compare,
+            output,
+            title,
+            locale,
+            cache,
+        } => {
             if !Path::new(&cache).exists() {
-                eprintln!("❌ Cache not found at '{}'. Run 'archify-graft index' first.", cache);
+                eprintln!(
+                    "❌ Cache not found at '{}'. Run 'archify-graft index' first.",
+                    cache
+                );
                 std::process::exit(1);
             }
 
@@ -164,8 +206,16 @@ async fn main() -> anyhow::Result<()> {
 
             let svg = match diagram_type.to_lowercase().as_str() {
                 "sequence" => {
-                    println!("🎨 [Archify-Core] Compiling Sequence Diagram for entrypoint '{}'...", entrypoint);
-                    let seq = GraftToArchifyBridge::compile_sequence(&graph, &entrypoint, &title, &locale);
+                    println!(
+                        "🎨 [Archify-Core] Compiling Sequence Diagram for entrypoint '{}'...",
+                        entrypoint
+                    );
+                    let seq = GraftToArchifyBridge::compile_sequence(
+                        &graph,
+                        &entrypoint,
+                        &title,
+                        &locale,
+                    );
                     SvgRenderer::render_sequence(&seq)
                 }
                 "dataflow" => {
@@ -175,7 +225,8 @@ async fn main() -> anyhow::Result<()> {
                 }
                 "delta" => {
                     let prev_cache = compare.unwrap_or_default();
-                    let before_graph = if !prev_cache.is_empty() && Path::new(&prev_cache).exists() {
+                    let before_graph = if !prev_cache.is_empty() && Path::new(&prev_cache).exists()
+                    {
                         println!("📖 [Archify-Core] Loading base graph for delta comparison from '{}'...", prev_cache);
                         GraphStorage::load_mmap(&prev_cache)?
                     } else {
@@ -183,7 +234,12 @@ async fn main() -> anyhow::Result<()> {
                         graft_model::CodeGraph::new()
                     };
                     println!("🎨 [Archify-Core] Computing Architectural Delta Analysis...");
-                    let delta = archify_delta::DeltaEngine::compute_graph_delta(&before_graph, &graph, &title, &locale);
+                    let delta = archify_delta::DeltaEngine::compute_graph_delta(
+                        &before_graph,
+                        &graph,
+                        &title,
+                        &locale,
+                    );
                     SvgRenderer::render_delta(&delta)
                 }
                 _ => {
@@ -193,22 +249,35 @@ async fn main() -> anyhow::Result<()> {
                 }
             };
 
-            println!("✨ [Archify-Core] Rendering Neon Glow SVG to '{}'...", output);
+            println!(
+                "✨ [Archify-Core] Rendering Neon Glow SVG to '{}'...",
+                output
+            );
             fs::write(&output, svg)?;
-            println!("🎉 [Archify-Core] Generated {} diagram at '{}' successfully!", diagram_type, output);
+            println!(
+                "🎉 [Archify-Core] Generated {} diagram at '{}' successfully!",
+                diagram_type, output
+            );
         }
         Commands::Mcp => {
             let mcp = McpServer::new();
             mcp.run_stdio().await?;
         }
         #[cfg(feature = "gui")]
-        Commands::Gui { title, locale, cache } => {
+        Commands::Gui {
+            title,
+            locale,
+            cache,
+        } => {
             let diagram = if Path::new(&cache).exists() {
                 println!("📖 [Archify-Studio] Loading graph from '{}'...", cache);
                 let graph = GraphStorage::load_mmap(&cache)?;
                 Some(GraftToArchifyBridge::compile(&graph, &title, &locale))
             } else {
-                println!("ℹ️ [Archify-Studio] No cache found at '{}', opening empty studio canvas...", cache);
+                println!(
+                    "ℹ️ [Archify-Studio] No cache found at '{}', opening empty studio canvas...",
+                    cache
+                );
                 None
             };
 

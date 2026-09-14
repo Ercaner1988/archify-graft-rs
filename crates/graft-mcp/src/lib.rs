@@ -2,17 +2,23 @@
 
 pub mod handlers;
 
-use std::io::{self, BufRead, Write};
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use serde_json::{json, Value};
 use graft_model::CodeGraph;
 use graft_search::Bm25Index;
 use handlers::ToolHandler;
+use serde_json::{json, Value};
+use std::io::{self, BufRead, Write};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub struct McpServer {
     graph: Arc<Mutex<Option<CodeGraph>>>,
     bm25: Arc<Mutex<Option<Bm25Index>>>,
+}
+
+impl Default for McpServer {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl McpServer {
@@ -97,10 +103,16 @@ impl McpServer {
                     }
                     "graft_ask" => {
                         let query = args.get("query").and_then(|q| q.as_str()).unwrap_or("");
-                        let limit = args.get("limit").and_then(|l| l.as_u64()).unwrap_or(10) as usize;
+                        let limit =
+                            args.get("limit").and_then(|l| l.as_u64()).unwrap_or(10) as usize;
                         let bm25_guard = self.bm25.lock().await;
                         let graph_guard = self.graph.lock().await;
-                        ToolHandler::execute_ask(query, limit, bm25_guard.as_ref(), graph_guard.as_ref())
+                        ToolHandler::execute_ask(
+                            query,
+                            limit,
+                            bm25_guard.as_ref(),
+                            graph_guard.as_ref(),
+                        )
                     }
                     "graft_trace_calls" => {
                         let symbol = args.get("symbol").and_then(|s| s.as_str()).unwrap_or("");
@@ -111,7 +123,9 @@ impl McpServer {
                         let graph_guard = self.graph.lock().await;
                         ToolHandler::execute_render_diagram(&args, graph_guard.as_ref())
                     }
-                    _ => json!({ "isError": true, "content": [{ "type": "text", "text": format!("Unknown tool: {}", tool_name) }] }),
+                    _ => {
+                        json!({ "isError": true, "content": [{ "type": "text", "text": format!("Unknown tool: {}", tool_name) }] })
+                    }
                 }
             }
             _ => json!({ "error": { "code": -32601, "message": "Method not found" } }),

@@ -9,10 +9,14 @@ fn test_aligned_buffer_alignment_and_growth() {
     let buf = AlignedBuffer::new(100);
     // Buffer capacity must be a positive multiple of SECTOR_ALIGNMENT (4096)
     assert_eq!(buf.capacity(), SECTOR_ALIGNMENT);
-    
+
     // Address must be 4096-byte aligned
     let ptr_addr = buf.as_slice().as_ptr() as usize;
-    assert_eq!(ptr_addr % SECTOR_ALIGNMENT, 0, "Buffer pointer is not sector aligned!");
+    assert_eq!(
+        ptr_addr % SECTOR_ALIGNMENT,
+        0,
+        "Buffer pointer is not sector aligned!"
+    );
 
     let large_buf = AlignedBuffer::new(5000);
     assert_eq!(large_buf.capacity(), 8192);
@@ -24,7 +28,11 @@ fn test_aligned_buffer_alignment_and_growth() {
 fn test_hardware_cache_detection() {
     let cl_size = cache_line_size();
     // Cache line size on modern x86/ARM is universally 64 or 128 bytes
-    assert!(cl_size == 64 || cl_size == 128, "Unexpected cache line size: {}", cl_size);
+    assert!(
+        cl_size == 64 || cl_size == 128,
+        "Unexpected cache line size: {}",
+        cl_size
+    );
 }
 
 #[test]

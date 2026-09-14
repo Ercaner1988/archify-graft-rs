@@ -1,12 +1,12 @@
 //! graft-search: Whole-file BM25 index, GraphRank (PageRank), and memory-mapped storage.
 
+use graft_i18n::TrilingualTokenizer;
+use graft_model::CodeGraph;
+use memmap2::Mmap;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use memmap2::Mmap;
-use graft_model::CodeGraph;
-use graft_i18n::TrilingualTokenizer;
 
 #[derive(Debug, Clone)]
 pub struct Bm25Document {
@@ -74,9 +74,10 @@ impl Bm25Index {
                 if let Some(&tf) = doc.term_freqs.get(q_term) {
                     let df = *self.doc_freqs.get(q_term).unwrap_or(&1) as f32;
                     let n = self.total_docs as f32;
-                    
+
                     let idf = ((n - df + 0.5) / (df + 0.5) + 1.0).ln();
-                    let tf_norm = (tf as f32 * (k1 + 1.0)) / (tf as f32 + k1 * (1.0 - b + b * doc_len_ratio));
+                    let tf_norm =
+                        (tf as f32 * (k1 + 1.0)) / (tf as f32 + k1 * (1.0 - b + b * doc_len_ratio));
                     score += idf * tf_norm;
                 }
             }
@@ -113,7 +114,10 @@ impl GraphRank {
 
         let mut adj: Vec<Vec<usize>> = vec![Vec::new(); n];
         for edge in &graph.edges {
-            if let (Some(&src), Some(&tgt)) = (id_to_idx.get(edge.source.as_str()), id_to_idx.get(edge.target.as_str())) {
+            if let (Some(&src), Some(&tgt)) = (
+                id_to_idx.get(edge.source.as_str()),
+                id_to_idx.get(edge.target.as_str()),
+            ) {
                 adj[src].push(tgt);
             }
         }

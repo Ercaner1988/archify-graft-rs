@@ -12,7 +12,10 @@ impl DataflowSvgRenderer {
 
         let mut svg = String::new();
         svg.push_str("<svg xmlns=\"http://www.w3.org/2000/svg\" ");
-        svg.push_str(&format!("viewBox=\"0 0 {} {}\" width=\"100%\" height=\"100%\" ", canvas_w, canvas_h));
+        svg.push_str(&format!(
+            "viewBox=\"0 0 {} {}\" width=\"100%\" height=\"100%\" ",
+            canvas_w, canvas_h
+        ));
         svg.push_str("style=\"background:#020617;font-family:system-ui, sans-serif;\"");
         if is_rtl {
             svg.push_str(" dir=\"rtl\"");
@@ -59,7 +62,8 @@ impl DataflowSvgRenderer {
             let fill = node.role.fill_rgba();
 
             svg.push_str(&format!(
-                "<g style=\"filter:drop-shadow(0 0 8px {});\">\n", stroke
+                "<g style=\"filter:drop-shadow(0 0 8px {});\">\n",
+                stroke
             ));
             svg.push_str(&format!(
                 "  <rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" rx=\"8\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1.8\"/>\n",
@@ -81,7 +85,10 @@ impl DataflowSvgRenderer {
 
         // Pipelines
         for pipe in &df.pipelines {
-            if let (Some(&(x1, y1)), Some(&(x2, y2))) = (node_positions.get(pipe.from.as_str()), node_positions.get(pipe.to.as_str())) {
+            if let (Some(&(x1, y1)), Some(&(x2, y2))) = (
+                node_positions.get(pipe.from.as_str()),
+                node_positions.get(pipe.to.as_str()),
+            ) {
                 let p1_x = x1 + cell_w;
                 let p1_y = y1 + cell_h / 2.0;
                 let p2_x = x2;

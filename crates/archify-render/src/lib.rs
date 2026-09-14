@@ -1,10 +1,10 @@
+pub mod dataflow_svg;
 pub mod delta_svg;
 pub mod sequence_svg;
-pub mod dataflow_svg;
 
+pub use dataflow_svg::DataflowSvgRenderer;
 pub use delta_svg::DeltaSvgRenderer;
 pub use sequence_svg::SequenceSvgRenderer;
-pub use dataflow_svg::DataflowSvgRenderer;
 
 use archify_ir::{ArchitectureDiagram, VisualPreset};
 
@@ -28,10 +28,38 @@ impl SvgRenderer {
         let preset = diagram.meta.visual_preset;
 
         let (bg_color, grid_color, text_main, text_sub, font_family, corner_rx) = match preset {
-            VisualPreset::SignalFlow => ("#020617", "#1e293b", "#f8fafc", "#94a3b8", "system-ui, sans-serif", "6"),
-            VisualPreset::Classic => ("#090d16", "#1e293b", "#f8fafc", "#94a3b8", "system-ui, sans-serif", "6"),
-            VisualPreset::Blueprint => ("#0a192f", "#172a45", "#e6f1ff", "#8892b0", "monospace, Courier, sans-serif", "0"),
-            VisualPreset::Editorial => ("#f8fafc", "#e2e8f0", "#0f172a", "#475569", "Georgia, Cambria, serif", "2"),
+            VisualPreset::SignalFlow => (
+                "#020617",
+                "#1e293b",
+                "#f8fafc",
+                "#94a3b8",
+                "system-ui, sans-serif",
+                "6",
+            ),
+            VisualPreset::Classic => (
+                "#090d16",
+                "#1e293b",
+                "#f8fafc",
+                "#94a3b8",
+                "system-ui, sans-serif",
+                "6",
+            ),
+            VisualPreset::Blueprint => (
+                "#0a192f",
+                "#172a45",
+                "#e6f1ff",
+                "#8892b0",
+                "monospace, Courier, sans-serif",
+                "0",
+            ),
+            VisualPreset::Editorial => (
+                "#f8fafc",
+                "#e2e8f0",
+                "#0f172a",
+                "#475569",
+                "Georgia, Cambria, serif",
+                "2",
+            ),
         };
 
         let glow_radius = match preset {
@@ -46,23 +74,37 @@ impl SvgRenderer {
 
         let mut svg = String::new();
         svg.push_str("<svg xmlns=\"http://www.w3.org/2000/svg\" ");
-        svg.push_str(&format!("viewBox=\"0 0 {} {}\" width=\"100%\" height=\"100%\" ", canvas_w, canvas_h));
-        svg.push_str(&format!("style=\"background:{};font-family:{};\"", bg_color, font_family));
+        svg.push_str(&format!(
+            "viewBox=\"0 0 {} {}\" width=\"100%\" height=\"100%\" ",
+            canvas_w, canvas_h
+        ));
+        svg.push_str(&format!(
+            "style=\"background:{};font-family:{};\"",
+            bg_color, font_family
+        ));
         if is_rtl {
             svg.push_str(" dir=\"rtl\"");
         }
         svg.push_str(">\n");
 
         svg.push_str("<defs>\n");
-        svg.push_str("  <pattern id=\"grid\" width=\"40\" height=\"40\" patternUnits=\"userSpaceOnUse\">\n");
+        svg.push_str(
+            "  <pattern id=\"grid\" width=\"40\" height=\"40\" patternUnits=\"userSpaceOnUse\">\n",
+        );
         svg.push_str(&format!("    <path d=\"M 40 0 L 0 0 0 40\" fill=\"none\" stroke=\"{}\" stroke-width=\"0.5\"/>\n", grid_color));
         svg.push_str("  </pattern>\n");
         svg.push_str("  <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"6\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\">\n");
-        svg.push_str(&format!("    <path d=\"M 0 1 L 10 5 L 0 9 z\" fill=\"{}\"/>\n", text_sub));
+        svg.push_str(&format!(
+            "    <path d=\"M 0 1 L 10 5 L 0 9 z\" fill=\"{}\"/>\n",
+            text_sub
+        ));
         svg.push_str("  </marker>\n");
         svg.push_str("</defs>\n");
 
-        svg.push_str(&format!("<rect width=\"100%\" height=\"100%\" fill=\"{}\"/>\n", bg_color));
+        svg.push_str(&format!(
+            "<rect width=\"100%\" height=\"100%\" fill=\"{}\"/>\n",
+            bg_color
+        ));
         svg.push_str("<rect width=\"100%\" height=\"100%\" fill=\"url(#grid)\"/>\n\n");
 
         let text_x = if is_rtl { canvas_w - 40.0 } else { 40.0 };
@@ -102,7 +144,10 @@ impl SvgRenderer {
             } else if preset == VisualPreset::Editorial {
                 "style=\"filter:drop-shadow(0 2px 3px rgba(0,0,0,0.15));\"".to_string()
             } else {
-                format!("style=\"filter:drop-shadow(0 0 {} {});\"", glow_radius, stroke)
+                format!(
+                    "style=\"filter:drop-shadow(0 0 {} {});\"",
+                    glow_radius, stroke
+                )
             };
 
             svg.push_str(&format!("<g {}>\n", filter_style));

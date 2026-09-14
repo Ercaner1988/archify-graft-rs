@@ -1,7 +1,7 @@
 //! Inter-symbol call resolver linking callers to function/method definitions.
 
-use std::collections::{HashMap, HashSet};
 use graft_model::{CodeGraph, EdgeRelation, EdgeV1, NodeKind};
+use std::collections::{HashMap, HashSet};
 
 pub struct CallResolver;
 
@@ -11,7 +11,10 @@ impl CallResolver {
         let mut name_to_ids: HashMap<String, Vec<String>> = HashMap::new();
         for node in &graph.nodes {
             if node.kind == NodeKind::Function || node.kind == NodeKind::Method {
-                name_to_ids.entry(node.name.clone()).or_default().push(node.id.clone());
+                name_to_ids
+                    .entry(node.name.clone())
+                    .or_default()
+                    .push(node.id.clone());
             }
         }
 

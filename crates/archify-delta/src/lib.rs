@@ -1,25 +1,41 @@
 //! archify-delta: Computes visual diff states (Added, Removed, Modified, Unchanged)
 //! between two architectural revisions or commit graphs.
 
-use std::collections::{HashMap, HashSet};
-use archify_ir::{ArchitectureDiagram, Component, DeltaComponent, DeltaConnection, DeltaDiagram, DiagramMeta, DiffStatus};
-use graft_model::CodeGraph;
 use archify_bridge::GraftToArchifyBridge;
+use archify_ir::{
+    ArchitectureDiagram, Component, DeltaComponent, DeltaConnection, DeltaDiagram, DiagramMeta,
+    DiffStatus,
+};
+use graft_model::CodeGraph;
+use std::collections::{HashMap, HashSet};
 
 pub struct DeltaEngine;
 
 impl DeltaEngine {
     /// Compares two architecture diagrams and produces a DeltaDiagram with visual statuses
-    pub fn compute_delta(before: &ArchitectureDiagram, after: &ArchitectureDiagram) -> DeltaDiagram {
-        let before_comps: HashMap<&str, &Component> = before.components.iter().map(|c| (c.id.as_str(), c)).collect();
-        let after_comps: HashMap<&str, &Component> = after.components.iter().map(|c| (c.id.as_str(), c)).collect();
+    pub fn compute_delta(
+        before: &ArchitectureDiagram,
+        after: &ArchitectureDiagram,
+    ) -> DeltaDiagram {
+        let before_comps: HashMap<&str, &Component> = before
+            .components
+            .iter()
+            .map(|c| (c.id.as_str(), c))
+            .collect();
+        let after_comps: HashMap<&str, &Component> = after
+            .components
+            .iter()
+            .map(|c| (c.id.as_str(), c))
+            .collect();
 
         let mut delta_components = Vec::new();
 
         // 1. Check components in 'after' (Added, Modified, or Unchanged)
         for comp in &after.components {
             if let Some(old) = before_comps.get(comp.id.as_str()) {
-                let is_modified = old.label != comp.label || old.role != comp.role || old.sublabel != comp.sublabel;
+                let is_modified = old.label != comp.label
+                    || old.role != comp.role
+                    || old.sublabel != comp.sublabel;
                 let status = if is_modified {
                     DiffStatus::Modified
                 } else {
@@ -48,8 +64,16 @@ impl DeltaEngine {
         }
 
         // 3. Check connections
-        let before_conns: HashSet<(&str, &str)> = before.connections.iter().map(|c| (c.from.as_str(), c.to.as_str())).collect();
-        let after_conns: HashSet<(&str, &str)> = after.connections.iter().map(|c| (c.from.as_str(), c.to.as_str())).collect();
+        let before_conns: HashSet<(&str, &str)> = before
+            .connections
+            .iter()
+            .map(|c| (c.from.as_str(), c.to.as_str()))
+            .collect();
+        let after_conns: HashSet<(&str, &str)> = after
+            .connections
+            .iter()
+            .map(|c| (c.from.as_str(), c.to.as_str()))
+            .collect();
 
         let mut delta_connections = Vec::new();
 
@@ -89,7 +113,12 @@ impl DeltaEngine {
     }
 
     /// Compares two AST code graphs directly and produces a DeltaDiagram
-    pub fn compute_graph_delta(before_graph: &CodeGraph, after_graph: &CodeGraph, title: &str, locale: &str) -> DeltaDiagram {
+    pub fn compute_graph_delta(
+        before_graph: &CodeGraph,
+        after_graph: &CodeGraph,
+        title: &str,
+        locale: &str,
+    ) -> DeltaDiagram {
         let before_diag = GraftToArchifyBridge::compile(before_graph, title, locale);
         let after_diag = GraftToArchifyBridge::compile(after_graph, title, locale);
         Self::compute_delta(&before_diag, &after_diag)
@@ -113,12 +142,33 @@ mod tests {
         let before = ArchitectureDiagram {
             meta: meta.clone(),
             components: vec![
-                Component { id: "a".into(), label: "Worker".into(), sublabel: None, role: SemanticRole::Backend, x: 0.0, y: 0.0, width: 100.0, height: 50.0 },
-                Component { id: "b".into(), label: "Database".into(), sublabel: None, role: SemanticRole::Database, x: 0.0, y: 0.0, width: 100.0, height: 50.0 },
+                Component {
+                    id: "a".into(),
+                    label: "Worker".into(),
+                    sublabel: None,
+                    role: SemanticRole::Backend,
+                    x: 0.0,
+                    y: 0.0,
+                    width: 100.0,
+                    height: 50.0,
+                },
+                Component {
+                    id: "b".into(),
+                    label: "Database".into(),
+                    sublabel: None,
+                    role: SemanticRole::Database,
+                    x: 0.0,
+                    y: 0.0,
+                    width: 100.0,
+                    height: 50.0,
+                },
             ],
-            connections: vec![
-                Connection { from: "a".into(), to: "b".into(), label: None, line_style: "default".into() },
-            ],
+            connections: vec![Connection {
+                from: "a".into(),
+                to: "b".into(),
+                label: None,
+                line_style: "default".into(),
+            }],
             story_beats: vec![],
         };
 
@@ -126,22 +176,55 @@ mod tests {
             meta,
             components: vec![
                 // "a" modified role to Cloud
-                Component { id: "a".into(), label: "Worker".into(), sublabel: None, role: SemanticRole::Cloud, x: 0.0, y: 0.0, width: 100.0, height: 50.0 },
+                Component {
+                    id: "a".into(),
+                    label: "Worker".into(),
+                    sublabel: None,
+                    role: SemanticRole::Cloud,
+                    x: 0.0,
+                    y: 0.0,
+                    width: 100.0,
+                    height: 50.0,
+                },
                 // "b" is removed
                 // "c" is added
-                Component { id: "c".into(), label: "Redis".into(), sublabel: None, role: SemanticRole::Database, x: 0.0, y: 0.0, width: 100.0, height: 50.0 },
+                Component {
+                    id: "c".into(),
+                    label: "Redis".into(),
+                    sublabel: None,
+                    role: SemanticRole::Database,
+                    x: 0.0,
+                    y: 0.0,
+                    width: 100.0,
+                    height: 50.0,
+                },
             ],
-            connections: vec![
-                Connection { from: "a".into(), to: "c".into(), label: None, line_style: "default".into() },
-            ],
+            connections: vec![Connection {
+                from: "a".into(),
+                to: "c".into(),
+                label: None,
+                line_style: "default".into(),
+            }],
             story_beats: vec![],
         };
 
         let delta = DeltaEngine::compute_delta(&before, &after);
 
-        let a_status = delta.components.iter().find(|c| c.component.id == "a").map(|c| c.status);
-        let b_status = delta.components.iter().find(|c| c.component.id == "b").map(|c| c.status);
-        let c_status = delta.components.iter().find(|c| c.component.id == "c").map(|c| c.status);
+        let a_status = delta
+            .components
+            .iter()
+            .find(|c| c.component.id == "a")
+            .map(|c| c.status);
+        let b_status = delta
+            .components
+            .iter()
+            .find(|c| c.component.id == "b")
+            .map(|c| c.status);
+        let c_status = delta
+            .components
+            .iter()
+            .find(|c| c.component.id == "c")
+            .map(|c| c.status);
 
         assert_eq!(a_status, Some(DiffStatus::Modified));
         assert_eq!(b_status, Some(DiffStatus::Removed));

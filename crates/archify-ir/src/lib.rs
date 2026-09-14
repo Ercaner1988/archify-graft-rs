@@ -17,13 +17,13 @@ pub enum SemanticRole {
 impl SemanticRole {
     pub fn stroke_hex(&self) -> &'static str {
         match self {
-            SemanticRole::Frontend => "#22d3ee",  // Verified Cyan
-            SemanticRole::Backend => "#34d399",   // Proof Green
-            SemanticRole::Database => "#a78bfa",  // Repository Violet
-            SemanticRole::Cloud => "#fbbf24",     // Cloud Amber
-            SemanticRole::Security => "#fb7185",  // Boundary Rose
-            SemanticRole::Messagebus => "#fb923c",// Transit Orange
-            SemanticRole::External => "#94a3b8",  // External Slate
+            SemanticRole::Frontend => "#22d3ee",   // Verified Cyan
+            SemanticRole::Backend => "#34d399",    // Proof Green
+            SemanticRole::Database => "#a78bfa",   // Repository Violet
+            SemanticRole::Cloud => "#fbbf24",      // Cloud Amber
+            SemanticRole::Security => "#fb7185",   // Boundary Rose
+            SemanticRole::Messagebus => "#fb923c", // Transit Orange
+            SemanticRole::External => "#94a3b8",   // External Slate
         }
     }
 

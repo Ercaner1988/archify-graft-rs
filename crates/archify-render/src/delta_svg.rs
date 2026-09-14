@@ -12,7 +12,10 @@ impl DeltaSvgRenderer {
 
         let mut svg = String::new();
         svg.push_str("<svg xmlns=\"http://www.w3.org/2000/svg\" ");
-        svg.push_str(&format!("viewBox=\"0 0 {} {}\" width=\"100%\" height=\"100%\" ", canvas_w, canvas_h));
+        svg.push_str(&format!(
+            "viewBox=\"0 0 {} {}\" width=\"100%\" height=\"100%\" ",
+            canvas_w, canvas_h
+        ));
         svg.push_str("style=\"background:#020617;font-family:system-ui, sans-serif;\"");
         if is_rtl {
             svg.push_str(" dir=\"rtl\"");
@@ -20,7 +23,9 @@ impl DeltaSvgRenderer {
         svg.push_str(">\n");
 
         svg.push_str("<defs>\n");
-        svg.push_str("  <pattern id=\"grid\" width=\"40\" height=\"40\" patternUnits=\"userSpaceOnUse\">\n");
+        svg.push_str(
+            "  <pattern id=\"grid\" width=\"40\" height=\"40\" patternUnits=\"userSpaceOnUse\">\n",
+        );
         svg.push_str("    <path d=\"M 40 0 L 0 0 0 40\" fill=\"none\" stroke=\"#1e293b\" stroke-width=\"0.5\"/>\n");
         svg.push_str("  </pattern>\n");
         svg.push_str("  <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"6\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\">\n");
@@ -41,11 +46,17 @@ impl DeltaSvgRenderer {
 
         // Legend
         svg.push_str("<g transform=\"translate(40, 55)\" font-size=\"11\" font-weight=\"500\">\n");
-        svg.push_str("  <rect x=\"0\" y=\"0\" width=\"12\" height=\"12\" rx=\"2\" fill=\"#22c55e\"/>\n");
+        svg.push_str(
+            "  <rect x=\"0\" y=\"0\" width=\"12\" height=\"12\" rx=\"2\" fill=\"#22c55e\"/>\n",
+        );
         svg.push_str("  <text x=\"18\" y=\"10\" fill=\"#22c55e\">[+] Added</text>\n");
-        svg.push_str("  <rect x=\"90\" y=\"0\" width=\"12\" height=\"12\" rx=\"2\" fill=\"#f43f5e\"/>\n");
+        svg.push_str(
+            "  <rect x=\"90\" y=\"0\" width=\"12\" height=\"12\" rx=\"2\" fill=\"#f43f5e\"/>\n",
+        );
         svg.push_str("  <text x=\"108\" y=\"10\" fill=\"#f43f5e\">[-] Removed</text>\n");
-        svg.push_str("  <rect x=\"190\" y=\"0\" width=\"12\" height=\"12\" rx=\"2\" fill=\"#f59e0b\"/>\n");
+        svg.push_str(
+            "  <rect x=\"190\" y=\"0\" width=\"12\" height=\"12\" rx=\"2\" fill=\"#f59e0b\"/>\n",
+        );
         svg.push_str("  <text x=\"208\" y=\"10\" fill=\"#f59e0b\">[Δ] Modified</text>\n");
         svg.push_str("</g>\n\n");
 
@@ -53,7 +64,10 @@ impl DeltaSvgRenderer {
         for d_conn in &delta.connections {
             let conn = &d_conn.connection;
             if let (Some(from_c), Some(to_c)) = (
-                delta.components.iter().find(|c| c.component.id == conn.from),
+                delta
+                    .components
+                    .iter()
+                    .find(|c| c.component.id == conn.from),
                 delta.components.iter().find(|c| c.component.id == conn.to),
             ) {
                 let x1 = from_c.component.x + from_c.component.width / 2.0;
@@ -100,7 +114,8 @@ impl DeltaSvgRenderer {
             };
 
             svg.push_str(&format!(
-                "<g style=\"filter:drop-shadow(0 0 8px {});\">\n", stroke
+                "<g style=\"filter:drop-shadow(0 0 8px {});\">\n",
+                stroke
             ));
             svg.push_str(&format!(
                 "  <rect x=\"{}\" y=\"{}\" width=\"{}\" height=\"{}\" rx=\"6\" fill=\"{}\" stroke=\"{}\" stroke-width=\"1.8\"{}>\n  </rect>\n",

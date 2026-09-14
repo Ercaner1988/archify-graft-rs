@@ -29,13 +29,21 @@ async fn test_mcp_unindexed_error_handling() {
     let server = McpServer::new();
 
     // Calling graft_ask before index should return graceful error, not crash
-    let ask_resp = server.handle_method("tools/call", json!({
-        "name": "graft_ask",
-        "arguments": { "query": "test" }
-    })).await;
+    let ask_resp = server
+        .handle_method(
+            "tools/call",
+            json!({
+                "name": "graft_ask",
+                "arguments": { "query": "test" }
+            }),
+        )
+        .await;
 
     assert_eq!(ask_resp["isError"], true);
-    assert!(ask_resp["content"][0]["text"].as_str().unwrap().contains("not yet indexed"));
+    assert!(ask_resp["content"][0]["text"]
+        .as_str()
+        .unwrap()
+        .contains("not yet indexed"));
 }
 
 #[tokio::test]

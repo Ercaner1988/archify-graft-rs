@@ -18,7 +18,7 @@ pub fn pin_current_thread_to_core(core_id: usize) -> Result<(), String> {
     }
 }
 
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 pub fn pin_current_thread_to_core(core_id: usize) -> Result<(), String> {
     unsafe {
         let mut cpuset: libc::cpu_set_t = std::mem::zeroed();
@@ -30,11 +30,20 @@ pub fn pin_current_thread_to_core(core_id: usize) -> Result<(), String> {
             &cpuset,
         );
         if ret != 0 {
-            Err(format!("pthread_setaffinity_np failed with error code: {}", ret))
+            Err(format!(
+                "pthread_setaffinity_np failed with error code: {}",
+                ret
+            ))
         } else {
             Ok(())
         }
     }
+}
+
+#[cfg(all(unix, not(target_os = "linux")))]
+pub fn pin_current_thread_to_core(_core_id: usize) -> Result<(), String> {
+    // macOS / BSD do not provide standard pthread_setaffinity_np
+    Ok(())
 }
 
 #[cfg(not(any(windows, unix)))]
