@@ -60,6 +60,28 @@ impl NeonPainter {
         // Core sharp line
         painter.line_segment([start, end], Stroke::new(1.8_f32, color));
     }
+
+    /// Paints a component rectangle with differential neon status (Added, Removed, Modified, Unchanged)
+    pub fn paint_delta_rect(
+        painter: &egui::Painter,
+        rect: Rect,
+        status: archify_ir::DiffStatus,
+        rounding: f32,
+        is_hovered: bool,
+    ) {
+        let (stroke_color, fill_color) = match status {
+            archify_ir::DiffStatus::Added => (Color32::from_rgb(0x22, 0xc5, 0x5e), Color32::from_rgba_premultiplied(0x05, 0x2e, 0x16, 0x66)),
+            archify_ir::DiffStatus::Removed => (Color32::from_rgb(0xf4, 0x3f, 0x5e), Color32::from_rgba_premultiplied(0x4c, 0x05, 0x19, 0x66)),
+            archify_ir::DiffStatus::Modified => (Color32::from_rgb(0xf5, 0x9e, 0x0b), Color32::from_rgba_premultiplied(0x45, 0x1a, 0x03, 0x66)),
+            archify_ir::DiffStatus::Unchanged => (Color32::from_rgb(0x64, 0x74, 0x8b), Color32::from_rgba_premultiplied(0x1e, 0x29, 0x3b, 0x4d)),
+        };
+
+        let glow_alpha = if is_hovered { 60 } else { 30 };
+        let outer_rect = rect.expand(if is_hovered { 6.0_f32 } else { 3.0_f32 });
+        let outer_color = Color32::from_rgba_unmultiplied(stroke_color.r(), stroke_color.g(), stroke_color.b(), glow_alpha);
+        painter.rect_stroke(outer_rect, rounding + 2.0_f32, Stroke::new(4.0_f32, outer_color));
+        painter.rect(rect, rounding, fill_color, Stroke::new(1.8_f32, stroke_color));
+    }
 }
 
 pub struct TrilingualUi;

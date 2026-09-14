@@ -64,6 +64,96 @@ impl GraftToArchifyBridge {
             connections,
         }
     }
+
+    pub fn compile_dataflow(graph: &CodeGraph, title: &str, locale: &str) -> archify_ir::DataflowDiagram {
+        let mut nodes = Vec::new();
+        let mut pipelines = Vec::new();
+
+        for node in &graph.nodes {
+            if node.kind == NodeKind::File || node.kind == NodeKind::Class {
+                let role = infer_role(&node.name, &node.path);
+                nodes.push(archify_ir::DataflowNode {
+                    id: node.id.clone(),
+                    label: node.name.clone(),
+                    role,
+                    stream_rate: Some("Direct DMA".to_string()),
+                });
+            }
+        }
+
+        for edge in &graph.edges {
+            pipelines.push(archify_ir::DataPipeline {
+                from: edge.source.clone(),
+                to: edge.target.clone(),
+                schema: Some("AST Call/Data".to_string()),
+                throughput: Some(format!("{:.0}%", edge.confidence * 100.0)),
+            });
+        }
+
+        archify_ir::DataflowDiagram {
+            meta: DiagramMeta {
+                title: title.to_string(),
+                subtitle: Some("Dataflow and Stream Pipelines".to_string()),
+                locale: locale.to_string(),
+                visual_preset: VisualPreset::SignalFlow,
+            },
+            nodes,
+            pipelines,
+        }
+    }
+
+    pub fn compile_sequence(graph: &CodeGraph, root_fn: &str, title: &str, locale: &str) -> archify_ir::SequenceDiagram {
+        let mut participants = Vec::new();
+        let mut messages = Vec::new();
+        let mut visited = std::collections::HashSet::new();
+
+        let root_node = graph.nodes.iter().find(|n| n.name == root_fn || n.id == root_fn);
+        let root_id = root_node.map(|n| n.id.clone()).unwrap_or_else(|| root_fn.to_string());
+        let root_label = root_node.map(|n| n.name.clone()).unwrap_or_else(|| root_fn.to_string());
+
+        participants.push(archify_ir::SequenceParticipant {
+            id: root_id.clone(),
+            label: root_label,
+            role: SemanticRole::Frontend,
+        });
+        visited.insert(root_id.clone());
+
+        let mut order = 1;
+        for edge in &graph.edges {
+            if edge.source == root_id || edge.source.ends_with(&format!(":{}", root_fn)) {
+                if let Some(target_node) = graph.nodes.iter().find(|n| n.id == edge.target) {
+                    if !visited.contains(&target_node.id) {
+                        visited.insert(target_node.id.clone());
+                        participants.push(archify_ir::SequenceParticipant {
+                            id: target_node.id.clone(),
+                            label: target_node.name.clone(),
+                            role: infer_role(&target_node.name, &target_node.path),
+                        });
+                    }
+
+                    messages.push(archify_ir::SequenceMessage {
+                        order,
+                        from: edge.source.clone(),
+                        to: target_node.id.clone(),
+                        action: format!("calls {}()", target_node.name),
+                        is_async: false,
+                    });
+                    order += 1;
+                }
+            }
+        }
+
+        archify_ir::SequenceDiagram {
+            meta: DiagramMeta {
+                title: title.to_string(),
+                subtitle: Some(format!("Call Sequence Flow for '{}'", root_fn)),
+                locale: locale.to_string(),
+                visual_preset: VisualPreset::SignalFlow,
+            },
+            participants,
+            messages,
+        }
+    }
 }
 
 fn infer_role(name: &str, path: &str) -> SemanticRole {

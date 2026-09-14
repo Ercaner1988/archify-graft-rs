@@ -10,6 +10,7 @@ members = [
     "crates/archify-geometry",
     "crates/archify-bridge",
     "crates/archify-render",
+    "crates/archify-delta",
     "crates/archify-egui",
     "crates/graft-mcp",
     ".",
@@ -53,6 +54,7 @@ archify-ir = { path = "crates/archify-ir" }
 archify-geometry = { path = "crates/archify-geometry" }
 archify-bridge = { path = "crates/archify-bridge" }
 archify-render = { path = "crates/archify-render" }
+archify-delta = { path = "crates/archify-delta" }
 archify-egui = { path = "crates/archify-egui", optional = true }
 graft-mcp = { path = "crates/graft-mcp" }
 serde.workspace = true

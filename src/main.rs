@@ -38,13 +38,22 @@ enum Commands {
         #[arg(short, long, default_value = ".cache/graft-graph.json")]
         cache: String,
     },
-    /// Generate an Archify architecture JSON-IR and neon SVG diagram from indexed code
+    /// Generate an Archify architecture, sequence, dataflow, or delta SVG diagram from indexed code
     Diagram {
+        /// Diagram type: architecture, sequence, dataflow, delta
+        #[arg(short = 't', long = "type", default_value = "architecture")]
+        diagram_type: String,
+        /// Entrypoint function for sequence diagram
+        #[arg(long, default_value = "main")]
+        entrypoint: String,
+        /// Previous cache path for delta comparison
+        #[arg(long)]
+        compare: Option<String>,
         /// Output path for SVG diagram file
         #[arg(short, long, default_value = "architecture.svg")]
         output: String,
         /// Title for the diagram
-        #[arg(short, long, default_value = "Codebase Architecture Map")]
+        #[arg(long, default_value = "Codebase Architecture Map")]
         title: String,
         /// Locale: tr (Turkish), ar (Arabic), en (English)
         #[arg(short, long, default_value = "tr")]
@@ -144,7 +153,7 @@ async fn main() -> anyhow::Result<()> {
                 println!("  {:2}. [{:.4}] {}", idx + 1, score, id);
             }
         }
-        Commands::Diagram { output, title, locale, cache } => {
+        Commands::Diagram { diagram_type, entrypoint, compare, output, title, locale, cache } => {
             if !Path::new(&cache).exists() {
                 eprintln!("❌ Cache not found at '{}'. Run 'archify-graft index' first.", cache);
                 std::process::exit(1);
@@ -153,14 +162,40 @@ async fn main() -> anyhow::Result<()> {
             println!("📖 [Graft-Core] Loading graph from '{}'...", cache);
             let graph = GraphStorage::load_mmap(&cache)?;
 
-            println!("🎨 [Archify-Core] Compiling AST into Archify Architecture JSON-IR (Locale: {})...", locale);
-            let diagram = GraftToArchifyBridge::compile(&graph, &title, &locale);
+            let svg = match diagram_type.to_lowercase().as_str() {
+                "sequence" => {
+                    println!("🎨 [Archify-Core] Compiling Sequence Diagram for entrypoint '{}'...", entrypoint);
+                    let seq = GraftToArchifyBridge::compile_sequence(&graph, &entrypoint, &title, &locale);
+                    SvgRenderer::render_sequence(&seq)
+                }
+                "dataflow" => {
+                    println!("🎨 [Archify-Core] Compiling Dataflow Pipeline Diagram...");
+                    let df = GraftToArchifyBridge::compile_dataflow(&graph, &title, &locale);
+                    SvgRenderer::render_dataflow(&df)
+                }
+                "delta" => {
+                    let prev_cache = compare.unwrap_or_default();
+                    let before_graph = if !prev_cache.is_empty() && Path::new(&prev_cache).exists() {
+                        println!("📖 [Archify-Core] Loading base graph for delta comparison from '{}'...", prev_cache);
+                        GraphStorage::load_mmap(&prev_cache)?
+                    } else {
+                        println!("ℹ️ [Archify-Core] No valid prior cache given, comparing against empty state.");
+                        graft_model::CodeGraph::new()
+                    };
+                    println!("🎨 [Archify-Core] Computing Architectural Delta Analysis...");
+                    let delta = archify_delta::DeltaEngine::compute_graph_delta(&before_graph, &graph, &title, &locale);
+                    SvgRenderer::render_delta(&delta)
+                }
+                _ => {
+                    println!("🎨 [Archify-Core] Compiling Architecture Diagram...");
+                    let diagram = GraftToArchifyBridge::compile(&graph, &title, &locale);
+                    SvgRenderer::render(&diagram)
+                }
+            };
 
             println!("✨ [Archify-Core] Rendering Neon Glow SVG to '{}'...", output);
-            let svg = SvgRenderer::render(&diagram);
-
             fs::write(&output, svg)?;
-            println!("🎉 [Archify-Core] Generated architecture diagram at '{}' successfully!", output);
+            println!("🎉 [Archify-Core] Generated {} diagram at '{}' successfully!", diagram_type, output);
         }
         Commands::Mcp => {
             let mcp = McpServer::new();

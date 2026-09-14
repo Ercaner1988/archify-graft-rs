@@ -162,6 +162,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "archify-delta"
+version = "0.1.0"
+dependencies = [
+ "archify-bridge",
+ "archify-ir",
+ "graft-model",
+]
+
+[[package]]
 name = "archify-egui"
 version = "0.1.0"
 dependencies = [
@@ -185,6 +194,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "archify-bridge",
+ "archify-delta",
  "archify-egui",
  "archify-geometry",
  "archify-ir",

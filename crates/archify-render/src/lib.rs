@@ -1,11 +1,28 @@
-//! archify-render: Standalone SVG and Neon Glow HTML exporter.
-//! Supports 4 visual presets (SignalFlow, Classic, Blueprint, Editorial) and trilingual RTL layout.
+pub mod delta_svg;
+pub mod sequence_svg;
+pub mod dataflow_svg;
+
+pub use delta_svg::DeltaSvgRenderer;
+pub use sequence_svg::SequenceSvgRenderer;
+pub use dataflow_svg::DataflowSvgRenderer;
 
 use archify_ir::{ArchitectureDiagram, VisualPreset};
 
 pub struct SvgRenderer;
 
 impl SvgRenderer {
+    pub fn render_delta(delta: &archify_ir::DeltaDiagram) -> String {
+        DeltaSvgRenderer::render(delta)
+    }
+
+    pub fn render_sequence(seq: &archify_ir::SequenceDiagram) -> String {
+        SequenceSvgRenderer::render(seq)
+    }
+
+    pub fn render_dataflow(df: &archify_ir::DataflowDiagram) -> String {
+        DataflowSvgRenderer::render(df)
+    }
+
     pub fn render(diagram: &ArchitectureDiagram) -> String {
         let is_rtl = diagram.meta.locale == "ar";
         let preset = diagram.meta.visual_preset;

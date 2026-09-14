@@ -103,3 +103,116 @@ pub struct WorkflowDiagram {
     pub steps: Vec<WorkflowStep>,
     pub connections: Vec<Connection>,
 }
+
+// Dataflow Diagram
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DataflowNode {
+    pub id: String,
+    pub label: String,
+    pub role: SemanticRole,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stream_rate: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DataPipeline {
+    pub from: String,
+    pub to: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub schema: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub throughput: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DataflowDiagram {
+    pub meta: DiagramMeta,
+    pub nodes: Vec<DataflowNode>,
+    pub pipelines: Vec<DataPipeline>,
+}
+
+// Lifecycle Diagram
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LifecycleState {
+    pub id: String,
+    pub label: String,
+    pub is_terminal: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StateTransition {
+    pub from: String,
+    pub to: String,
+    pub trigger: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LifecycleDiagram {
+    pub meta: DiagramMeta,
+    pub states: Vec<LifecycleState>,
+    pub transitions: Vec<StateTransition>,
+}
+
+// Sequence Diagram
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SequenceParticipant {
+    pub id: String,
+    pub label: String,
+    pub role: SemanticRole,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SequenceMessage {
+    pub order: usize,
+    pub from: String,
+    pub to: String,
+    pub action: String,
+    pub is_async: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SequenceDiagram {
+    pub meta: DiagramMeta,
+    pub participants: Vec<SequenceParticipant>,
+    pub messages: Vec<SequenceMessage>,
+}
+
+// Delta Analysis
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum DiffStatus {
+    Added,
+    Removed,
+    Modified,
+    Unchanged,
+}
+
+impl DiffStatus {
+    pub fn neon_hex(&self) -> &'static str {
+        match self {
+            DiffStatus::Added => "#22c55e",
+            DiffStatus::Removed => "#f43f5e",
+            DiffStatus::Modified => "#f59e0b",
+            DiffStatus::Unchanged => "#475569",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeltaComponent {
+    pub component: Component,
+    pub status: DiffStatus,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeltaConnection {
+    pub connection: Connection,
+    pub status: DiffStatus,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeltaDiagram {
+    pub meta: DiagramMeta,
+    pub components: Vec<DeltaComponent>,
+    pub connections: Vec<DeltaConnection>,
+}
