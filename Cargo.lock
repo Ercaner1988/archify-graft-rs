@@ -1205,6 +1205,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "archify-bridge",
+ "archify-delta",
  "archify-ir",
  "archify-render",
  "graft-model",
