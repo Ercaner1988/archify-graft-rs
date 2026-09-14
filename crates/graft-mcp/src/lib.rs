@@ -4,7 +4,7 @@ use std::io::{self, BufRead, Write};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use serde_json::{json, Value};
-use graft_model::CodeGraph;
+use graft_model::{CodeGraph, EdgeRelation};
 use graft_parser::CodeExtractor;
 use graft_search::{Bm25Index, GraphRank};
 use archify_bridge::GraftToArchifyBridge;
@@ -71,7 +71,7 @@ impl McpServer {
         Ok(())
     }
 
-    async fn handle_method(&self, method: &str, params: Value) -> Value {
+    pub async fn handle_method(&self, method: &str, params: Value) -> Value {
         match method {
             "initialize" => {
                 json!({
@@ -102,6 +102,17 @@ impl McpServer {
                                     "limit": { "type": "number" }
                                 },
                                 "required": ["query"]
+                            }
+                        },
+                        {
+                            "name": "graft_trace_calls",
+                            "description": "Trace upstream callers and downstream callees of a function or class",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "symbol": { "type": "string" }
+                                },
+                                "required": ["symbol"]
                             }
                         },
                         {
@@ -166,6 +177,37 @@ impl McpServer {
 
                             json!({
                                 "content": [{ "type": "text", "text": formatted }]
+                            })
+                        } else {
+                            json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] })
+                        }
+                    }
+                    "graft_trace_calls" => {
+                        let symbol = args.get("symbol").and_then(|s| s.as_str()).unwrap_or("");
+                        let graph_guard = self.graph.lock().await;
+
+                        if let Some(graph) = graph_guard.as_ref() {
+                            let mut callers = Vec::new();
+                            let mut callees = Vec::new();
+
+                            for edge in &graph.edges {
+                                if edge.relation == EdgeRelation::Calls {
+                                    if edge.target.contains(symbol) {
+                                        callers.push(edge.source.clone());
+                                    }
+                                    if edge.source.contains(symbol) {
+                                        callees.push(edge.target.clone());
+                                    }
+                                }
+                            }
+
+                            let output = format!(
+                                "Call trace for '{}':\nUpstream Callers ({}) -> {:?}\nDownstream Callees ({}) -> {:?}",
+                                symbol, callers.len(), callers, callees.len(), callees
+                            );
+
+                            json!({
+                                "content": [{ "type": "text", "text": output }]
                             })
                         } else {
                             json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] })

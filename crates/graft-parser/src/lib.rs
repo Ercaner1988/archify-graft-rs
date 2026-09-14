@@ -1,5 +1,6 @@
-//! graft-parser: Direct DMA unbuffered file reader and parallel AST extractor.
+//! graft-parser: Direct DMA unbuffered file reader, parallel AST extractor, and call resolver.
 
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use rayon::prelude::*;
 use graft_model::{CodeGraph, EdgeRelation, EdgeV1, NodeKind, NodeV1};
@@ -28,6 +29,7 @@ impl CodeExtractor {
             }
         }
 
+        Self::resolve_inter_symbol_calls(&mut master);
         master.rebuild_index();
         Ok(master)
     }
@@ -149,6 +151,85 @@ impl CodeExtractor {
 
         Ok(graph)
     }
+
+    pub fn resolve_inter_symbol_calls(graph: &mut CodeGraph) {
+        let mut name_to_ids: HashMap<String, Vec<String>> = HashMap::new();
+        for node in &graph.nodes {
+            if node.kind == NodeKind::Function || node.kind == NodeKind::Method {
+                name_to_ids.entry(node.name.clone()).or_default().push(node.id.clone());
+            }
+        }
+
+        let mut new_edges = Vec::new();
+        let mut existing_pairs: HashSet<(String, String)> = HashSet::new();
+
+        for edge in &graph.edges {
+            existing_pairs.insert((edge.source.clone(), edge.target.clone()));
+        }
+
+        for node in &graph.nodes {
+            if node.kind == NodeKind::Function || node.kind == NodeKind::Method {
+                for (target_name, target_ids) in &name_to_ids {
+                    if *target_name == node.name {
+                        continue;
+                    }
+
+                    let call_pattern_1 = format!("{}(", target_name);
+                    let call_pattern_2 = format!("::{}", target_name);
+                    let call_pattern_3 = format!(".{}(", target_name);
+
+                    if node.search_body.contains(&call_pattern_1)
+                        || node.search_body.contains(&call_pattern_2)
+                        || node.search_body.contains(&call_pattern_3)
+                    {
+                        for target_id in target_ids {
+                            let pair = (node.id.clone(), target_id.clone());
+                            if !existing_pairs.contains(&pair) {
+                                existing_pairs.insert(pair);
+                                new_edges.push(EdgeV1 {
+                                    source: node.id.clone(),
+                                    target: target_id.clone(),
+                                    relation: EdgeRelation::Calls,
+                                    confidence: 0.85,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for edge in new_edges {
+            graph.add_edge(edge);
+        }
+    }
+
+    pub fn is_fresh<P: AsRef<Path>>(root: P, cache_file: P) -> bool {
+        let cache_path = cache_file.as_ref();
+        if !cache_path.exists() {
+            return false;
+        }
+
+        let cache_mtime = match cache_path.metadata().and_then(|m| m.modified()) {
+            Ok(t) => t,
+            Err(_) => return false,
+        };
+
+        let mut file_paths = Vec::new();
+        if Self::collect_files(root.as_ref(), &mut file_paths).is_err() {
+            return false;
+        }
+
+        for path in file_paths {
+            if let Ok(m) = path.metadata().and_then(|m| m.modified()) {
+                if m > cache_mtime {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
 }
 
 fn extract_identifier_after_keyword(line: &str) -> Option<&str> {
@@ -162,4 +243,44 @@ fn extract_identifier_after_keyword(line: &str) -> Option<&str> {
         }
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_call_resolution_linking() {
+        let mut graph = CodeGraph::new();
+
+        let caller = NodeV1 {
+            id: "main.rs:run_job".to_string(),
+            path: "main.rs".to_string(),
+            name: "run_job".to_string(),
+            kind: NodeKind::Function,
+            span: None,
+            search_body: "fn run_job() { calculate_total(); }".to_string(),
+            file_residual: "".to_string(),
+        };
+
+        let callee = NodeV1 {
+            id: "calc.rs:calculate_total".to_string(),
+            path: "calc.rs".to_string(),
+            name: "calculate_total".to_string(),
+            kind: NodeKind::Function,
+            span: None,
+            search_body: "fn calculate_total() -> i32 { 42 }".to_string(),
+            file_residual: "".to_string(),
+        };
+
+        graph.add_node(caller);
+        graph.add_node(callee);
+
+        CodeExtractor::resolve_inter_symbol_calls(&mut graph);
+
+        assert_eq!(graph.edges.len(), 1);
+        assert_eq!(graph.edges[0].source, "main.rs:run_job");
+        assert_eq!(graph.edges[0].target, "calc.rs:calculate_total");
+        assert_eq!(graph.edges[0].relation, EdgeRelation::Calls);
+    }
 }

@@ -87,3 +87,19 @@ pub struct ArchitectureDiagram {
     pub components: Vec<Component>,
     pub connections: Vec<Connection>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WorkflowStep {
+    pub id: String,
+    pub label: String,
+    pub lane: String,
+    pub phase: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WorkflowDiagram {
+    pub meta: DiagramMeta,
+    pub lanes: Vec<String>,
+    pub steps: Vec<WorkflowStep>,
+    pub connections: Vec<Connection>,
+}
