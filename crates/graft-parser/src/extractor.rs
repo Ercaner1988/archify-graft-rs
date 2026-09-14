@@ -51,6 +51,56 @@ impl AstExtractor {
                 }
             }
 
+            if trimmed.starts_with("pub enum ") || trimmed.starts_with("enum ") {
+                let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    let name = parts[parts.len() - 1].trim_end_matches('{').trim_end_matches(';');
+                    let enum_id = format!("{}:{}", path_str, name);
+
+                    graph.add_node(NodeV1 {
+                        id: enum_id.clone(),
+                        path: path_str.to_string(),
+                        name: name.to_string(),
+                        kind: NodeKind::Enum,
+                        span: None,
+                        search_body: trimmed.to_string(),
+                        file_residual: String::new(),
+                    });
+
+                    graph.add_edge(EdgeV1 {
+                        source: file_node_id.clone(),
+                        target: enum_id,
+                        relation: EdgeRelation::Contains,
+                        confidence: 1.0,
+                    });
+                }
+            }
+
+            if trimmed.starts_with("pub trait ") || trimmed.starts_with("trait ") || trimmed.starts_with("interface ") {
+                let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    let name = parts[parts.len() - 1].trim_end_matches('{').trim_end_matches(';');
+                    let iface_id = format!("{}:{}", path_str, name);
+
+                    graph.add_node(NodeV1 {
+                        id: iface_id.clone(),
+                        path: path_str.to_string(),
+                        name: name.to_string(),
+                        kind: NodeKind::Interface,
+                        span: None,
+                        search_body: trimmed.to_string(),
+                        file_residual: String::new(),
+                    });
+
+                    graph.add_edge(EdgeV1 {
+                        source: file_node_id.clone(),
+                        target: iface_id,
+                        relation: EdgeRelation::Contains,
+                        confidence: 1.0,
+                    });
+                }
+            }
+
             if trimmed.starts_with("pub fn ")
                 || trimmed.starts_with("fn ")
                 || trimmed.starts_with("def ")

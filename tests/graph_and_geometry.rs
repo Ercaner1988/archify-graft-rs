@@ -78,6 +78,7 @@ fn test_reachability_route_probe() {
             Connection { from: "ui".to_string(), to: "api".to_string(), label: None, line_style: "default".to_string() },
             Connection { from: "api".to_string(), to: "db".to_string(), label: None, line_style: "default".to_string() },
         ],
+        story_beats: vec![],
     };
 
     // UI to DB path exists: ui -> api -> db
@@ -102,6 +103,7 @@ fn test_neon_svg_rendering_structure() {
             Component { id: "server".to_string(), label: "الخادم".to_string(), sublabel: Some("api.rs".to_string()), role: SemanticRole::Backend, x: 50.0, y: 50.0, width: 160.0, height: 70.0 },
         ],
         connections: vec![],
+        story_beats: vec![],
     };
 
     let svg = SvgRenderer::render(&diagram);

@@ -119,6 +119,7 @@ mod tests {
             connections: vec![
                 Connection { from: "a".into(), to: "b".into(), label: None, line_style: "default".into() },
             ],
+            story_beats: vec![],
         };
 
         let after = ArchitectureDiagram {
@@ -133,6 +134,7 @@ mod tests {
             connections: vec![
                 Connection { from: "a".into(), to: "c".into(), label: None, line_style: "default".into() },
             ],
+            story_beats: vec![],
         };
 
         let delta = DeltaEngine::compute_delta(&before, &after);

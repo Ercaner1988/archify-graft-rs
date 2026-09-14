@@ -155,6 +155,7 @@ mod tests {
                 height: 50.0,
             }],
             connections: vec![],
+            story_beats: vec![],
         };
 
         // 1. SignalFlow

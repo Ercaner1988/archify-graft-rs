@@ -82,10 +82,21 @@ pub struct Connection {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StoryBeat {
+    pub step: usize,
+    pub title: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub highlighted_nodes: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArchitectureDiagram {
     pub meta: DiagramMeta,
     pub components: Vec<Component>,
     pub connections: Vec<Connection>,
+    #[serde(default)]
+    pub story_beats: Vec<StoryBeat>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

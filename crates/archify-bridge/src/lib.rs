@@ -53,6 +53,37 @@ impl GraftToArchifyBridge {
             });
         }
 
+        let mut story_beats = Vec::new();
+        let fe_ids: Vec<String> = components.iter().filter(|c| c.role == SemanticRole::Frontend).map(|c| c.id.clone()).collect();
+        if !fe_ids.is_empty() {
+            story_beats.push(archify_ir::StoryBeat {
+                step: 1,
+                title: match locale { "tr" => "1. Kullanıcı ve Giriş Katmanı", "ar" => "١. طبقة المستخدم والواجهة", _ => "1. Client Ingress Layer" }.to_string(),
+                description: Some("Entrypoint surfaces handling inbound client interactions".to_string()),
+                highlighted_nodes: fe_ids,
+            });
+        }
+
+        let be_ids: Vec<String> = components.iter().filter(|c| c.role == SemanticRole::Backend || c.role == SemanticRole::Messagebus).map(|c| c.id.clone()).collect();
+        if !be_ids.is_empty() {
+            story_beats.push(archify_ir::StoryBeat {
+                step: story_beats.len() + 1,
+                title: match locale { "tr" => "2. Çekirdek Servis ve Mantık Katmanı", "ar" => "٢. طبقة الخدمات والمنطق", _ => "2. Core Application Services" }.to_string(),
+                description: Some("Business logic, orchestrators, and internal message routing".to_string()),
+                highlighted_nodes: be_ids,
+            });
+        }
+
+        let db_ids: Vec<String> = components.iter().filter(|c| c.role == SemanticRole::Database).map(|c| c.id.clone()).collect();
+        if !db_ids.is_empty() {
+            story_beats.push(archify_ir::StoryBeat {
+                step: story_beats.len() + 1,
+                title: match locale { "tr" => "3. Kalıcılık ve Veri Katmanı", "ar" => "٣. طبقة البيانات والتخزين", _ => "3. State & Persistence Storage" }.to_string(),
+                description: Some("Memory-mapped indices, repositories, and transactional stores".to_string()),
+                highlighted_nodes: db_ids,
+            });
+        }
+
         ArchitectureDiagram {
             meta: DiagramMeta {
                 title: title.to_string(),
@@ -62,6 +93,7 @@ impl GraftToArchifyBridge {
             },
             components,
             connections,
+            story_beats,
         }
     }
 

@@ -2,11 +2,13 @@
 //! Zero C dependencies. Supports optional Linux `glow` (OpenGL) backend.
 
 pub mod app;
+pub mod canvas;
 
 use egui::{Color32, Pos2, Rect, Stroke};
 use archify_ir::SemanticRole;
 
 pub use app::ArchifyApp;
+pub use canvas::CanvasRenderer;
 
 pub struct NeonPainter;
 

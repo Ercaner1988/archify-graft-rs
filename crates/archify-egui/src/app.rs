@@ -1,8 +1,8 @@
 //! Interactive Archify & Graft Desktop Studio Application using egui.
 
-use egui::{Color32, Pos2, Rect, Sense, Stroke, Vec2};
+use egui::{Color32, Pos2, Rect, Sense, Vec2};
 use archify_ir::{ArchitectureDiagram, VisualPreset};
-use crate::{NeonPainter, TrilingualUi};
+use crate::{CanvasRenderer, NeonPainter, TrilingualUi};
 
 pub struct ArchifyApp {
     pub diagram: Option<ArchitectureDiagram>,
@@ -12,6 +12,7 @@ pub struct ArchifyApp {
     pub route_start: Option<String>,
     pub route_target: Option<String>,
     pub active_route: Option<Vec<String>>,
+    pub active_story_beat: Option<usize>,
     pub locale: String,
     pub preset: VisualPreset,
     pub search_text: String,
@@ -27,6 +28,7 @@ impl Default for ArchifyApp {
             route_start: None,
             route_target: None,
             active_route: None,
+            active_story_beat: None,
             locale: "tr".to_string(),
             preset: VisualPreset::SignalFlow,
             search_text: String::new(),
@@ -45,7 +47,7 @@ impl ArchifyApp {
 
     /// Primary UI rendering function called every frame by eframe/egui
     pub fn render_ui(&mut self, ctx: &egui::Context) {
-        // Bottom Status Bar with Route Diagnostics
+        // Bottom Status Bar with Route Diagnostics & Story Beat Navigator
         egui::TopBottomPanel::bottom("archify_statusbar").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 let status = TrilingualUi::route_label(
@@ -60,6 +62,31 @@ impl ArchifyApp {
                     self.route_target = None;
                     self.active_route = None;
                 }
+
+                if let Some(diag) = &self.diagram {
+                    if !diag.story_beats.is_empty() {
+                        ui.separator();
+                        ui.label("📖 Story:");
+                        if ui.button("◀").clicked() {
+                            let curr = self.active_story_beat.unwrap_or(0);
+                            if curr > 0 { self.active_story_beat = Some(curr - 1); }
+                        }
+                        if let Some(idx) = self.active_story_beat {
+                            if let Some(beat) = diag.story_beats.get(idx) {
+                                ui.colored_label(Color32::from_rgb(0x38, 0xbd, 0xf8), &beat.title);
+                            }
+                        } else {
+                            ui.label("Overview");
+                        }
+                        if ui.button("▶").clicked() {
+                            let curr = self.active_story_beat.map_or(0, |c| c + 1);
+                            if curr < diag.story_beats.len() { self.active_story_beat = Some(curr); }
+                        }
+                        if self.active_story_beat.is_some() && ui.button("⏹").clicked() {
+                            self.active_story_beat = None;
+                        }
+                    }
+                }
             });
         });
 
@@ -71,28 +98,16 @@ impl ArchifyApp {
 
                 // Language Switcher
                 ui.label("🌐");
-                if ui.selectable_label(self.locale == "tr", "Türkçe").clicked() {
-                    self.locale = "tr".to_string();
-                }
-                if ui.selectable_label(self.locale == "ar", "العربية").clicked() {
-                    self.locale = "ar".to_string();
-                }
-                if ui.selectable_label(self.locale == "en", "English").clicked() {
-                    self.locale = "en".to_string();
-                }
+                if ui.selectable_label(self.locale == "tr", "Türkçe").clicked() { self.locale = "tr".to_string(); }
+                if ui.selectable_label(self.locale == "ar", "العربية").clicked() { self.locale = "ar".to_string(); }
+                if ui.selectable_label(self.locale == "en", "English").clicked() { self.locale = "en".to_string(); }
 
                 ui.separator();
 
                 // Preset Selector
-                if ui.selectable_label(self.preset == VisualPreset::SignalFlow, "⚡ Neon").clicked() {
-                    self.preset = VisualPreset::SignalFlow;
-                }
-                if ui.selectable_label(self.preset == VisualPreset::Classic, "🌙 Classic").clicked() {
-                    self.preset = VisualPreset::Classic;
-                }
-                if ui.selectable_label(self.preset == VisualPreset::Blueprint, "📐 Blueprint").clicked() {
-                    self.preset = VisualPreset::Blueprint;
-                }
+                if ui.selectable_label(self.preset == VisualPreset::SignalFlow, "⚡ Neon").clicked() { self.preset = VisualPreset::SignalFlow; }
+                if ui.selectable_label(self.preset == VisualPreset::Classic, "🌙 Classic").clicked() { self.preset = VisualPreset::Classic; }
+                if ui.selectable_label(self.preset == VisualPreset::Blueprint, "📐 Blueprint").clicked() { self.preset = VisualPreset::Blueprint; }
 
                 ui.separator();
 
@@ -112,37 +127,19 @@ impl ArchifyApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             let (response, painter) = ui.allocate_painter(ui.available_size(), Sense::click_and_drag());
 
-            // Handle Drag Pan
             if response.dragged() {
                 self.pan += response.drag_delta();
             }
 
-            // Handle Scroll Zoom
             let scroll_delta = ui.input(|i| i.raw_scroll_delta.y);
             if scroll_delta != 0.0 {
                 let zoom_factor = if scroll_delta > 0.0 { 1.1 } else { 0.9 };
                 self.zoom = (self.zoom * zoom_factor).clamp(0.2, 4.0);
             }
 
-            // Background Cyber Grid
             let canvas_rect = response.rect;
-            let bg_color = Color32::from_rgb(0x02, 0x06, 0x17);
-            painter.rect_filled(canvas_rect, 0.0, bg_color);
+            CanvasRenderer::draw_grid(&painter, canvas_rect, self.pan, self.zoom);
 
-            let grid_step = 40.0 * self.zoom;
-            let grid_color = Color32::from_rgba_unmultiplied(0x1e, 0x29, 0x3b, 80);
-            let mut x = canvas_rect.min.x + (self.pan.x % grid_step);
-            while x < canvas_rect.max.x {
-                painter.line_segment([Pos2::new(x, canvas_rect.min.y), Pos2::new(x, canvas_rect.max.y)], Stroke::new(1.0_f32, grid_color));
-                x += grid_step;
-            }
-            let mut y = canvas_rect.min.y + (self.pan.y % grid_step);
-            while y < canvas_rect.max.y {
-                painter.line_segment([Pos2::new(canvas_rect.min.x, y), Pos2::new(canvas_rect.max.x, y)], Stroke::new(1.0_f32, grid_color));
-                y += grid_step;
-            }
-
-            // Render Diagram Elements
             if let Some(diagram) = &self.diagram {
                 let to_screen = |x: f32, y: f32| -> Pos2 {
                     Pos2::new(
@@ -151,33 +148,12 @@ impl ArchifyApp {
                     )
                 };
 
-                // 1. Connections
-                for conn in &diagram.connections {
-                    if let (Some(from_c), Some(to_c)) = (
-                        diagram.components.iter().find(|c| c.id == conn.from),
-                        diagram.components.iter().find(|c| c.id == conn.to),
-                    ) {
-                        let start = to_screen(from_c.x + from_c.width / 2.0, from_c.y + from_c.height);
-                        let end = to_screen(to_c.x + to_c.width / 2.0, to_c.y);
-                        let is_route_edge = self.active_route.as_ref().map_or(false, |route| {
-                            route.windows(2).any(|w| w[0] == conn.from && w[1] == conn.to)
-                        });
-                        let beam_color = if is_route_edge {
-                            Color32::from_rgb(0x22, 0xd3, 0xee)
-                        } else {
-                            Color32::from_rgb(0x64, 0x74, 0x8b)
-                        };
+                CanvasRenderer::draw_connections(&painter, diagram, to_screen, self.active_route.as_deref());
 
-                        NeonPainter::paint_neon_line(&painter, start, end, beam_color);
-                    }
-                }
-
-                // 2. Components
                 let pointer_pos = ctx.input(|i| i.pointer.hover_pos());
                 let mut newly_selected = None;
 
                 for comp in &diagram.components {
-                    // Filter search if typed
                     if !self.search_text.is_empty() && !comp.label.to_lowercase().contains(&self.search_text.to_lowercase()) {
                         continue;
                     }
@@ -211,11 +187,14 @@ impl ArchifyApp {
                     let is_in_route = self.active_route.as_ref().map_or(false, |r| r.contains(&comp.id))
                         || self.route_start.as_deref() == Some(&comp.id);
 
-                    // Draw neon box
-                    NeonPainter::paint_neon_rect(&painter, rect, comp.role, 6.0 * self.zoom, is_hovered || is_selected || is_in_route);
+                    let is_beat_active = self.active_story_beat.and_then(|idx| {
+                        diagram.story_beats.get(idx).map(|b| b.highlighted_nodes.contains(&comp.id))
+                    }).unwrap_or(true);
 
-                    // Text labels
-                    let text_color = Color32::from_rgb(0xf8, 0xfa, 0xfc);
+                    NeonPainter::paint_neon_rect(&painter, rect, comp.role, 6.0 * self.zoom, (is_hovered || is_selected || is_in_route) && is_beat_active);
+
+                    let text_alpha = if is_beat_active { 255 } else { 70 };
+                    let text_color = Color32::from_rgba_unmultiplied(0xf8, 0xfa, 0xfc, text_alpha);
                     let font_size = 13.0 * self.zoom;
                     painter.text(
                         Pos2::new(rect.center().x, rect.center().y - 4.0 * self.zoom),
@@ -226,12 +205,13 @@ impl ArchifyApp {
                     );
 
                     if let Some(sub) = &comp.sublabel {
+                        let sub_color = Color32::from_rgba_unmultiplied(0x94, 0xa3, 0xb8, text_alpha);
                         painter.text(
                             Pos2::new(rect.center().x, rect.center().y + 10.0 * self.zoom),
                             egui::Align2::CENTER_CENTER,
                             sub,
                             egui::FontId::proportional(font_size * 0.75),
-                            Color32::from_rgb(0x94, 0xa3, 0xb8),
+                            sub_color,
                         );
                     }
                 }
@@ -250,4 +230,3 @@ impl eframe::App for ArchifyApp {
         self.render_ui(ctx);
     }
 }
-

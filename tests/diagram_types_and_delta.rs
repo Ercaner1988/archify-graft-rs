@@ -24,6 +24,7 @@ fn test_delta_svg_rendering_and_legend() {
         connections: vec![
             Connection { from: "auth".into(), to: "legacy_db".into(), label: None, line_style: "default".into() },
         ],
+        story_beats: vec![],
     };
 
     let after = ArchitectureDiagram {
@@ -35,6 +36,7 @@ fn test_delta_svg_rendering_and_legend() {
         connections: vec![
             Connection { from: "auth".into(), to: "cloud_db".into(), label: None, line_style: "default".into() },
         ],
+        story_beats: vec![],
     };
 
     let delta = DeltaEngine::compute_delta(&before, &after);
