@@ -65,5 +65,5 @@ env_logger.workspace = true
 
 [features]
 default = []
-gui = ["dep:archify-egui"]
-glow = ["archify-egui?/glow"]
+gui = ["dep:archify-egui", "archify-egui/glow"]
+glow = ["gui"]

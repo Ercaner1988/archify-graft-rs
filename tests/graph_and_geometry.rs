@@ -80,9 +80,9 @@ fn test_reachability_route_probe() {
         ],
     };
 
-    // UI to DB path exists
+    // UI to DB path exists: ui -> api -> db
     let route = ReachabilityEngine::find_route(&diagram, "ui", "db");
-    assert!(route.is_some());
+    assert_eq!(route, Some(vec!["ui".to_string(), "api".to_string(), "db".to_string()]));
 
     // UI to isolated path does not exist
     let unreachable = ReachabilityEngine::find_route(&diagram, "ui", "isolated");

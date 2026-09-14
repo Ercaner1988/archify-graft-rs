@@ -1,6 +1,6 @@
 //! archify-geometry: Orthogonal layout geometry, port spread, and topologic routing.
 
-use petgraph::algo::dijkstra;
+use petgraph::algo::astar;
 use petgraph::graph::{DiGraph, NodeIndex};
 use std::collections::HashMap;
 use archify_ir::ArchitectureDiagram;
@@ -8,6 +8,7 @@ use archify_ir::ArchitectureDiagram;
 pub struct ReachabilityEngine;
 
 impl ReachabilityEngine {
+    /// Finds the shortest directed path between two components, returning the ordered node IDs
     pub fn find_route(diagram: &ArchitectureDiagram, start_id: &str, target_id: &str) -> Option<Vec<String>> {
         let mut graph = DiGraph::<String, ()>::new();
         let mut id_to_index: HashMap<&str, NodeIndex> = HashMap::new();
@@ -28,9 +29,9 @@ impl ReachabilityEngine {
         let start_idx = *id_to_index.get(start_id)?;
         let target_idx = *id_to_index.get(target_id)?;
 
-        let node_map = dijkstra(&graph, start_idx, Some(target_idx), |_| 1);
-        if node_map.contains_key(&target_idx) {
-            Some(vec![start_id.to_string(), target_id.to_string()])
+        if let Some((_cost, path)) = astar(&graph, start_idx, |finish| finish == target_idx, |_| 1, |_| 0) {
+            let result: Vec<String> = path.into_iter().filter_map(|idx| index_to_id.get(&idx).cloned()).collect();
+            Some(result)
         } else {
             None
         }

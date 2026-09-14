@@ -55,6 +55,19 @@ enum Commands {
     },
     /// Start the Model Context Protocol (MCP) JSON-RPC stdio server for AI agents
     Mcp,
+    /// Launch the interactive pure-Rust desktop Archify studio window
+    #[cfg(feature = "gui")]
+    Gui {
+        /// Diagram title
+        #[arg(short, long, default_value = "Archify Studio")]
+        title: String,
+        /// Locale: tr (Turkish), ar (Arabic), en (English)
+        #[arg(short, long, default_value = "tr")]
+        locale: String,
+        /// Cache path to read graph from (optional)
+        #[arg(short, long, default_value = ".cache/graft-graph.json")]
+        cache: String,
+    },
 }
 
 #[tokio::main]
@@ -67,12 +80,37 @@ async fn main() -> anyhow::Result<()> {
             println!("⚡ [Hardware-Sys] Detected CPU cache line: {} bytes", cache_line_size());
             println!("🚀 [Graft-Core] Indexing codebase at '{}' using direct DMA buffers...", path);
             
+            let hash_file = Path::new(&cache).with_extension("hashes.json");
             let timer = HardwareTimer::start();
-            let graph = CodeExtractor::index_directory(&path)?;
+
+            let (graph, changed) = if Path::new(&cache).exists() && hash_file.exists() {
+                println!("⚡ [Graft-Core] Found existing index. Performing incremental change scan...");
+                let mut prev_graph = GraphStorage::load_mmap(&cache)?;
+                let mut hash_index = graft_parser::HashIndex::load_from_file(&hash_file)?;
+                let changed = CodeExtractor::index_directory_incremental(&path, &mut prev_graph, &mut hash_index)?;
+                let _ = hash_index.save_to_file(&hash_file);
+                (prev_graph, changed)
+            } else {
+                let graph = CodeExtractor::index_directory(&path)?;
+                let mut hash_index = graft_parser::HashIndex::new();
+                let mut file_paths = Vec::new();
+                let _ = CodeExtractor::collect_files(Path::new(&path), &mut file_paths);
+                for fp in file_paths {
+                    if let Ok(bytes) = lowlevel_sys::DirectReader::read_file(&fp) {
+                        hash_index.update(fp.to_string_lossy().to_string(), graft_parser::HashIndex::hash_bytes(&bytes));
+                    }
+                }
+                if let Some(parent) = hash_file.parent() {
+                    let _ = fs::create_dir_all(parent);
+                }
+                let _ = hash_index.save_to_file(&hash_file);
+                let count = graph.nodes.len();
+                (graph, count)
+            };
             let elapsed_cycles = timer.elapsed_cycles();
 
-            println!("✅ [Graft-Core] Extracted {} nodes and {} edges in {} CPU cycles.", 
-                graph.nodes.len(), graph.edges.len(), elapsed_cycles);
+            println!("✅ [Graft-Core] Processed {} files. Index contains {} nodes and {} edges (in {} CPU cycles).", 
+                changed, graph.nodes.len(), graph.edges.len(), elapsed_cycles);
 
             if let Some(parent) = Path::new(&cache).parent() {
                 fs::create_dir_all(parent)?;
@@ -127,6 +165,21 @@ async fn main() -> anyhow::Result<()> {
         Commands::Mcp => {
             let mcp = McpServer::new();
             mcp.run_stdio().await?;
+        }
+        #[cfg(feature = "gui")]
+        Commands::Gui { title, locale, cache } => {
+            let diagram = if Path::new(&cache).exists() {
+                println!("📖 [Archify-Studio] Loading graph from '{}'...", cache);
+                let graph = GraphStorage::load_mmap(&cache)?;
+                Some(GraftToArchifyBridge::compile(&graph, &title, &locale))
+            } else {
+                println!("ℹ️ [Archify-Studio] No cache found at '{}', opening empty studio canvas...", cache);
+                None
+            };
+
+            println!("🚀 [Archify-Studio] Launching interactive neon desktop studio window (Locale: {})...", locale);
+            archify_egui::run_desktop(diagram, &locale)
+                .map_err(|e| anyhow::anyhow!("Desktop studio error: {:?}", e))?;
         }
     }
 

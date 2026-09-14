@@ -1,6 +1,12 @@
-//! graft-parser: Direct DMA unbuffered file reader, parallel AST extractor, and call resolver.
+//! graft-parser: Direct DMA unbuffered file reader, parallel AST extractor, incremental hash tracker, and call resolver.
 
-use std::collections::{HashMap, HashSet};
+pub mod incremental;
+pub mod resolver;
+
+pub use incremental::HashIndex;
+pub use resolver::CallResolver;
+
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use rayon::prelude::*;
 use graft_model::{CodeGraph, EdgeRelation, EdgeV1, NodeKind, NodeV1};
@@ -9,6 +15,7 @@ use lowlevel_sys::DirectReader;
 pub struct CodeExtractor;
 
 impl CodeExtractor {
+    /// Full parallel scan of a codebase directory
     pub fn index_directory<P: AsRef<Path>>(root: P) -> anyhow::Result<CodeGraph> {
         let root_path = root.as_ref().to_path_buf();
         let mut file_paths = Vec::new();
@@ -34,7 +41,72 @@ impl CodeExtractor {
         Ok(master)
     }
 
-    fn collect_files(dir: &Path, files: &mut Vec<PathBuf>) -> anyhow::Result<()> {
+    /// Incremental scan: skips unchanged files by verifying FNV-1a content hashes
+    pub fn index_directory_incremental<P: AsRef<Path>>(
+        root: P,
+        graph: &mut CodeGraph,
+        hash_index: &mut HashIndex,
+    ) -> anyhow::Result<usize> {
+        let root_path = root.as_ref().to_path_buf();
+        let mut file_paths = Vec::new();
+        Self::collect_files(&root_path, &mut file_paths)?;
+
+        let mut changed_count = 0;
+        let mut current_paths = HashSet::new();
+
+        for path in &file_paths {
+            let path_str = path.to_string_lossy().to_string();
+            current_paths.insert(path_str.clone());
+
+            let bytes = match DirectReader::read_file(path) {
+                Ok(b) => b,
+                Err(_) => continue,
+            };
+            let content_hash = HashIndex::hash_bytes(&bytes);
+
+            if !hash_index.is_unchanged(&path_str, content_hash) {
+                changed_count += 1;
+                hash_index.update(path_str.clone(), content_hash);
+
+                // Evict previous nodes and edges for this file
+                let file_prefix = format!("{}:", path_str);
+                let file_node_id = format!("file:{}", path_str);
+                graph.nodes.retain(|n| n.id != file_node_id && !n.id.starts_with(&file_prefix));
+                graph.edges.retain(|e| !e.source.starts_with(&path_str) && !e.target.starts_with(&path_str));
+
+                // Parse fresh content
+                if let Ok(fresh) = Self::extract_file_content(path, &bytes) {
+                    for node in fresh.nodes {
+                        graph.add_node(node);
+                    }
+                    for edge in fresh.edges {
+                        graph.add_edge(edge);
+                    }
+                }
+            }
+        }
+
+        // Evict deleted files
+        let all_known: Vec<String> = hash_index.hashes.keys().cloned().collect();
+        for known in all_known {
+            if !current_paths.contains(&known) {
+                hash_index.remove(&known);
+                let file_prefix = format!("{}:", known);
+                let file_node_id = format!("file:{}", known);
+                graph.nodes.retain(|n| n.id != file_node_id && !n.id.starts_with(&file_prefix));
+                graph.edges.retain(|e| !e.source.starts_with(&known) && !e.target.starts_with(&known));
+            }
+        }
+
+        if changed_count > 0 {
+            Self::resolve_inter_symbol_calls(graph);
+            graph.rebuild_index();
+        }
+
+        Ok(changed_count)
+    }
+
+    pub fn collect_files(dir: &Path, files: &mut Vec<PathBuf>) -> anyhow::Result<()> {
         if let Ok(entries) = std::fs::read_dir(dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
@@ -69,11 +141,14 @@ impl CodeExtractor {
 
     pub fn extract_file(path: &Path) -> anyhow::Result<CodeGraph> {
         let bytes = DirectReader::read_file(path)?;
-        let content = String::from_utf8_lossy(&bytes);
+        Self::extract_file_content(path, &bytes)
+    }
+
+    pub fn extract_file_content(path: &Path, bytes: &[u8]) -> anyhow::Result<CodeGraph> {
+        let content = String::from_utf8_lossy(bytes);
         let path_str = path.to_string_lossy().to_string();
 
         let mut graph = CodeGraph::new();
-
         let file_node_id = format!("file:{}", path_str);
         graph.add_node(NodeV1 {
             id: file_node_id.clone(),
@@ -87,7 +162,7 @@ impl CodeExtractor {
 
         let mut current_class: Option<String> = None;
 
-        for (_line_idx, line) in content.lines().enumerate() {
+        for line in content.lines() {
             let trimmed = line.trim();
 
             if trimmed.starts_with("pub struct ") || trimmed.starts_with("struct ") || trimmed.starts_with("class ") {
@@ -141,7 +216,7 @@ impl CodeExtractor {
                     let parent = current_class.as_ref().unwrap_or(&file_node_id);
                     graph.add_edge(EdgeV1 {
                         source: parent.clone(),
-                        target: fn_id.clone(),
+                        target: fn_id,
                         relation: EdgeRelation::Contains,
                         confidence: 1.0,
                     });
@@ -153,55 +228,7 @@ impl CodeExtractor {
     }
 
     pub fn resolve_inter_symbol_calls(graph: &mut CodeGraph) {
-        let mut name_to_ids: HashMap<String, Vec<String>> = HashMap::new();
-        for node in &graph.nodes {
-            if node.kind == NodeKind::Function || node.kind == NodeKind::Method {
-                name_to_ids.entry(node.name.clone()).or_default().push(node.id.clone());
-            }
-        }
-
-        let mut new_edges = Vec::new();
-        let mut existing_pairs: HashSet<(String, String)> = HashSet::new();
-
-        for edge in &graph.edges {
-            existing_pairs.insert((edge.source.clone(), edge.target.clone()));
-        }
-
-        for node in &graph.nodes {
-            if node.kind == NodeKind::Function || node.kind == NodeKind::Method {
-                for (target_name, target_ids) in &name_to_ids {
-                    if *target_name == node.name {
-                        continue;
-                    }
-
-                    let call_pattern_1 = format!("{}(", target_name);
-                    let call_pattern_2 = format!("::{}", target_name);
-                    let call_pattern_3 = format!(".{}(", target_name);
-
-                    if node.search_body.contains(&call_pattern_1)
-                        || node.search_body.contains(&call_pattern_2)
-                        || node.search_body.contains(&call_pattern_3)
-                    {
-                        for target_id in target_ids {
-                            let pair = (node.id.clone(), target_id.clone());
-                            if !existing_pairs.contains(&pair) {
-                                existing_pairs.insert(pair);
-                                new_edges.push(EdgeV1 {
-                                    source: node.id.clone(),
-                                    target: target_id.clone(),
-                                    relation: EdgeRelation::Calls,
-                                    confidence: 0.85,
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        for edge in new_edges {
-            graph.add_edge(edge);
-        }
+        CallResolver::resolve_calls(graph);
     }
 
     pub fn is_fresh<P: AsRef<Path>>(root: P, cache_file: P) -> bool {

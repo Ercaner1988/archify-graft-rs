@@ -9,3 +9,5 @@ graft-model = { path = "../graft-model" }
 lowlevel-sys = { path = "../lowlevel-sys" }
 rayon.workspace = true
 anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true

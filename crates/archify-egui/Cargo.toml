@@ -6,9 +6,12 @@ license.workspace = true
 
 [features]
 default = []
-glow = ["eframe?/glow"]
+eframe = ["dep:eframe"]
+glow = ["dep:eframe", "eframe/glow"]
+wgpu = ["dep:eframe", "eframe/wgpu"]
 
 [dependencies]
 archify-ir = { path = "../archify-ir" }
+archify-geometry = { path = "../archify-geometry" }
 egui.workspace = true
 eframe = { workspace = true, optional = true }

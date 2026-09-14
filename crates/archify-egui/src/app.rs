@@ -9,6 +9,9 @@ pub struct ArchifyApp {
     pub pan: Vec2,
     pub zoom: f32,
     pub selected_id: Option<String>,
+    pub route_start: Option<String>,
+    pub route_target: Option<String>,
+    pub active_route: Option<Vec<String>>,
     pub locale: String,
     pub preset: VisualPreset,
     pub search_text: String,
@@ -21,6 +24,9 @@ impl Default for ArchifyApp {
             pan: Vec2::new(50.0, 50.0),
             zoom: 1.0,
             selected_id: None,
+            route_start: None,
+            route_target: None,
+            active_route: None,
             locale: "tr".to_string(),
             preset: VisualPreset::SignalFlow,
             search_text: String::new(),
@@ -39,6 +45,24 @@ impl ArchifyApp {
 
     /// Primary UI rendering function called every frame by eframe/egui
     pub fn render_ui(&mut self, ctx: &egui::Context) {
+        // Bottom Status Bar with Route Diagnostics
+        egui::TopBottomPanel::bottom("archify_statusbar").show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                let status = TrilingualUi::route_label(
+                    &self.locale,
+                    self.route_start.as_deref(),
+                    self.route_target.as_deref(),
+                    self.active_route.is_some(),
+                );
+                ui.label(status);
+                if self.route_start.is_some() && ui.button("✖").clicked() {
+                    self.route_start = None;
+                    self.route_target = None;
+                    self.active_route = None;
+                }
+            });
+        });
+
         // Top Toolbar
         egui::TopBottomPanel::top("archify_toolbar").show(ctx, |ui| {
             ui.horizontal(|ui| {
@@ -135,7 +159,14 @@ impl ArchifyApp {
                     ) {
                         let start = to_screen(from_c.x + from_c.width / 2.0, from_c.y + from_c.height);
                         let end = to_screen(to_c.x + to_c.width / 2.0, to_c.y);
-                        let beam_color = Color32::from_rgb(0x64, 0x74, 0x8b);
+                        let is_route_edge = self.active_route.as_ref().map_or(false, |route| {
+                            route.windows(2).any(|w| w[0] == conn.from && w[1] == conn.to)
+                        });
+                        let beam_color = if is_route_edge {
+                            Color32::from_rgb(0x22, 0xd3, 0xee)
+                        } else {
+                            Color32::from_rgb(0x64, 0x74, 0x8b)
+                        };
 
                         NeonPainter::paint_neon_line(&painter, start, end, beam_color);
                     }
@@ -158,12 +189,30 @@ impl ArchifyApp {
                     let is_hovered = pointer_pos.map_or(false, |pos| rect.contains(pos));
                     if is_hovered && response.clicked() {
                         newly_selected = Some(comp.id.clone());
+                        if self.route_start.is_none() {
+                            self.route_start = Some(comp.id.clone());
+                            self.route_target = None;
+                            self.active_route = None;
+                        } else if self.route_start.as_deref() == Some(&comp.id) {
+                            self.route_start = None;
+                            self.route_target = None;
+                            self.active_route = None;
+                        } else {
+                            self.route_target = Some(comp.id.clone());
+                            self.active_route = archify_geometry::ReachabilityEngine::find_route(
+                                diagram,
+                                self.route_start.as_ref().unwrap(),
+                                &comp.id,
+                            );
+                        }
                     }
 
                     let is_selected = self.selected_id.as_deref() == Some(&comp.id);
+                    let is_in_route = self.active_route.as_ref().map_or(false, |r| r.contains(&comp.id))
+                        || self.route_start.as_deref() == Some(&comp.id);
 
                     // Draw neon box
-                    NeonPainter::paint_neon_rect(&painter, rect, comp.role, 6.0 * self.zoom, is_hovered || is_selected);
+                    NeonPainter::paint_neon_rect(&painter, rect, comp.role, 6.0 * self.zoom, is_hovered || is_selected || is_in_route);
 
                     // Text labels
                     let text_color = Color32::from_rgb(0xf8, 0xfa, 0xfc);
@@ -194,3 +243,11 @@ impl ArchifyApp {
         });
     }
 }
+
+#[cfg(any(feature = "glow", feature = "wgpu"))]
+impl eframe::App for ArchifyApp {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.render_ui(ctx);
+    }
+}
+

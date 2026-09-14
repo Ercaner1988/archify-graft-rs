@@ -80,4 +80,64 @@ impl TrilingualUi {
             _ => "Search code or architecture...",
         }
     }
+
+    pub fn route_label(locale: &str, start: Option<&str>, target: Option<&str>, active: bool) -> String {
+        match locale {
+            "ar" => {
+                if let (Some(s), Some(t)) = (start, target) {
+                    if active {
+                        format!("المسار النشط: {} ➔ {}", s, t)
+                    } else {
+                        format!("لا يوجد مسار بين {} و {}", s, t)
+                    }
+                } else if let Some(s) = start {
+                    format!("البداية: {}. اختر الهدف...", s)
+                } else {
+                    "انقر على عقدتين لتتبع المسار المباشر".to_string()
+                }
+            }
+            "tr" => {
+                if let (Some(s), Some(t)) = (start, target) {
+                    if active {
+                        format!("Aktif Rota: {} ➔ {}", s, t)
+                    } else {
+                        format!("{} ile {} arasında rota bulunamadı", s, t)
+                    }
+                } else if let Some(s) = start {
+                    format!("Başlangıç: {}. Hedef düğümü seçin...", s)
+                } else {
+                    "Canlı rota takibi için iki düğüme tıklayın".to_string()
+                }
+            }
+            _ => {
+                if let (Some(s), Some(t)) = (start, target) {
+                    if active {
+                        format!("Active Route: {} ➔ {}", s, t)
+                    } else {
+                        format!("No route between {} and {}", s, t)
+                    }
+                } else if let Some(s) = start {
+                    format!("Start: {}. Select target...", s)
+                } else {
+                    "Click two nodes to probe shortest route".to_string()
+                }
+            }
+        }
+    }
+}
+
+#[cfg(any(feature = "glow", feature = "wgpu"))]
+pub fn run_desktop(diagram: Option<archify_ir::ArchitectureDiagram>, locale: &str) -> eframe::Result<()> {
+    let native_options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default()
+            .with_inner_size([1280.0, 800.0])
+            .with_title(TrilingualUi::title(locale)),
+        ..Default::default()
+    };
+    let loc = locale.to_string();
+    eframe::run_native(
+        TrilingualUi::title(locale),
+        native_options,
+        Box::new(move |_cc| Ok(Box::new(ArchifyApp::new(diagram, &loc)))),
+    )
 }
