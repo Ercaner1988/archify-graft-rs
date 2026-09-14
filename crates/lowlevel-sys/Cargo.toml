@@ -1,0 +1,22 @@
+[package]
+name = "lowlevel-sys"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+log.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Threading",
+    "Win32_System_SystemInformation",
+    "Win32_System_IO"
+] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

@@ -1,0 +1,19 @@
+[package]
+name = "graft-mcp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+graft-model = { path = "../graft-model" }
+graft-parser = { path = "../graft-parser" }
+graft-search = { path = "../graft-search" }
+archify-ir = { path = "../archify-ir" }
+archify-bridge = { path = "../archify-bridge" }
+archify-render = { path = "../archify-render" }
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+log.workspace = true
+thiserror.workspace = true

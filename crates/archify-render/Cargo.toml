@@ -1,0 +1,8 @@
+[package]
+name = "archify-render"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+archify-ir = { path = "../archify-ir" }

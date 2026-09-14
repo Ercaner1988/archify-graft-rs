@@ -1,0 +1,69 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/lowlevel-sys",
+    "crates/graft-model",
+    "crates/graft-i18n",
+    "crates/graft-parser",
+    "crates/graft-search",
+    "crates/archify-ir",
+    "crates/archify-geometry",
+    "crates/archify-bridge",
+    "crates/archify-render",
+    "crates/archify-egui",
+    "crates/graft-mcp",
+    ".",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Ercan <buzbe@users.noreply.github.com>"]
+license = "MIT"
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rayon = "1.10"
+tokio = { version = "1.40", features = ["full"] }
+memmap2 = "0.9"
+petgraph = "0.6"
+thiserror = "1.0"
+anyhow = "1.0"
+log = "0.4"
+env_logger = "0.11"
+clap = { version = "4.5", features = ["derive"] }
+unicode-normalization = "0.1"
+eframe = { version = "0.29", default-features = false, features = ["default_fonts"] }
+egui = "0.29"
+
+[package]
+name = "archify-graft-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+lowlevel-sys = { path = "crates/lowlevel-sys" }
+graft-model = { path = "crates/graft-model" }
+graft-i18n = { path = "crates/graft-i18n" }
+graft-parser = { path = "crates/graft-parser" }
+graft-search = { path = "crates/graft-search" }
+archify-ir = { path = "crates/archify-ir" }
+archify-geometry = { path = "crates/archify-geometry" }
+archify-bridge = { path = "crates/archify-bridge" }
+archify-render = { path = "crates/archify-render" }
+archify-egui = { path = "crates/archify-egui", optional = true }
+graft-mcp = { path = "crates/graft-mcp" }
+serde.workspace = true
+serde_json.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+tokio.workspace = true
+log.workspace = true
+env_logger.workspace = true
+
+[features]
+default = []
+gui = ["dep:archify-egui"]
+glow = ["archify-egui?/glow"]

@@ -1,0 +1,11 @@
+[package]
+name = "graft-parser"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+graft-model = { path = "../graft-model" }
+lowlevel-sys = { path = "../lowlevel-sys" }
+rayon.workspace = true
+anyhow.workspace = true
