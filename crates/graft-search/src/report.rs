@@ -146,6 +146,43 @@ pub fn build_repo_map(graph: &CodeGraph, max_dirs: usize) -> String {
     out
 }
 
+/// `skeleton` — bir dosyanın imza yüzeyi: o dosyaya ait Function/Method/
+/// Class/Enum/Interface düğümlerinin bildirim satırları. Bu SEARCH_BODY
+/// zaten tam bildirim metnidir (bkz. `extractor.rs`) — extractor'ın bilinen
+/// isim-çıkarma hatasından (boşluklu `{` içeren bildirimlerde `name` boş
+/// çıkması) ETKİLENMEZ, çünkü burada `name` değil ham satır gösteriliyor.
+///
+/// `dosya_yolu` eşlemesi: ters slash'e normalize edilip tam ya da SONEK
+/// eşleşmesi aranır — "gomme.rs" ya da "src/gomme.rs" gibi kısaltılmış bir
+/// yol da çalışır.
+pub fn file_skeleton(graph: &CodeGraph, dosya_yolu: &str) -> String {
+    let gelen = gelen_referanslar(graph);
+    let hedef = dosya_yolu.replace('\\', "/");
+
+    let eslesen: Vec<&NodeV1> = graph
+        .nodes
+        .iter()
+        .filter(|n| n.kind != NodeKind::File)
+        .filter(|n| {
+            let yol = n.path.replace('\\', "/");
+            yol == hedef || yol.ends_with(&hedef)
+        })
+        .collect();
+
+    if eslesen.is_empty() {
+        return format!("'{dosya_yolu}' eşleşen indekslenmiş dosya bulunamadı.\n");
+    }
+
+    let mut out = String::new();
+    let tam_yol = eslesen[0].path.replace('\\', "/");
+    let _ = writeln!(out, "{tam_yol} — {} sembol", eslesen.len());
+    for node in eslesen {
+        let refs = gelen.get(node.id.as_str()).copied().unwrap_or(0);
+        let _ = writeln!(out, "  {:?}  {}   ({refs}←)", node.kind, node.search_body);
+    }
+    out
+}
+
 /// Regex arama, iki katman:
 ///  1) Bildirim-satırı eşleşmeleri: Function/Method/Class/vb. düğümlerin
 ///     `search_body`'si TEK SATIRLIK bildirim metnidir (bkz. `extractor.rs`)

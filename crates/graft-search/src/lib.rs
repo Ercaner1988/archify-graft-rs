@@ -1,7 +1,7 @@
 //! graft-search: Whole-file BM25 index, GraphRank (PageRank), and memory-mapped storage.
 
 mod report;
-pub use report::{build_repo_map, grep_graph};
+pub use report::{build_repo_map, file_skeleton, grep_graph};
 
 use graft_i18n::TrilingualTokenizer;
 use graft_model::CodeGraph;

@@ -5,7 +5,7 @@ use archify_delta::DeltaEngine;
 use archify_render::SvgRenderer;
 use graft_model::{CodeGraph, EdgeRelation};
 use graft_parser::CodeExtractor;
-use graft_search::{build_repo_map, grep_graph, Bm25Index, GraphRank};
+use graft_search::{build_repo_map, file_skeleton, grep_graph, Bm25Index, GraphRank};
 use serde_json::{json, Value};
 
 pub struct ToolHandler;
@@ -82,7 +82,7 @@ impl ToolHandler {
                 },
                 {
                     "name": "graft_file_api",
-                    "description": "NOT YET IMPLEMENTED — signatures-only view of one file. Needs a `skeleton`-equivalent pass over the graph first.",
+                    "description": "Signatures-only view of one file's indexed symbols (declaration lines), from the currently loaded graph",
                     "inputSchema": {
                         "type": "object",
                         "properties": {
@@ -93,10 +93,14 @@ impl ToolHandler {
                 },
                 {
                     "name": "graft_check_freshness",
-                    "description": "NOT YET IMPLEMENTED — whether the cache reflects current source. Needs a `check`-equivalent pass first.",
+                    "description": "Whether the on-disk cache file is newer than every source file under `path` (mtime-based, independent of the in-session graph — needs its own `path`/`cache`)",
                     "inputSchema": {
                         "type": "object",
-                        "properties": {}
+                        "properties": {
+                            "path": { "type": "string" },
+                            "cache": { "type": "string" }
+                        },
+                        "required": ["path"]
                     }
                 },
                 {
@@ -179,6 +183,31 @@ impl ToolHandler {
             }
         } else {
             json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] })
+        }
+    }
+
+    pub fn execute_file_api(path: &str, graph: Option<&CodeGraph>) -> Value {
+        if let Some(graph) = graph {
+            json!({ "content": [{ "type": "text", "text": file_skeleton(graph, path) }] })
+        } else {
+            json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] })
+        }
+    }
+
+    /// `graft_index` çağrısıyla RAM'e alınan grafın aksine, bu SÜREÇTEN
+    /// BAĞIMSIZ çalışır — diskteki cache dosyasının mtime'ını kaynak
+    /// dosyalarınkiyle karşılaştırır (bkz. `CodeExtractor::freshness_report`).
+    /// Bu yüzden `path`/`cache` parametre alır, oturumdaki grafı kullanmaz.
+    pub fn execute_check_freshness(path: &str, cache: &str) -> Value {
+        match CodeExtractor::freshness_report(path.to_string(), cache.to_string()) {
+            Ok((true, _)) => json!({ "content": [{ "type": "text", "text": "fresh" }] }),
+            Ok((false, bayat)) => json!({
+                "content": [{
+                    "type": "text",
+                    "text": format!("stale: {} dosya kaynaktan daha eski:\n{}", bayat.len(), bayat.join("\n"))
+                }]
+            }),
+            Err(e) => json!({ "isError": true, "content": [{ "type": "text", "text": e.to_string() }] }),
         }
     }
 

@@ -192,6 +192,35 @@ impl CodeExtractor {
 
         true
     }
+
+    /// `is_fresh`'in ayrıntılı hali — yalnız evet/hayır değil, CI'da tanı için
+    /// HANGİ dosyaların cache'ten daha yeni olduğunu da döner. `is_fresh` hiç
+    /// çağrılmıyordu (grep ile doğrulandı) — `check` komutu/`graft_check_freshness`
+    /// bunun ilk gerçek tüketicisi.
+    pub fn freshness_report<P: AsRef<Path>>(
+        root: P,
+        cache_file: P,
+    ) -> anyhow::Result<(bool, Vec<String>)> {
+        let cache_path = cache_file.as_ref();
+        if !cache_path.exists() {
+            return Ok((false, vec!["<cache hiç üretilmemiş>".to_string()]));
+        }
+        let cache_mtime = cache_path.metadata()?.modified()?;
+
+        let mut file_paths = Vec::new();
+        Self::collect_files(root.as_ref(), &mut file_paths)?;
+
+        let mut bayat: Vec<String> = file_paths
+            .iter()
+            .filter_map(|p| {
+                let m = p.metadata().ok()?.modified().ok()?;
+                (m > cache_mtime).then(|| p.to_string_lossy().replace('\\', "/"))
+            })
+            .collect();
+        bayat.sort();
+
+        Ok((bayat.is_empty(), bayat))
+    }
 }
 
 #[cfg(test)]

@@ -3,7 +3,7 @@ use archify_render::SvgRenderer;
 use clap::{Parser, Subcommand};
 use graft_mcp::McpServer;
 use graft_parser::CodeExtractor;
-use graft_search::{build_repo_map, grep_graph, Bm25Index, GraphRank, GraphStorage};
+use graft_search::{build_repo_map, file_skeleton, grep_graph, Bm25Index, GraphRank, GraphStorage};
 use lowlevel_sys::{cache_line_size, HardwareTimer};
 use std::collections::BTreeSet;
 use std::fs;
@@ -129,6 +129,23 @@ enum Commands {
         /// Case-insensitive match
         #[arg(short = 'i', long)]
         ignore_case: bool,
+    },
+    /// Signatures-only view of one file from the wiring graph
+    Skeleton {
+        /// File path (exact or suffix match against indexed paths)
+        file: String,
+        /// Cache path to read graph from
+        #[arg(short, long, default_value = ".cache/graft-graph.bin")]
+        cache: String,
+    },
+    /// Fail if the index is stale relative to the code (for CI)
+    Check {
+        /// Directory that was indexed
+        #[arg(default_value = ".")]
+        path: String,
+        /// Cache path to check freshness against
+        #[arg(short, long, default_value = ".cache/graft-graph.bin")]
+        cache: String,
     },
     /// Start the Model Context Protocol (MCP) JSON-RPC stdio server for AI agents
     Mcp,
@@ -354,6 +371,32 @@ async fn main() -> anyhow::Result<()> {
             }
             let graph = GraphStorage::load_mmap(&cache)?;
             print!("{}", grep_graph(&graph, &pattern, ignore_case)?);
+        }
+        Commands::Skeleton { file, cache } => {
+            if !Path::new(&cache).exists() {
+                eprintln!(
+                    "❌ Cache not found at '{}'. Run 'archify-graft index' first.",
+                    cache
+                );
+                std::process::exit(1);
+            }
+            let graph = GraphStorage::load_mmap(&cache)?;
+            print!("{}", file_skeleton(&graph, &file));
+        }
+        Commands::Check { path, cache } => {
+            let (taze, bayat) = CodeExtractor::freshness_report(path, cache)?;
+            if taze {
+                println!("✅ graft cache güncel.");
+            } else {
+                println!(
+                    "❌ graft cache BAYAT. {} dosya kaynaktan daha eski:",
+                    bayat.len()
+                );
+                for f in &bayat {
+                    println!("  {f}");
+                }
+                std::process::exit(1);
+            }
         }
         Commands::Mcp => {
             let mcp = McpServer::new();

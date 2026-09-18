@@ -134,8 +134,18 @@ impl McpServer {
                         let graph_guard = self.graph.lock().await;
                         ToolHandler::execute_trace_calls(symbol, graph_guard.as_ref())
                     }
-                    "graft_file_api" | "graft_check_freshness" => {
-                        json!({ "isError": true, "content": [{ "type": "text", "text": format!("{tool_name} henüz uygulanmadı — archify-graft-rs'te bu yeteneğin altyapısı yok.") }] })
+                    "graft_file_api" => {
+                        let path = args.get("path").and_then(|p| p.as_str()).unwrap_or("");
+                        let graph_guard = self.graph.lock().await;
+                        ToolHandler::execute_file_api(path, graph_guard.as_ref())
+                    }
+                    "graft_check_freshness" => {
+                        let path = args.get("path").and_then(|p| p.as_str()).unwrap_or(".");
+                        let cache = args
+                            .get("cache")
+                            .and_then(|c| c.as_str())
+                            .unwrap_or(".cache/graft-graph.bin");
+                        ToolHandler::execute_check_freshness(path, cache)
                     }
                     "archify_render_diagram" => {
                         let graph_guard = self.graph.lock().await;
