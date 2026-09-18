@@ -208,6 +208,7 @@ dependencies = [
  "graft-search",
  "log",
  "lowlevel-sys",
+ "regex",
  "serde",
  "serde_json",
  "tokio",
