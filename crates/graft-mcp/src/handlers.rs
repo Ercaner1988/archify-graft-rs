@@ -5,7 +5,7 @@ use archify_delta::DeltaEngine;
 use archify_render::SvgRenderer;
 use graft_model::{CodeGraph, EdgeRelation};
 use graft_parser::CodeExtractor;
-use graft_search::{Bm25Index, GraphRank};
+use graft_search::{build_repo_map, grep_graph, Bm25Index, GraphRank};
 use serde_json::{json, Value};
 
 pub struct ToolHandler;
@@ -36,6 +36,40 @@ impl ToolHandler {
                     }
                 },
                 {
+                    "name": "graft_find_code",
+                    "description": "Locate and understand: ranked BM25 + GraphRank search over the codebase (alias of graft_ask, matches the graft skill's naming)",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "query": { "type": "string" },
+                            "limit": { "type": "number" }
+                        },
+                        "required": ["query"]
+                    }
+                },
+                {
+                    "name": "graft_find_all",
+                    "description": "Exhaustive regex search over indexed files: declaration-line matches (name/signature) plus file-body matches with real line numbers. Does NOT group by enclosing symbol yet — the extractor does not populate node spans.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "pattern": { "type": "string" },
+                            "ignore_case": { "type": "boolean" }
+                        },
+                        "required": ["pattern"]
+                    }
+                },
+                {
+                    "name": "graft_repo_map",
+                    "description": "Token-budgeted repo orientation: directory clusters, per-directory hubs, and global hotspots from the wiring graph",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "max_dirs": { "type": "number" }
+                        }
+                    }
+                },
+                {
                     "name": "graft_trace_calls",
                     "description": "Trace upstream callers and downstream callees of a function or class",
                     "inputSchema": {
@@ -44,6 +78,25 @@ impl ToolHandler {
                             "symbol": { "type": "string" }
                         },
                         "required": ["symbol"]
+                    }
+                },
+                {
+                    "name": "graft_file_api",
+                    "description": "NOT YET IMPLEMENTED — signatures-only view of one file. Needs a `skeleton`-equivalent pass over the graph first.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "path": { "type": "string" }
+                        },
+                        "required": ["path"]
+                    }
+                },
+                {
+                    "name": "graft_check_freshness",
+                    "description": "NOT YET IMPLEMENTED — whether the cache reflects current source. Needs a `check`-equivalent pass first.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {}
                     }
                 },
                 {
@@ -105,6 +158,25 @@ impl ToolHandler {
             }
 
             json!({ "content": [{ "type": "text", "text": formatted }] })
+        } else {
+            json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] })
+        }
+    }
+
+    pub fn execute_repo_map(max_dirs: usize, graph: Option<&CodeGraph>) -> Value {
+        if let Some(graph) = graph {
+            json!({ "content": [{ "type": "text", "text": build_repo_map(graph, max_dirs) }] })
+        } else {
+            json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] })
+        }
+    }
+
+    pub fn execute_find_all(pattern: &str, ignore_case: bool, graph: Option<&CodeGraph>) -> Value {
+        if let Some(graph) = graph {
+            match grep_graph(graph, pattern, ignore_case) {
+                Ok(text) => json!({ "content": [{ "type": "text", "text": text }] }),
+                Err(e) => json!({ "isError": true, "content": [{ "type": "text", "text": format!("Invalid pattern: {e}") }] }),
+            }
         } else {
             json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] })
         }

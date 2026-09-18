@@ -101,7 +101,7 @@ impl McpServer {
                         }
                         resp
                     }
-                    "graft_ask" => {
+                    "graft_ask" | "graft_find_code" => {
                         let query = args.get("query").and_then(|q| q.as_str()).unwrap_or("");
                         let limit =
                             args.get("limit").and_then(|l| l.as_u64()).unwrap_or(10) as usize;
@@ -114,10 +114,28 @@ impl McpServer {
                             graph_guard.as_ref(),
                         )
                     }
+                    "graft_find_all" => {
+                        let pattern = args.get("pattern").and_then(|p| p.as_str()).unwrap_or("");
+                        let ignore_case = args
+                            .get("ignore_case")
+                            .and_then(|b| b.as_bool())
+                            .unwrap_or(false);
+                        let graph_guard = self.graph.lock().await;
+                        ToolHandler::execute_find_all(pattern, ignore_case, graph_guard.as_ref())
+                    }
+                    "graft_repo_map" => {
+                        let max_dirs =
+                            args.get("max_dirs").and_then(|n| n.as_u64()).unwrap_or(30) as usize;
+                        let graph_guard = self.graph.lock().await;
+                        ToolHandler::execute_repo_map(max_dirs, graph_guard.as_ref())
+                    }
                     "graft_trace_calls" => {
                         let symbol = args.get("symbol").and_then(|s| s.as_str()).unwrap_or("");
                         let graph_guard = self.graph.lock().await;
                         ToolHandler::execute_trace_calls(symbol, graph_guard.as_ref())
+                    }
+                    "graft_file_api" | "graft_check_freshness" => {
+                        json!({ "isError": true, "content": [{ "type": "text", "text": format!("{tool_name} henüz uygulanmadı — archify-graft-rs'te bu yeteneğin altyapısı yok.") }] })
                     }
                     "archify_render_diagram" => {
                         let graph_guard = self.graph.lock().await;

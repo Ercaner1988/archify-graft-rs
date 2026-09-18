@@ -208,7 +208,6 @@ dependencies = [
  "graft-search",
  "log",
  "lowlevel-sys",
- "regex",
  "serde",
  "serde_json",
  "tokio",
@@ -1267,6 +1266,7 @@ dependencies = [
  "graft-i18n",
  "graft-model",
  "memmap2",
+ "regex",
  "serde",
 ]
 

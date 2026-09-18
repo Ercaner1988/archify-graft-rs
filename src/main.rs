@@ -3,7 +3,7 @@ use archify_render::SvgRenderer;
 use clap::{Parser, Subcommand};
 use graft_mcp::McpServer;
 use graft_parser::CodeExtractor;
-use graft_search::{Bm25Index, GraphRank, GraphStorage};
+use graft_search::{build_repo_map, grep_graph, Bm25Index, GraphRank, GraphStorage};
 use lowlevel_sys::{cache_line_size, HardwareTimer};
 use std::collections::BTreeSet;
 use std::fs;
@@ -53,204 +53,6 @@ fn extension_to_language(ext: &str) -> Option<&'static str> {
         "json" => "json",
         _ => return None,
     })
-}
-
-struct DizinIstatistik {
-    dosya: usize,
-    sembol: usize,
-    /// (isim, dosya_yolu, gelen_referans)
-    hublar: Vec<(String, String, usize)>,
-}
-
-/// `map` — dizin başına özet + genel hotspot listesi. Sıralama sinyali
-/// "gelen kenar sayısı" (relation farketmeksizin): şu an bu ÇOĞUNLUKLA
-/// `Contains` (dosya→sembol) demek, `Calls` kenarları extractor'ın yalnız
-/// bildirim SATIRINI taraması yüzünden az/gürültülü (bkz. `resolver.rs`,
-/// ölçüldü: pasli-beyin/cekirdek'te 480 kenarın 89'u Calls). Yani "hub" burada
-/// "bu dosyada en çok sembol barındıran/adı geçen" anlamına geliyor —
-/// `@nanonets/graft`'ın AST-doğru çağrı-grafiği hotspot'larıyla BİREBİR AYNI
-/// KEsinlikte değil. Extractor gerçek çağrı çözümlemesi kazanınca bu fonksiyon
-/// DEĞİŞMEDEN doğruluğu otomatik yükselir (girdi kalitesi sorunu, algoritma değil).
-fn print_map(graph: &graft_model::CodeGraph, max_dirs: usize) {
-    use graft_model::NodeKind;
-    use std::collections::BTreeMap;
-
-    let mut gelen: std::collections::HashMap<&str, usize> = std::collections::HashMap::new();
-    for e in &graph.edges {
-        *gelen.entry(e.target.as_str()).or_insert(0) += 1;
-    }
-
-    let dosya_sayisi = graph
-        .nodes
-        .iter()
-        .filter(|n| n.kind == NodeKind::File)
-        .count();
-    let sembol_sayisi = graph.nodes.len() - dosya_sayisi;
-
-    let mut dizinler: BTreeMap<String, DizinIstatistik> = BTreeMap::new();
-    for node in &graph.nodes {
-        let dizin = Path::new(&node.path)
-            .parent()
-            .map(|p| p.to_string_lossy().replace('\\', "/"))
-            .unwrap_or_default();
-        let girdi = dizinler.entry(dizin).or_insert(DizinIstatistik {
-            dosya: 0,
-            sembol: 0,
-            hublar: Vec::new(),
-        });
-        if node.kind == NodeKind::File {
-            girdi.dosya += 1;
-        } else {
-            girdi.sembol += 1;
-            let ref_sayisi = gelen.get(node.id.as_str()).copied().unwrap_or(0);
-            girdi
-                .hublar
-                .push((node.name.clone(), node.path.clone(), ref_sayisi));
-        }
-    }
-
-    println!(
-        "repo map — {} dosya · {} sembol · {} kenar",
-        dosya_sayisi,
-        sembol_sayisi,
-        graph.edges.len()
-    );
-    println!();
-
-    let toplam_dizin = dizinler.len();
-    for (i, (dizin, ist)) in dizinler.iter().enumerate() {
-        if i >= max_dirs {
-            println!(
-                "… +{} dizin daha gösterilmedi (--max-dirs ile genişlet)",
-                toplam_dizin - max_dirs
-            );
-            break;
-        }
-        let mut hublar = ist.hublar.clone();
-        hublar.sort_by(|a, b| b.2.cmp(&a.2));
-        let ust: Vec<String> = hublar
-            .iter()
-            .filter(|h| h.2 > 0)
-            .take(3)
-            .map(|(isim, yol, refs)| {
-                let dosya_adi = Path::new(yol)
-                    .file_name()
-                    .map(|f| f.to_string_lossy().to_string())
-                    .unwrap_or_default();
-                format!("{isim} ({dosya_adi}, {refs}←)")
-            })
-            .collect();
-        print!(
-            "{:<45}{} dosya · {} sembol",
-            if dizin.is_empty() { "(kök)" } else { dizin },
-            ist.dosya,
-            ist.sembol
-        );
-        if !ust.is_empty() {
-            print!("   hublar: {}", ust.join(", "));
-        }
-        println!();
-    }
-
-    let mut tum_semboller: Vec<(&str, &NodeKind, &str, usize)> = graph
-        .nodes
-        .iter()
-        .filter(|n| n.kind != NodeKind::File)
-        .map(|n| {
-            (
-                n.name.as_str(),
-                &n.kind,
-                n.path.as_str(),
-                gelen.get(n.id.as_str()).copied().unwrap_or(0),
-            )
-        })
-        .collect();
-    tum_semboller.sort_by(|a, b| b.3.cmp(&a.3));
-    let hotspotlar: Vec<String> = tum_semboller
-        .iter()
-        .filter(|s| s.3 > 0)
-        .take(12)
-        .map(|(isim, tur, yol, refs)| {
-            format!("{isim} · {tur:?} · {} · {refs}←", yol.replace('\\', "/"))
-        })
-        .collect();
-    if !hotspotlar.is_empty() {
-        println!();
-        println!("hotspots: {}", hotspotlar.join("  "));
-    }
-}
-
-/// `grep` — iki ayrı katman:
-///  1) Bildirim-satırı eşleşmeleri: Function/Method/Class/vb. düğümlerin
-///     `search_body`'si TEK SATIRLIK bildirim metnidir (bkz. `extractor.rs`) —
-///     yani burada eşleşme "bu isim/imza örtüşüyor" demektir, gövde değil.
-///  2) Dosya-içeriği eşleşmeleri: File düğümlerinin `file_residual`'ı (ilk
-///     8000 karakter) satır satır taranır, GERÇEK satır numarası verilir.
-/// "Kapsayan sembole göre gruplama" (@nanonets/graft'ın yaptığı) burada YOK
-/// — `span` alanı extractor tarafından hiç doldurulmuyor (`extractor.rs`:
-/// her düğümde `span: None`), yani bir satırın hangi fonksiyonun içinde
-/// olduğunu bilmiyoruz. Bu, gerçek bir extractor sınırı — span doldurulunca
-/// bu fonksiyon gruplamayı ekleyebilir.
-fn run_grep(graph: &graft_model::CodeGraph, pattern: &str, ignore_case: bool) -> anyhow::Result<()> {
-    use graft_model::NodeKind;
-
-    let re = regex::RegexBuilder::new(pattern)
-        .case_insensitive(ignore_case)
-        .build()?;
-
-    let mut gelen: std::collections::HashMap<&str, usize> = std::collections::HashMap::new();
-    for e in &graph.edges {
-        *gelen.entry(e.target.as_str()).or_insert(0) += 1;
-    }
-
-    let mut bildirim_eslesme: Vec<(&graft_model::NodeV1, usize)> = graph
-        .nodes
-        .iter()
-        .filter(|n| n.kind != NodeKind::File && re.is_match(&n.search_body))
-        .map(|n| (n, gelen.get(n.id.as_str()).copied().unwrap_or(0)))
-        .collect();
-    bildirim_eslesme.sort_by(|a, b| b.1.cmp(&a.1));
-
-    if !bildirim_eslesme.is_empty() {
-        println!("## bildirim satırı eşleşmeleri (isim/imza — gövde değil)");
-        for (node, refs) in &bildirim_eslesme {
-            println!(
-                "  {} · {:?} · {} · {refs}←",
-                node.name,
-                node.kind,
-                node.path.replace('\\', "/")
-            );
-        }
-        println!();
-    }
-
-    println!("## dosya içeriği eşleşmeleri (satır numaralı, ilk 8000 karakterle sınırlı)");
-    let mut dosya_eslesme = 0usize;
-    for node in &graph.nodes {
-        if node.kind != NodeKind::File {
-            continue;
-        }
-        let mut yol_yazildi = false;
-        for (i, satir) in node.file_residual.lines().enumerate() {
-            if re.is_match(satir) {
-                if !yol_yazildi {
-                    println!("{}", node.path.replace('\\', "/"));
-                    yol_yazildi = true;
-                }
-                println!("  {}: {}", i + 1, satir.trim());
-                dosya_eslesme += 1;
-            }
-        }
-    }
-
-    println!();
-    println!(
-        "{} bildirim eşleşmesi, {} dosya-içeriği eşleşmesi",
-        bildirim_eslesme.len(),
-        dosya_eslesme
-    );
-
-    Ok(())
 }
 
 #[derive(Parser, Debug)]
@@ -536,7 +338,7 @@ async fn main() -> anyhow::Result<()> {
                 std::process::exit(1);
             }
             let graph = GraphStorage::load_mmap(&cache)?;
-            print_map(&graph, max_dirs);
+            print!("{}", build_repo_map(&graph, max_dirs));
         }
         Commands::Grep {
             pattern,
@@ -551,7 +353,7 @@ async fn main() -> anyhow::Result<()> {
                 std::process::exit(1);
             }
             let graph = GraphStorage::load_mmap(&cache)?;
-            run_grep(&graph, &pattern, ignore_case)?;
+            print!("{}", grep_graph(&graph, &pattern, ignore_case)?);
         }
         Commands::Mcp => {
             let mcp = McpServer::new();

@@ -11,3 +11,4 @@ serde.workspace = true
 bincode.workspace = true
 memmap2.workspace = true
 anyhow.workspace = true
+regex.workspace = true
