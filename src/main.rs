@@ -5,8 +5,55 @@ use graft_mcp::McpServer;
 use graft_parser::CodeExtractor;
 use graft_search::{Bm25Index, GraphRank, GraphStorage};
 use lowlevel_sys::{cache_line_size, HardwareTimer};
+use std::collections::BTreeSet;
 use std::fs;
 use std::path::Path;
+
+/// `graft/.graph/wiring.json` başlığı — pasli-beyin'in `kopru.rs::graft_koprusu`
+/// köprüsünün beklediği KÜÇÜK, sürümlü sözleşme: yalnız `meta` (nodeCount,
+/// edgeCount, languages). Düğüm/kenar dizisinin TAMAMINI yazmıyoruz — köprü
+/// zaten onlara dokunmuyor (`kopru.rs`: "düğüm dizisi büyük olabilir, ona hiç
+/// dokunmayız"), gereksiz yere büyük bir JSON üretmenin anlamı yok. Bu, eski
+/// Node.js `@nanonets/graft`'ın yerini almanın en ucuz, en somut adımı.
+fn write_wiring_meta(indexed_path: &str, graph: &graft_model::CodeGraph) -> anyhow::Result<()> {
+    let languages: BTreeSet<&'static str> = graph
+        .nodes
+        .iter()
+        .filter_map(|n| Path::new(&n.path).extension()?.to_str())
+        .filter_map(extension_to_language)
+        .collect();
+
+    let wiring = serde_json::json!({
+        "meta": {
+            "version": 1,
+            "nodeCount": graph.nodes.len(),
+            "edgeCount": graph.edges.len(),
+            "languages": languages.into_iter().collect::<Vec<_>>(),
+        }
+    });
+
+    let dir = Path::new(indexed_path).join("graft").join(".graph");
+    fs::create_dir_all(&dir)?;
+    fs::write(dir.join("wiring.json"), serde_json::to_string_pretty(&wiring)?)?;
+    Ok(())
+}
+
+/// `graft-parser`'ın taradığı uzantı kümesiyle AYNI (bkz. `is_supported_extension`) —
+/// biri değişirse öbürü bayatlar, o yüzden burada da elle listelenir.
+fn extension_to_language(ext: &str) -> Option<&'static str> {
+    Some(match ext {
+        "rs" => "rust",
+        "ts" => "typescript",
+        "js" => "javascript",
+        "py" => "python",
+        "go" => "go",
+        "java" => "java",
+        "c" | "h" => "c",
+        "cpp" | "hpp" => "cpp",
+        "json" => "json",
+        _ => return None,
+    })
+}
 
 #[derive(Parser, Debug)]
 #[command(name = "archify-graft")]
@@ -145,6 +192,8 @@ async fn main() -> anyhow::Result<()> {
                 "💾 [Graft-Core] Saved memory-mapped graph index to '{}'.",
                 cache
             );
+
+            write_wiring_meta(&path, &graph)?;
         }
         Commands::Ask {
             query,
