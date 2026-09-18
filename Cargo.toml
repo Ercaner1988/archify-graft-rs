@@ -69,3 +69,22 @@ env_logger.workspace = true
 default = []
 gui = ["dep:archify-egui", "archify-egui/glow"]
 glow = ["gui"]
+
+[dev-dependencies]
+divan = { version = "5.0.2", package = "codspeed-divan-compat" }
+
+[[bench]]
+name = "tokenizer"
+harness = false
+
+[[bench]]
+name = "indexing"
+harness = false
+
+[[bench]]
+name = "search"
+harness = false
+
+[[bench]]
+name = "diagram"
+harness = false
