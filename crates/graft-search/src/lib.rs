@@ -181,9 +181,9 @@ pub struct GraphStorage;
 
 impl GraphStorage {
     pub fn save<P: AsRef<Path>>(graph: &CodeGraph, path: P) -> anyhow::Result<()> {
-        let json_bytes = serde_json::to_vec(graph)?;
+        let bytes = bincode::serde::encode_to_vec(graph, bincode::config::standard())?;
         let mut file = File::create(path)?;
-        file.write_all(&json_bytes)?;
+        file.write_all(&bytes)?;
         file.flush()?;
         Ok(())
     }
@@ -191,7 +191,8 @@ impl GraphStorage {
     pub fn load_mmap<P: AsRef<Path>>(path: P) -> anyhow::Result<CodeGraph> {
         let file = File::open(path)?;
         let mmap = unsafe { Mmap::map(&file)? };
-        let mut graph: CodeGraph = serde_json::from_slice(&mmap)?;
+        let (mut graph, _): (CodeGraph, usize) =
+            bincode::serde::decode_from_slice(&mmap, bincode::config::standard())?;
         graph.rebuild_index();
         Ok(graph)
     }

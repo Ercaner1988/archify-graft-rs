@@ -24,7 +24,7 @@ enum Commands {
         #[arg(default_value = ".")]
         path: String,
         /// Cache output path
-        #[arg(short, long, default_value = ".cache/graft-graph.json")]
+        #[arg(short, long, default_value = ".cache/graft-graph.bin")]
         cache: String,
     },
     /// Query the codebase using trilingual BM25 + PageRank (TR/AR/EN)
@@ -35,7 +35,7 @@ enum Commands {
         #[arg(short, long, default_value_t = 10)]
         limit: usize,
         /// Cache path to read graph from
-        #[arg(short, long, default_value = ".cache/graft-graph.json")]
+        #[arg(short, long, default_value = ".cache/graft-graph.bin")]
         cache: String,
     },
     /// Generate an Archify architecture, sequence, dataflow, or delta SVG diagram from indexed code
@@ -59,7 +59,7 @@ enum Commands {
         #[arg(short, long, default_value = "tr")]
         locale: String,
         /// Cache path to read graph from
-        #[arg(short, long, default_value = ".cache/graft-graph.json")]
+        #[arg(short, long, default_value = ".cache/graft-graph.bin")]
         cache: String,
     },
     /// Start the Model Context Protocol (MCP) JSON-RPC stdio server for AI agents
@@ -74,7 +74,7 @@ enum Commands {
         #[arg(short, long, default_value = "tr")]
         locale: String,
         /// Cache path to read graph from (optional)
-        #[arg(short, long, default_value = ".cache/graft-graph.json")]
+        #[arg(short, long, default_value = ".cache/graft-graph.bin")]
         cache: String,
     },
 }
