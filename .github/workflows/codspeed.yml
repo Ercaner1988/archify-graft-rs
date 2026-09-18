@@ -28,7 +28,7 @@ jobs:
           bins: cargo-codspeed
 
       - name: Build the benchmark targets
-        run: cargo codspeed build --mode simulation
+        run: cargo codspeed build --measurement-mode simulation
 
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v5

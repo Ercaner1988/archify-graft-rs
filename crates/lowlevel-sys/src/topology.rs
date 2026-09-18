@@ -25,8 +25,7 @@ pub fn cache_line_size() -> usize {
     #[cfg(target_arch = "x86_64")]
     {
         // CPUID leaf 1: EBX bits 15-8 contains cache line size in quadwords (CLFLUSH line size * 8)
-        // SAFETY: CPUID leaf 1 is available on every x86_64 CPU.
-        let cpuid = unsafe { core::arch::x86_64::__cpuid(1) };
+        let cpuid = core::arch::x86_64::__cpuid(1);
         let clflush = ((cpuid.ebx >> 8) & 0xFF) as usize;
         if clflush > 0 {
             return clflush * 8;

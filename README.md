@@ -83,6 +83,6 @@ Performance is tracked continuously with [CodSpeed](https://codspeed.io). The su
 cargo bench
 
 # Run through the CodSpeed CPU simulation instrument
-cargo codspeed build --mode simulation
+cargo codspeed build --measurement-mode simulation
 codspeed run --mode simulation -- cargo codspeed run
 ```
