@@ -29,11 +29,9 @@ impl AstExtractor {
                 || trimmed.starts_with("struct ")
                 || trimmed.starts_with("class ")
             {
-                let parts: Vec<&str> = trimmed.split_whitespace().collect();
-                if parts.len() >= 2 {
-                    let name = parts[parts.len() - 1]
-                        .trim_end_matches('{')
-                        .trim_end_matches(';');
+                if let Some(name) =
+                    Self::extract_type_name(trimmed, &["pub struct ", "struct ", "class "])
+                {
                     let class_id = format!("{}:{}", path_str, name);
                     current_class = Some(class_id.clone());
 
@@ -57,11 +55,7 @@ impl AstExtractor {
             }
 
             if trimmed.starts_with("pub enum ") || trimmed.starts_with("enum ") {
-                let parts: Vec<&str> = trimmed.split_whitespace().collect();
-                if parts.len() >= 2 {
-                    let name = parts[parts.len() - 1]
-                        .trim_end_matches('{')
-                        .trim_end_matches(';');
+                if let Some(name) = Self::extract_type_name(trimmed, &["pub enum ", "enum "]) {
                     let enum_id = format!("{}:{}", path_str, name);
 
                     graph.add_node(NodeV1 {
@@ -87,11 +81,9 @@ impl AstExtractor {
                 || trimmed.starts_with("trait ")
                 || trimmed.starts_with("interface ")
             {
-                let parts: Vec<&str> = trimmed.split_whitespace().collect();
-                if parts.len() >= 2 {
-                    let name = parts[parts.len() - 1]
-                        .trim_end_matches('{')
-                        .trim_end_matches(';');
+                if let Some(name) =
+                    Self::extract_type_name(trimmed, &["pub trait ", "trait ", "interface "])
+                {
                     let iface_id = format!("{}:{}", path_str, name);
 
                     graph.add_node(NodeV1 {
@@ -154,6 +146,35 @@ impl AstExtractor {
             if let Some(pos) = line.find(kw) {
                 let after = &line[pos + kw.len()..];
                 let name = after.split('(').next()?.trim();
+                if !name.is_empty() {
+                    return Some(name);
+                }
+            }
+        }
+        None
+    }
+
+    /// struct/enum/trait/class/interface bildirimlerinden isim çıkarır.
+    ///
+    /// ESKİ HATA (düzeltildi): `split_whitespace().last()` kullanılıyordu —
+    /// `"pub struct Foo {"` gibi açan parantez BOŞLUKLA ayrıysa (standart
+    /// biçim) son öğe `"{"` olur, `trim_end_matches('{')` boş string üretir.
+    /// Sonuç: aynı dosyada birden çok düğüm `id = "yol:"` üzerinde çakışır
+    /// (`CodeGraph::add_node` id çakışmasını kontrol etmez, `node_index_map`
+    /// sessizce son ekleneni tutar). Bunun yerine anahtar kelimeden sonraki
+    /// metni İLK sınırlayıcıya (boşluk, `{`, `(`, `<`, `;`, `:`) kadar alıyoruz
+    /// — generic'ler (`Foo<T>`), tuple struct'lar (`Foo(i32)`) ve tek satır
+    /// bildirimler (`struct Foo;`) hepsi doğru ayrışır.
+    fn extract_type_name<'a>(line: &'a str, keywords: &[&str]) -> Option<&'a str> {
+        for kw in keywords {
+            if let Some(pos) = line.find(kw) {
+                let after = &line[pos + kw.len()..];
+                let name = after
+                    .split(|c: char| {
+                        c.is_whitespace() || matches!(c, '{' | '(' | '<' | ';' | ':')
+                    })
+                    .next()?
+                    .trim();
                 if !name.is_empty() {
                     return Some(name);
                 }
