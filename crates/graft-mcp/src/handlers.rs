@@ -179,7 +179,9 @@ impl ToolHandler {
         if let Some(graph) = graph {
             match grep_graph(graph, pattern, ignore_case) {
                 Ok(text) => json!({ "content": [{ "type": "text", "text": text }] }),
-                Err(e) => json!({ "isError": true, "content": [{ "type": "text", "text": format!("Invalid pattern: {e}") }] }),
+                Err(e) => {
+                    json!({ "isError": true, "content": [{ "type": "text", "text": format!("Invalid pattern: {e}") }] })
+                }
             }
         } else {
             json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] })
@@ -207,7 +209,9 @@ impl ToolHandler {
                     "text": format!("stale: {} dosya kaynaktan daha eski:\n{}", bayat.len(), bayat.join("\n"))
                 }]
             }),
-            Err(e) => json!({ "isError": true, "content": [{ "type": "text", "text": e.to_string() }] }),
+            Err(e) => {
+                json!({ "isError": true, "content": [{ "type": "text", "text": e.to_string() }] })
+            }
         }
     }
 

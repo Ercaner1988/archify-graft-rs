@@ -90,7 +90,7 @@ pub fn build_repo_map(graph: &CodeGraph, max_dirs: usize) -> String {
             break;
         }
         let mut hublar = ist.hublar.clone();
-        hublar.sort_by(|a, b| b.2.cmp(&a.2));
+        hublar.sort_by_key(|h| std::cmp::Reverse(h.2));
         let ust: Vec<String> = hublar
             .iter()
             .filter(|h| h.2 > 0)
@@ -129,7 +129,7 @@ pub fn build_repo_map(graph: &CodeGraph, max_dirs: usize) -> String {
             )
         })
         .collect();
-    tum_semboller.sort_by(|a, b| b.3.cmp(&a.3));
+    tum_semboller.sort_by_key(|s| std::cmp::Reverse(s.3));
     let hotspotlar: Vec<String> = tum_semboller
         .iter()
         .filter(|s| s.3 > 0)
@@ -207,10 +207,13 @@ pub fn grep_graph(graph: &CodeGraph, pattern: &str, ignore_case: bool) -> anyhow
         .filter(|n| n.kind != NodeKind::File && re.is_match(&n.search_body))
         .map(|n| (n, gelen.get(n.id.as_str()).copied().unwrap_or(0)))
         .collect();
-    bildirim_eslesme.sort_by(|a, b| b.1.cmp(&a.1));
+    bildirim_eslesme.sort_by_key(|(_, refs)| std::cmp::Reverse(*refs));
 
     if !bildirim_eslesme.is_empty() {
-        let _ = writeln!(out, "## bildirim satırı eşleşmeleri (isim/imza — gövde değil)");
+        let _ = writeln!(
+            out,
+            "## bildirim satırı eşleşmeleri (isim/imza — gövde değil)"
+        );
         for (node, refs) in &bildirim_eslesme {
             let _ = writeln!(
                 out,

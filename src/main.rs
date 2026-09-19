@@ -34,7 +34,10 @@ fn write_wiring_meta(indexed_path: &str, graph: &graft_model::CodeGraph) -> anyh
 
     let dir = Path::new(indexed_path).join("graft").join(".graph");
     fs::create_dir_all(&dir)?;
-    fs::write(dir.join("wiring.json"), serde_json::to_string_pretty(&wiring)?)?;
+    fs::write(
+        dir.join("wiring.json"),
+        serde_json::to_string_pretty(&wiring)?,
+    )?;
     Ok(())
 }
 

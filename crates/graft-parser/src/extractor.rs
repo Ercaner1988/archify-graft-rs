@@ -170,9 +170,7 @@ impl AstExtractor {
             if let Some(pos) = line.find(kw) {
                 let after = &line[pos + kw.len()..];
                 let name = after
-                    .split(|c: char| {
-                        c.is_whitespace() || matches!(c, '{' | '(' | '<' | ';' | ':')
-                    })
+                    .split(|c: char| c.is_whitespace() || matches!(c, '{' | '(' | '<' | ';' | ':'))
                     .next()?
                     .trim();
                 if !name.is_empty() {
