@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/Ercaner1988/archify-graft-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/Ercaner1988/archify-graft-rs/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/Ercaner1988/archify-graft-rs?utm_source=badge)
 
 Archify-Graft merges the deterministic code graph and personalized PageRank intelligence of **Graft** with the JSON-IR architecture modeling and signature neon visual aesthetics of **Archify**. Built 100% in native Rust, it completely eliminates Node.js, Bun, V8, and Python/uv runtime dependencies.
 
@@ -62,4 +63,26 @@ cargo run --features gui -- gui
 
 # Start MCP server for AI agents
 cargo run -- mcp
+```
+
+---
+
+## Benchmarks
+
+Performance is tracked continuously with [CodSpeed](https://codspeed.io). The suites live in
+`benches/` and cover the hot paths of the engine:
+
+- `tokenizer`: trilingual tokenization and character folding (`graft-i18n`).
+- `indexing`: FNV-1a content hashing, AST extraction, call resolution (`graft-parser`).
+- `search`: BM25 index build/scoring and GraphRank propagation (`graft-search`).
+- `diagram`: JSON-IR compilation, neon SVG export, delta diffing, A* routing
+  (`archify-bridge`, `archify-render`, `archify-delta`, `archify-geometry`).
+
+```bash
+# Run locally with divan (walltime, human-readable output)
+cargo bench
+
+# Run through the CodSpeed CPU simulation instrument
+cargo codspeed build --measurement-mode simulation
+codspeed run --mode simulation -- cargo codspeed run
 ```
