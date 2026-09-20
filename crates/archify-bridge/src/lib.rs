@@ -1,59 +1,21 @@
 //! archify-bridge: Translates Graft's AST CodeGraph into Archify Architecture Diagrams.
 
-use archify_ir::{
-    ArchitectureDiagram, Component, Connection, DiagramMeta, SemanticRole, VisualPreset,
-};
+use archify_ir::{ArchitectureDiagram, DiagramMeta, SemanticRole, VisualPreset};
 use graft_model::{CodeGraph, NodeKind};
+
+mod labels;
+mod layout;
+mod modules;
 
 pub struct GraftToArchifyBridge;
 
 impl GraftToArchifyBridge {
+    /// Module-level architecture: regions are crates/top-level folders, components are
+    /// modules, connections are aggregated dependencies (see `modules` and `layout`).
     pub fn compile(graph: &CodeGraph, title: &str, locale: &str) -> ArchitectureDiagram {
-        let mut components = Vec::new();
-        let mut connections = Vec::new();
-
-        let cell_w = 160.0f32;
-        let cell_h = 70.0f32;
-        let gap_x = 40.0f32;
-        let gap_y = 50.0f32;
-        let cols = 4;
-
-        let mut current_col = 0;
-        let mut current_row = 0;
-
-        for node in &graph.nodes {
-            if node.kind == NodeKind::File || node.kind == NodeKind::Class {
-                let role = infer_role(&node.name, &node.path);
-                let x = 60.0 + current_col as f32 * (cell_w + gap_x);
-                let y = 80.0 + current_row as f32 * (cell_h + gap_y);
-
-                components.push(Component {
-                    id: node.id.clone(),
-                    label: node.name.clone(),
-                    sublabel: Some(shorten_path(&node.path)),
-                    role,
-                    x,
-                    y,
-                    width: cell_w,
-                    height: cell_h,
-                });
-
-                current_col += 1;
-                if current_col >= cols {
-                    current_col = 0;
-                    current_row += 1;
-                }
-            }
-        }
-
-        for edge in &graph.edges {
-            connections.push(Connection {
-                from: edge.source.clone(),
-                to: edge.target.clone(),
-                label: None,
-                line_style: "default".to_string(),
-            });
-        }
+        let laid = layout::layout(&modules::summarize(graph), locale);
+        let subtitle = labels::subtitle(laid.shown, laid.total, laid.connections.len(), locale);
+        let (regions, components, connections) = (laid.regions, laid.components, laid.connections);
 
         let mut story_beats = Vec::new();
         let fe_ids: Vec<String> = components
@@ -122,12 +84,13 @@ impl GraftToArchifyBridge {
         ArchitectureDiagram {
             meta: DiagramMeta {
                 title: title.to_string(),
-                subtitle: Some("Automatically generated from Graft AST Call Graph".to_string()),
+                subtitle: Some(subtitle),
                 locale: locale.to_string(),
                 visual_preset: VisualPreset::SignalFlow,
             },
             components,
             connections,
+            regions,
             story_beats,
         }
     }
@@ -277,12 +240,4 @@ fn infer_role(name: &str, path: &str) -> SemanticRole {
     } else {
         SemanticRole::External
     }
-}
-
-fn shorten_path(p: &str) -> String {
-    let path = std::path::Path::new(p);
-    path.file_name()
-        .and_then(|f| f.to_str())
-        .unwrap_or(p)
-        .to_string()
 }
