@@ -1,6 +1,7 @@
 //! graft-parser: Direct DMA unbuffered file reader, parallel AST extractor, incremental hash tracker, and call resolver.
 
 pub mod extractor;
+pub mod imports;
 pub mod incremental;
 pub mod resolver;
 
@@ -36,6 +37,7 @@ impl CodeExtractor {
             for edge in sub.edges {
                 master.add_edge(edge);
             }
+            master.imports.extend(sub.imports);
         }
 
         Self::resolve_inter_symbol_calls(&mut master);
@@ -78,6 +80,7 @@ impl CodeExtractor {
                 graph.edges.retain(|e| {
                     !e.source.starts_with(&path_str) && !e.target.starts_with(&path_str)
                 });
+                graph.imports.remove(&file_node_id);
 
                 let file_name = path.file_name().unwrap_or_default().to_string_lossy();
                 let fresh = AstExtractor::extract_content(&path_str, &file_name, &bytes);
@@ -87,6 +90,7 @@ impl CodeExtractor {
                 for edge in fresh.edges {
                     graph.add_edge(edge);
                 }
+                graph.imports.extend(fresh.imports);
             }
         }
 
@@ -102,6 +106,7 @@ impl CodeExtractor {
                 graph
                     .edges
                     .retain(|e| !e.source.starts_with(&known) && !e.target.starts_with(&known));
+                graph.imports.remove(&file_node_id);
             }
         }
 
@@ -163,6 +168,7 @@ impl CodeExtractor {
     }
 
     pub fn resolve_inter_symbol_calls(graph: &mut CodeGraph) {
+        imports::resolve(graph);
         CallResolver::resolve_calls(graph);
     }
 

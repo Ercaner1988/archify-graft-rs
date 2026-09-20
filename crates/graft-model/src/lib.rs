@@ -1,6 +1,6 @@
 //! graft-model: Core data models for Graft code intelligence.
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum NodeKind {
@@ -56,8 +56,23 @@ pub struct EdgeV1 {
 pub struct CodeGraph {
     pub nodes: Vec<NodeV1>,
     pub edges: Vec<EdgeV1>,
+    /// Raw `use`/`import` specs per file node id. `Imports` edges are derived from
+    /// this map from scratch whenever the file set changes, so an incremental update
+    /// never loses the links of files it did not re-read. BTreeMap: stable cache bytes.
+    pub imports: BTreeMap<String, Vec<String>>,
     #[serde(skip)]
     node_index_map: HashMap<String, usize>,
+}
+
+/// `graft/.graph/wiring.bin`: the small versioned record other tools read to learn
+/// that a repository was indexed. bincode is not self-describing, so FIELD ORDER IS
+/// THE FORMAT: readers mirror this struct exactly and `version` bumps on any change.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WiringMeta {
+    pub version: u32,
+    pub node_count: u64,
+    pub edge_count: u64,
+    pub languages: Vec<String>,
 }
 
 impl CodeGraph {
