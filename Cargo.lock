@@ -208,6 +208,7 @@ dependencies = [
  "archify-geometry",
  "archify-ir",
  "archify-render",
+ "bincode",
  "clap",
  "codspeed-divan-compat",
  "env_logger",
@@ -1353,11 +1354,11 @@ name = "graft-parser"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bincode",
  "graft-model",
  "lowlevel-sys",
  "rayon",
  "serde",
- "serde_json",
 ]
 
 [[package]]

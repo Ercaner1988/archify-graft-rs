@@ -40,17 +40,19 @@ impl HashIndex {
         self.hashes.remove(path)
     }
 
-    /// Save hash index to disk as JSON
+    /// Save hash index to disk (bincode)
     pub fn save_to_file<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()> {
-        let json = serde_json::to_string_pretty(self)?;
-        std::fs::write(path, json)?;
+        std::fs::write(
+            path,
+            bincode::serde::encode_to_vec(self, bincode::config::standard())?,
+        )?;
         Ok(())
     }
 
     /// Load hash index from disk
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> anyhow::Result<Self> {
-        let content = std::fs::read_to_string(path)?;
-        let index: Self = serde_json::from_str(&content)?;
+        let bytes = std::fs::read(path)?;
+        let (index, _) = bincode::serde::decode_from_slice(&bytes, bincode::config::standard())?;
         Ok(index)
     }
 }
@@ -79,5 +81,19 @@ mod tests {
         assert!(index.is_unchanged(&path, hash));
         assert!(!index.is_unchanged(&path, hash + 1));
         assert!(!index.is_unchanged("src/other.rs", hash));
+    }
+
+    #[test]
+    fn test_hash_index_file_roundtrip_is_binary() {
+        let mut index = HashIndex::new();
+        index.update("src/a.rs".to_string(), HashIndex::hash_bytes(b"a"));
+        index.update("src/b.rs".to_string(), HashIndex::hash_bytes(b"b"));
+
+        let file = std::env::temp_dir().join(format!("graft-hash-{}.bin", std::process::id()));
+        index.save_to_file(&file).unwrap();
+        let raw = std::fs::read(&file).unwrap();
+        assert!(!raw.starts_with(b"{"), "hash index must not be JSON");
+        assert_eq!(HashIndex::load_from_file(&file).unwrap(), index);
+        std::fs::remove_file(&file).ok();
     }
 }

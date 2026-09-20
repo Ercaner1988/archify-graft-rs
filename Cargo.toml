@@ -60,7 +60,7 @@ archify-delta = { path = "crates/archify-delta" }
 archify-egui = { path = "crates/archify-egui", optional = true }
 graft-mcp = { path = "crates/graft-mcp" }
 serde.workspace = true
-serde_json.workspace = true
+bincode.workspace = true
 clap.workspace = true
 anyhow.workspace = true
 tokio.workspace = true
@@ -74,6 +74,7 @@ glow = ["gui"]
 
 [dev-dependencies]
 divan = { version = "5.0.2", package = "codspeed-divan-compat" }
+serde_json.workspace = true
 
 [[bench]]
 name = "tokenizer"

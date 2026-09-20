@@ -3,6 +3,7 @@
 mod report;
 pub use report::{build_repo_map, file_skeleton, grep_graph};
 
+use anyhow::Context;
 use graft_i18n::TrilingualTokenizer;
 use graft_model::CodeGraph;
 use memmap2::Mmap;
@@ -195,7 +196,8 @@ impl GraphStorage {
         let file = File::open(path)?;
         let mmap = unsafe { Mmap::map(&file)? };
         let (mut graph, _): (CodeGraph, usize) =
-            bincode::serde::decode_from_slice(&mmap, bincode::config::standard())?;
+            bincode::serde::decode_from_slice(&mmap, bincode::config::standard())
+                .context("graph cache is unreadable (older layout?); run `index` again")?;
         graph.rebuild_index();
         Ok(graph)
     }
