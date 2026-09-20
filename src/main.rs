@@ -202,36 +202,30 @@ async fn main() -> anyhow::Result<()> {
                 None
             };
 
-            let (graph, changed) = if let Some((mut prev_graph, mut hash_index)) = previous {
+            let (graph, changed, dirty) = if let Some((mut prev_graph, mut hash_index)) = previous {
                 println!(
                     "⚡ [Graft-Core] Found existing index. Performing incremental change scan..."
                 );
+                let known_before = hash_index.hashes.len();
                 let changed = CodeExtractor::index_directory_incremental(
                     &path,
                     &mut prev_graph,
                     &mut hash_index,
                 )?;
-                let _ = hash_index.save_to_file(&hash_file);
-                (prev_graph, changed)
-            } else {
-                let graph = CodeExtractor::index_directory(&path)?;
-                let mut hash_index = graft_parser::HashIndex::new();
-                let mut file_paths = Vec::new();
-                let _ = CodeExtractor::collect_files(Path::new(&path), &mut file_paths);
-                for fp in file_paths {
-                    if let Ok(bytes) = lowlevel_sys::DirectReader::read_file(&fp) {
-                        hash_index.update(
-                            fp.to_string_lossy().to_string(),
-                            graft_parser::HashIndex::hash_bytes(&bytes),
-                        );
-                    }
+                // Deleted files shrink the hash index without counting as "changed".
+                let dirty = changed > 0 || hash_index.hashes.len() != known_before;
+                if dirty {
+                    let _ = hash_index.save_to_file(&hash_file);
                 }
+                (prev_graph, changed, dirty)
+            } else {
+                let (graph, hash_index) = CodeExtractor::index_directory_with_hashes(&path)?;
                 if let Some(parent) = hash_file.parent() {
                     let _ = fs::create_dir_all(parent);
                 }
                 let _ = hash_index.save_to_file(&hash_file);
                 let count = graph.nodes.len();
-                (graph, count)
+                (graph, count, true)
             };
             let elapsed_cycles = timer.elapsed_cycles();
 
@@ -242,11 +236,20 @@ async fn main() -> anyhow::Result<()> {
                 fs::create_dir_all(parent)?;
             }
 
-            GraphStorage::save(&graph, &cache)?;
-            println!(
-                "💾 [Graft-Core] Saved memory-mapped graph index to '{}'.",
-                cache
-            );
+            // Nothing changed: leave the cache untouched (no rewrite, and two sessions
+            // starting together cannot race on it).
+            if dirty {
+                GraphStorage::save(&graph, &cache)?;
+                println!(
+                    "💾 [Graft-Core] Saved memory-mapped graph index to '{}'.",
+                    cache
+                );
+            } else {
+                println!(
+                    "💤 [Graft-Core] Nothing changed; cache '{}' left as is.",
+                    cache
+                );
+            }
 
             if !no_wiring {
                 write_wiring_meta(&path, &graph)?;
