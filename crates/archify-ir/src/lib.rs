@@ -81,6 +81,20 @@ pub struct Connection {
     pub line_style: String,
 }
 
+/// Bileşenleri çevreleyen çerçeve (ör. bir crate ya da üst klasör). Yalnız çizim
+/// içindir: konumu köprü hesaplar, bileşenler kendi koordinatlarını taşır.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Region {
+    pub id: String,
+    pub label: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sublabel: Option<String>,
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StoryBeat {
     pub step: usize,
@@ -95,6 +109,9 @@ pub struct ArchitectureDiagram {
     pub meta: DiagramMeta,
     pub components: Vec<Component>,
     pub connections: Vec<Connection>,
+    /// Boşsa çizim eskisi gibi düz kalır (geri uyum).
+    #[serde(default)]
+    pub regions: Vec<Region>,
     #[serde(default)]
     pub story_beats: Vec<StoryBeat>,
 }

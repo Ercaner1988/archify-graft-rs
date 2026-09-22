@@ -47,6 +47,7 @@ fn test_delta_svg_rendering_and_legend() {
             label: None,
             line_style: "default".into(),
         }],
+        regions: vec![],
         story_beats: vec![],
     };
 
@@ -80,6 +81,7 @@ fn test_delta_svg_rendering_and_legend() {
             label: None,
             line_style: "default".into(),
         }],
+        regions: vec![],
         story_beats: vec![],
     };
 

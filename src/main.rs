@@ -9,12 +9,11 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::Path;
 
-/// `graft/.graph/wiring.json` başlığı — pasli-beyin'in `kopru.rs::graft_koprusu`
-/// köprüsünün beklediği KÜÇÜK, sürümlü sözleşme: yalnız `meta` (nodeCount,
-/// edgeCount, languages). Düğüm/kenar dizisinin TAMAMINI yazmıyoruz — köprü
-/// zaten onlara dokunmuyor (`kopru.rs`: "düğüm dizisi büyük olabilir, ona hiç
-/// dokunmayız"), gereksiz yere büyük bir JSON üretmenin anlamı yok. Bu, eski
-/// Node.js `@nanonets/graft`'ın yerini almanın en ucuz, en somut adımı.
+/// `graft/.graph/wiring.bin` başlığı — pasli-beyin'in `kopru.rs::graft_koprusu`
+/// köprüsünün okuduğu KÜÇÜK, sürümlü sözleşme (`graft_model::WiringMeta`, bincode
+/// `config::standard()`). JSON değil: alan SIRASI biçimin parçasıdır ve pasli-beyin
+/// aynı yapıyı aynı sırayla yansıtır. Düğüm/kenar dizisinin tamamı yazılmaz; köprü
+/// onlara dokunmuyor. Eski Node.js `@nanonets/graft`'ın yerini alan en ucuz adım.
 fn write_wiring_meta(indexed_path: &str, graph: &graft_model::CodeGraph) -> anyhow::Result<()> {
     let languages: BTreeSet<&'static str> = graph
         .nodes
@@ -23,20 +22,18 @@ fn write_wiring_meta(indexed_path: &str, graph: &graft_model::CodeGraph) -> anyh
         .filter_map(extension_to_language)
         .collect();
 
-    let wiring = serde_json::json!({
-        "meta": {
-            "version": 1,
-            "nodeCount": graph.nodes.len(),
-            "edgeCount": graph.edges.len(),
-            "languages": languages.into_iter().collect::<Vec<_>>(),
-        }
-    });
+    let wiring = graft_model::WiringMeta {
+        version: 1,
+        node_count: graph.nodes.len() as u64,
+        edge_count: graph.edges.len() as u64,
+        languages: languages.into_iter().map(str::to_string).collect(),
+    };
 
     let dir = Path::new(indexed_path).join("graft").join(".graph");
     fs::create_dir_all(&dir)?;
     fs::write(
-        dir.join("wiring.json"),
-        serde_json::to_string_pretty(&wiring)?,
+        dir.join("wiring.bin"),
+        bincode::serde::encode_to_vec(&wiring, bincode::config::standard())?,
     )?;
     Ok(())
 }
@@ -76,6 +73,10 @@ enum Commands {
         /// Cache output path
         #[arg(short, long, default_value = ".cache/graft-graph.bin")]
         cache: String,
+        /// Do not write `graft/.graph/wiring.bin` into the indexed folder (keeps a
+        /// foreign repository untouched, e.g. when only a diagram is wanted)
+        #[arg(long)]
+        no_wiring: bool,
     },
     /// Query the codebase using trilingual BM25 + PageRank (TR/AR/EN)
     Ask {
@@ -173,7 +174,11 @@ async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Index { path, cache } => {
+        Commands::Index {
+            path,
+            cache,
+            no_wiring,
+        } => {
             println!(
                 "⚡ [Hardware-Sys] Detected CPU cache line: {} bytes",
                 cache_line_size()
@@ -183,41 +188,44 @@ async fn main() -> anyhow::Result<()> {
                 path
             );
 
-            let hash_file = Path::new(&cache).with_extension("hashes.json");
+            let hash_file = Path::new(&cache).with_extension("hashes.bin");
             let timer = HardwareTimer::start();
 
-            let (graph, changed) = if Path::new(&cache).exists() && hash_file.exists() {
+            // An unreadable previous index (older cache layout, half-written file) is
+            // not an error: it is rebuilt from scratch below.
+            let previous = if Path::new(&cache).exists() && hash_file.exists() {
+                GraphStorage::load_mmap(&cache)
+                    .and_then(|g| Ok((g, graft_parser::HashIndex::load_from_file(&hash_file)?)))
+                    .map_err(|e| println!("⚠️  [Graft-Core] Existing index unusable ({e}); re-indexing from scratch."))
+                    .ok()
+            } else {
+                None
+            };
+
+            let (graph, changed, dirty) = if let Some((mut prev_graph, mut hash_index)) = previous {
                 println!(
                     "⚡ [Graft-Core] Found existing index. Performing incremental change scan..."
                 );
-                let mut prev_graph = GraphStorage::load_mmap(&cache)?;
-                let mut hash_index = graft_parser::HashIndex::load_from_file(&hash_file)?;
+                let known_before = hash_index.hashes.len();
                 let changed = CodeExtractor::index_directory_incremental(
                     &path,
                     &mut prev_graph,
                     &mut hash_index,
                 )?;
-                let _ = hash_index.save_to_file(&hash_file);
-                (prev_graph, changed)
-            } else {
-                let graph = CodeExtractor::index_directory(&path)?;
-                let mut hash_index = graft_parser::HashIndex::new();
-                let mut file_paths = Vec::new();
-                let _ = CodeExtractor::collect_files(Path::new(&path), &mut file_paths);
-                for fp in file_paths {
-                    if let Ok(bytes) = lowlevel_sys::DirectReader::read_file(&fp) {
-                        hash_index.update(
-                            fp.to_string_lossy().to_string(),
-                            graft_parser::HashIndex::hash_bytes(&bytes),
-                        );
-                    }
+                // Deleted files shrink the hash index without counting as "changed".
+                let dirty = changed > 0 || hash_index.hashes.len() != known_before;
+                if dirty {
+                    let _ = hash_index.save_to_file(&hash_file);
                 }
+                (prev_graph, changed, dirty)
+            } else {
+                let (graph, hash_index) = CodeExtractor::index_directory_with_hashes(&path)?;
                 if let Some(parent) = hash_file.parent() {
                     let _ = fs::create_dir_all(parent);
                 }
                 let _ = hash_index.save_to_file(&hash_file);
                 let count = graph.nodes.len();
-                (graph, count)
+                (graph, count, true)
             };
             let elapsed_cycles = timer.elapsed_cycles();
 
@@ -228,13 +236,24 @@ async fn main() -> anyhow::Result<()> {
                 fs::create_dir_all(parent)?;
             }
 
-            GraphStorage::save(&graph, &cache)?;
-            println!(
-                "💾 [Graft-Core] Saved memory-mapped graph index to '{}'.",
-                cache
-            );
+            // Nothing changed: leave the cache untouched (no rewrite, and two sessions
+            // starting together cannot race on it).
+            if dirty {
+                GraphStorage::save(&graph, &cache)?;
+                println!(
+                    "💾 [Graft-Core] Saved memory-mapped graph index to '{}'.",
+                    cache
+                );
+            } else {
+                println!(
+                    "💤 [Graft-Core] Nothing changed; cache '{}' left as is.",
+                    cache
+                );
+            }
 
-            write_wiring_meta(&path, &graph)?;
+            if !no_wiring {
+                write_wiring_meta(&path, &graph)?;
+            }
         }
         Commands::Ask {
             query,

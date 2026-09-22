@@ -138,6 +138,11 @@ impl AstExtractor {
             }
         }
 
+        let specs = crate::imports::extract(path_str, &content);
+        if !specs.is_empty() {
+            graph.imports.insert(file_node_id, specs);
+        }
+
         graph
     }
 

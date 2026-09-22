@@ -169,6 +169,7 @@ mod tests {
                 label: None,
                 line_style: "default".into(),
             }],
+            regions: vec![],
             story_beats: vec![],
         };
 
@@ -205,6 +206,7 @@ mod tests {
                 label: None,
                 line_style: "default".into(),
             }],
+            regions: vec![],
             story_beats: vec![],
         };
 

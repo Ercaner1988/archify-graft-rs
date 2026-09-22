@@ -78,10 +78,17 @@ impl DirectReader {
     #[cfg(windows)]
     fn read_file_win32_direct(path: &Path) -> io::Result<Vec<u8>> {
         use std::os::windows::fs::OpenOptionsExt;
+        const DIRECT_MIN_BYTES: usize = 1 << 20;
 
         let size = path.metadata()?.len() as usize;
         if size == 0 {
             return Ok(Vec::new());
+        }
+        // Unbuffered I/O bypasses the OS file cache, so a small file costs a device read
+        // every time: source trees are thousands of small files, where it is far slower
+        // than a cached read. Only large files gain from skipping the cache.
+        if size < DIRECT_MIN_BYTES {
+            return Err(io::ErrorKind::Unsupported.into());
         }
 
         // Windows unbuffered direct I/O requires read sizes to be sector-aligned (4096 bytes)

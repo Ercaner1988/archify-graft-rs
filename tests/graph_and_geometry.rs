@@ -141,6 +141,7 @@ fn test_reachability_route_probe() {
                 line_style: "default".to_string(),
             },
         ],
+        regions: vec![],
         story_beats: vec![],
     };
 
@@ -176,6 +177,7 @@ fn test_neon_svg_rendering_structure() {
             height: 70.0,
         }],
         connections: vec![],
+        regions: vec![],
         story_beats: vec![],
     };
 
