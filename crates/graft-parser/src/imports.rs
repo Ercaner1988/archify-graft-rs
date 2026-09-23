@@ -14,7 +14,9 @@ pub fn extract(path: &str, content: &str) -> Vec<String> {
     let ext = Path::new(path).extension().and_then(|e| e.to_str());
     let specs: Vec<String> = match ext {
         Some("rs") => tagged("rs", rust_chains(content)),
-        Some("ts" | "js") => tagged("js", js_specs(content)),
+        Some("ts" | "js" | "tsx" | "jsx" | "mjs" | "cjs" | "mts" | "cts") => {
+            tagged("js", js_specs(content))
+        }
         Some("py") => tagged("py", py_specs(content)),
         _ => Vec::new(),
     };
@@ -231,10 +233,20 @@ fn lookup(paths: &HashMap<&str, &str>, candidates: &[String]) -> Option<String> 
 
 fn resolve_js(from: &str, spec: &str, paths: &HashMap<&str, &str>) -> Option<String> {
     let base = join_norm(dir_of(from), spec);
-    let candidates: Vec<String> = ["", ".ts", ".js", "/index.ts", "/index.js"]
-        .iter()
-        .map(|ext| format!("{base}{ext}"))
-        .collect();
+    let candidates: Vec<String> = [
+        "",
+        ".ts",
+        ".js",
+        ".mjs",
+        ".cjs",
+        "/index.ts",
+        "/index.js",
+        "/index.mjs",
+        "/index.cjs",
+    ]
+    .iter()
+    .map(|ext| format!("{base}{ext}"))
+    .collect();
     lookup(paths, &candidates)
 }
 

@@ -181,7 +181,17 @@ impl CodeExtractor {
             path.extension().and_then(|s| s.to_str()),
             Some("rs")
                 | Some("ts")
+                | Some("tsx")
                 | Some("js")
+                | Some("jsx")
+                // ESM/CJS explicit-extension variants (`"type": "module"` packages,
+                // .cjs escape hatches, TS's own ESM/CJS-explicit sources) — without
+                // these a Node project built entirely on `.mjs` (e.g. archify) indexes
+                // as zero source files.
+                | Some("mjs")
+                | Some("cjs")
+                | Some("mts")
+                | Some("cts")
                 | Some("py")
                 | Some("go")
                 | Some("java")
@@ -300,6 +310,27 @@ mod tests {
         assert_eq!(graph.edges[0].source, "main.rs:run_job");
         assert_eq!(graph.edges[0].target, "calc.rs:calculate_total");
         assert_eq!(graph.edges[0].relation, EdgeRelation::Calls);
+    }
+
+    /// Node's own `"type": "module"` convention (and TS's `.mts`/`.cts`) means a whole
+    /// real-world JS/TS project can be 100% `.mjs`/`.cjs` files with not a single bare
+    /// `.js`. Before this fix `is_supported_extension` did not know those extensions
+    /// existed, so such a project indexed as zero source files.
+    #[test]
+    fn mjs_cjs_mts_cts_files_are_indexed_not_skipped() {
+        let dir = std::env::temp_dir().join(format!("graft-esm-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("a.mjs"), "export function alpha() {}\n").unwrap();
+        std::fs::write(dir.join("b.cjs"), "function beta() {}\nmodule.exports = beta;\n").unwrap();
+        std::fs::write(dir.join("c.mts"), "export function gamma() {}\n").unwrap();
+
+        let (graph, hashes) = CodeExtractor::index_directory_with_hashes(&dir).unwrap();
+
+        assert_eq!(hashes.hashes.len(), 3, "all three ESM/TS variants get walked");
+        assert!(graph.nodes.iter().any(|n| n.name == "alpha"));
+        assert!(graph.nodes.iter().any(|n| n.name == "beta"));
+        assert!(graph.nodes.iter().any(|n| n.name == "gamma"));
+        std::fs::remove_dir_all(&dir).ok();
     }
 
     #[test]

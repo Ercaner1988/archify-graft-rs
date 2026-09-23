@@ -105,14 +105,15 @@ impl ToolHandler {
                 },
                 {
                     "name": "archify_render_diagram",
-                    "description": "Generate an Archify architecture, sequence, dataflow, or delta diagram with neon lighting",
+                    "description": "Generate an Archify architecture, sequence, dataflow, or delta diagram with neon lighting and write it to disk. Returns the written path and a short summary, not the raw diagram markup — write `output` ending in `.html` for a self-contained, pannable/zoomable viewer, or `.svg` for the raw static image.",
                     "inputSchema": {
                         "type": "object",
                         "properties": {
                             "title": { "type": "string" },
                             "locale": { "type": "string", "enum": ["tr", "ar", "en"] },
                             "diagram_type": { "type": "string", "enum": ["architecture", "sequence", "dataflow", "delta"] },
-                            "entrypoint": { "type": "string" }
+                            "entrypoint": { "type": "string" },
+                            "output": { "type": "string", "description": "File path to write; extension `.html`/`.htm` wraps the SVG in an explorable pan/zoom viewer, anything else writes raw SVG. Defaults to `<diagram_type>.svg` in the server's working directory." }
                         }
                     }
                 }
@@ -242,46 +243,160 @@ impl ToolHandler {
         }
     }
 
+    /// Renders and WRITES the diagram to disk, returning only a path + a short summary.
+    /// The full SVG/HTML markup used to come back as the tool's `text` content — for any
+    /// non-trivial codebase that is tens or hundreds of KB of XML dumped straight into
+    /// the agent's context (and easily truncated by the caller's own limits), with
+    /// nothing written anywhere the human can actually open. That is very likely why an
+    /// earlier "diagram attempt" through this tool looked broken: there was no file, just
+    /// an unreadable text blob.
     pub fn execute_render_diagram(args: &Value, graph: Option<&CodeGraph>) -> Value {
-        if let Some(graph) = graph {
-            let title = args
-                .get("title")
-                .and_then(|t| t.as_str())
-                .unwrap_or("System Architecture");
-            let locale = args.get("locale").and_then(|l| l.as_str()).unwrap_or("tr");
-            let diag_type = args
-                .get("diagram_type")
-                .and_then(|d| d.as_str())
-                .unwrap_or("architecture");
-            let entrypoint = args
-                .get("entrypoint")
-                .and_then(|e| e.as_str())
-                .unwrap_or("main");
+        let Some(graph) = graph else {
+            return json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] });
+        };
 
-            let svg = match diag_type {
-                "sequence" => {
-                    let seq =
-                        GraftToArchifyBridge::compile_sequence(graph, entrypoint, title, locale);
-                    SvgRenderer::render_sequence(&seq)
-                }
-                "dataflow" => {
-                    let df = GraftToArchifyBridge::compile_dataflow(graph, title, locale);
-                    SvgRenderer::render_dataflow(&df)
-                }
-                "delta" => {
-                    let delta =
-                        DeltaEngine::compute_graph_delta(&CodeGraph::new(), graph, title, locale);
-                    SvgRenderer::render_delta(&delta)
-                }
-                _ => {
-                    let diagram = GraftToArchifyBridge::compile(graph, title, locale);
-                    SvgRenderer::render(&diagram)
-                }
-            };
+        let title = args
+            .get("title")
+            .and_then(|t| t.as_str())
+            .unwrap_or("System Architecture");
+        let locale = args.get("locale").and_then(|l| l.as_str()).unwrap_or("tr");
+        let diag_type = args
+            .get("diagram_type")
+            .and_then(|d| d.as_str())
+            .unwrap_or("architecture");
+        let entrypoint = args
+            .get("entrypoint")
+            .and_then(|e| e.as_str())
+            .unwrap_or("main");
 
-            json!({ "content": [{ "type": "text", "text": svg }] })
+        let (svg, summary) = match diag_type {
+            "sequence" => {
+                let seq = GraftToArchifyBridge::compile_sequence(graph, entrypoint, title, locale);
+                let summary = format!(
+                    "{} participants, {} messages",
+                    seq.participants.len(),
+                    seq.messages.len()
+                );
+                (SvgRenderer::render_sequence(&seq), summary)
+            }
+            "dataflow" => {
+                let df = GraftToArchifyBridge::compile_dataflow(graph, title, locale);
+                let summary = format!("{} nodes, {} pipelines", df.nodes.len(), df.pipelines.len());
+                (SvgRenderer::render_dataflow(&df), summary)
+            }
+            "delta" => {
+                let delta =
+                    DeltaEngine::compute_graph_delta(&CodeGraph::new(), graph, title, locale);
+                let summary = format!(
+                    "{} components, {} connections (vs. empty baseline)",
+                    delta.components.len(),
+                    delta.connections.len()
+                );
+                (SvgRenderer::render_delta(&delta), summary)
+            }
+            _ => {
+                let diagram = GraftToArchifyBridge::compile(graph, title, locale);
+                let summary = format!(
+                    "{} components, {} connections, {} regions",
+                    diagram.components.len(),
+                    diagram.connections.len(),
+                    diagram.regions.len()
+                );
+                (SvgRenderer::render(&diagram), summary)
+            }
+        };
+
+        let output = args
+            .get("output")
+            .and_then(|o| o.as_str())
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("{diag_type}.svg"));
+        let is_html = std::path::Path::new(&output)
+            .extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| e.eq_ignore_ascii_case("html") || e.eq_ignore_ascii_case("htm"));
+        let contents = if is_html {
+            archify_render::wrap_html(&svg, title)
         } else {
-            json!({ "isError": true, "content": [{ "type": "text", "text": "Codebase not yet indexed. Run graft_index first." }] })
+            svg
+        };
+        let bytes = contents.len();
+
+        match std::fs::write(&output, contents) {
+            Ok(()) => json!({ "content": [{
+                "type": "text",
+                "text": format!(
+                    "Wrote {} diagram to '{}' ({} bytes, {}).{}",
+                    diag_type, output, bytes, summary,
+                    if is_html { " Open it in a browser: drag to pan, scroll to zoom." } else { "" }
+                )
+            }] }),
+            Err(e) => json!({ "isError": true, "content": [{
+                "type": "text",
+                "text": format!("Rendered the diagram ({summary}) but could not write '{output}': {e}")
+            }] }),
         }
+    }
+}
+
+#[cfg(test)]
+mod render_diagram_tests {
+    use super::*;
+    use graft_model::{NodeKind, NodeV1};
+
+    fn sample_graph() -> CodeGraph {
+        let mut g = CodeGraph::new();
+        g.add_node(NodeV1 {
+            id: "file:a.rs".into(),
+            path: "a.rs".into(),
+            name: "a.rs".into(),
+            kind: NodeKind::File,
+            span: None,
+            search_body: String::new(),
+            file_residual: String::new(),
+        });
+        g
+    }
+
+    /// The tool used to return the entire SVG/HTML markup as the MCP text content —
+    /// tens of KB of XML dumped into the agent's context, with no file written anywhere
+    /// a human could open it. That is the behavior a prior "the diagram doesn't work"
+    /// report almost certainly hit. This locks in the fix: a file on disk, a short
+    /// summary in the response.
+    #[test]
+    fn writes_svg_to_disk_and_returns_a_summary_not_the_markup() {
+        let dir = std::env::temp_dir().join(format!("agr-mcp-svg-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let out = dir.join("d.svg");
+        let resp = ToolHandler::execute_render_diagram(
+            &json!({ "output": out.to_string_lossy() }),
+            Some(&sample_graph()),
+        );
+        let text = resp["content"][0]["text"].as_str().unwrap();
+        assert!(text.starts_with("Wrote architecture diagram"), "{text}");
+        assert!(
+            !text.contains("<svg"),
+            "response must not embed the raw diagram markup: {text}"
+        );
+        let written = std::fs::read_to_string(&out).unwrap();
+        assert!(written.contains("<svg"));
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn html_output_wraps_the_svg_in_a_pannable_zoomable_viewer() {
+        let dir = std::env::temp_dir().join(format!("agr-mcp-html-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let out = dir.join("d.html");
+        ToolHandler::execute_render_diagram(
+            &json!({ "output": out.to_string_lossy() }),
+            Some(&sample_graph()),
+        );
+        let written = std::fs::read_to_string(&out).unwrap();
+        assert!(written.contains("<html"));
+        assert!(written.contains("pointerdown"), "needs pan support");
+        assert!(written.contains("wheel"), "needs zoom support");
+        assert!(written.contains("<svg"), "the diagram itself must still be embedded");
+        std::fs::remove_dir_all(&dir).ok();
     }
 }

@@ -4,6 +4,31 @@ use graft_model::{CodeGraph, EdgeRelation, EdgeV1, NodeKind, NodeV1};
 
 pub struct AstExtractor;
 
+/// One list for both "should this line even be inspected" and "where does the name
+/// start" — a prefix here that is missing from the other call site is exactly the kind
+/// of drift `extract_type_name`'s doc comment already warns about. Covers ESM's
+/// `export`/`export default` variants and `async function`, which plain `"function "`
+/// alone does not: real-world `.mjs` code is close to half `export function`/`async
+/// function` declarations, not bare `function`.
+const TYPE_PREFIXES: [&str; 5] = [
+    "pub struct ",
+    "struct ",
+    "class ",
+    "export class ",
+    "export default class ",
+];
+const FN_PREFIXES: [&str; 9] = [
+    "pub fn ",
+    "fn ",
+    "def ",
+    "function ",
+    "async function ",
+    "export function ",
+    "export async function ",
+    "export default function ",
+    "export default async function ",
+];
+
 impl AstExtractor {
     pub fn extract_content(path_str: &str, file_name: &str, bytes: &[u8]) -> CodeGraph {
         let content = String::from_utf8_lossy(bytes);
@@ -25,13 +50,8 @@ impl AstExtractor {
         for line in content.lines() {
             let trimmed = line.trim();
 
-            if trimmed.starts_with("pub struct ")
-                || trimmed.starts_with("struct ")
-                || trimmed.starts_with("class ")
-            {
-                if let Some(name) =
-                    Self::extract_type_name(trimmed, &["pub struct ", "struct ", "class "])
-                {
+            if TYPE_PREFIXES.iter().any(|p| trimmed.starts_with(p)) {
+                if let Some(name) = Self::extract_type_name(trimmed, &TYPE_PREFIXES) {
                     let class_id = format!("{}:{}", path_str, name);
                     current_class = Some(class_id.clone());
 
@@ -105,11 +125,7 @@ impl AstExtractor {
                 }
             }
 
-            if trimmed.starts_with("pub fn ")
-                || trimmed.starts_with("fn ")
-                || trimmed.starts_with("def ")
-                || trimmed.starts_with("function ")
-            {
+            if FN_PREFIXES.iter().any(|p| trimmed.starts_with(p)) {
                 if let Some(fn_name) = Self::extract_identifier_after_keyword(trimmed) {
                     let fn_id = format!("{}:{}", path_str, fn_name);
 
@@ -147,7 +163,7 @@ impl AstExtractor {
     }
 
     fn extract_identifier_after_keyword(line: &str) -> Option<&str> {
-        for kw in &["pub fn ", "fn ", "def ", "function "] {
+        for kw in &FN_PREFIXES {
             if let Some(pos) = line.find(kw) {
                 let after = &line[pos + kw.len()..];
                 let name = after.split('(').next()?.trim();
@@ -184,5 +200,42 @@ impl AstExtractor {
             }
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn names(graph: &CodeGraph) -> Vec<&str> {
+        graph.nodes.iter().map(|n| n.name.as_str()).collect()
+    }
+
+    /// `export function`/`export async function`/`export class` are how most real
+    /// `.mjs`/`.ts` modules declare their public surface. Before `FN_PREFIXES`/
+    /// `TYPE_PREFIXES` covered them, only bare `function`/`class` were seen — on
+    /// Archify's own source about a quarter of its declarations use these forms.
+    #[test]
+    fn esm_export_and_async_declarations_are_extracted() {
+        let src = "export function alpha() {}\n\
+                    async function beta() {}\n\
+                    export async function gamma() {}\n\
+                    export default function delta() {}\n\
+                    export class Widget {}\n";
+        let graph = AstExtractor::extract_content("a.mjs", "a.mjs", src.as_bytes());
+        let found = names(&graph);
+        for n in ["alpha", "beta", "gamma", "delta", "Widget"] {
+            assert!(found.contains(&n), "missing {n} in {found:?}");
+        }
+    }
+
+    #[test]
+    fn plain_rust_and_python_declarations_still_work() {
+        let src = "pub fn alpha() {}\ndef beta():\n    pass\nstruct Foo { x: i32 }\n";
+        let graph = AstExtractor::extract_content("a.rs", "a.rs", src.as_bytes());
+        let found = names(&graph);
+        for n in ["alpha", "beta", "Foo"] {
+            assert!(found.contains(&n), "missing {n} in {found:?}");
+        }
     }
 }

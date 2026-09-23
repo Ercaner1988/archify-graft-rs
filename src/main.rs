@@ -1,5 +1,5 @@
 use archify_bridge::GraftToArchifyBridge;
-use archify_render::SvgRenderer;
+use archify_render::{wrap_html, SvgRenderer};
 use clap::{Parser, Subcommand};
 use graft_mcp::McpServer;
 use graft_parser::CodeExtractor;
@@ -43,8 +43,8 @@ fn write_wiring_meta(indexed_path: &str, graph: &graft_model::CodeGraph) -> anyh
 fn extension_to_language(ext: &str) -> Option<&'static str> {
     Some(match ext {
         "rs" => "rust",
-        "ts" => "typescript",
-        "js" => "javascript",
+        "ts" | "tsx" | "mts" | "cts" => "typescript",
+        "js" | "jsx" | "mjs" | "cjs" => "javascript",
         "py" => "python",
         "go" => "go",
         "java" => "java",
@@ -358,11 +358,24 @@ async fn main() -> anyhow::Result<()> {
                 }
             };
 
+            // `.html`/`.htm` gets a self-contained pan/zoom viewer around the same SVG;
+            // any other extension (default `.svg`) writes the raw markup as before.
+            let is_html = Path::new(&output)
+                .extension()
+                .and_then(|e| e.to_str())
+                .is_some_and(|e| e.eq_ignore_ascii_case("html") || e.eq_ignore_ascii_case("htm"));
+            let contents = if is_html {
+                wrap_html(&svg, &title)
+            } else {
+                svg
+            };
+
             println!(
-                "✨ [Archify-Core] Rendering Neon Glow SVG to '{}'...",
+                "✨ [Archify-Core] Rendering Neon Glow {} to '{}'...",
+                if is_html { "HTML" } else { "SVG" },
                 output
             );
-            fs::write(&output, svg)?;
+            fs::write(&output, contents)?;
             println!(
                 "🎉 [Archify-Core] Generated {} diagram at '{}' successfully!",
                 diagram_type, output
