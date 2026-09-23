@@ -58,17 +58,28 @@ impl McpServer {
                 }
             };
 
-            let id = request.get("id").cloned();
+            // JSON-RPC: a notification has no id and must never be answered;
+            // replying to `notifications/initialized` made Claude Code drop the connection.
+            let Some(id) = request.get("id").cloned() else {
+                continue;
+            };
             let method = request.get("method").and_then(|m| m.as_str()).unwrap_or("");
             let params = request.get("params").cloned().unwrap_or(json!({}));
 
             let response = self.handle_method(method, params).await;
 
-            let full_resp = json!({
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": response
-            });
+            let full_resp = match response.get("error") {
+                Some(err) if method != "tools/call" => json!({
+                    "jsonrpc": "2.0",
+                    "id": id,
+                    "error": err
+                }),
+                _ => json!({
+                    "jsonrpc": "2.0",
+                    "id": id,
+                    "result": response
+                }),
+            };
 
             writeln!(stdout, "{}", full_resp)?;
             stdout.flush()?;
@@ -86,6 +97,7 @@ impl McpServer {
                     "serverInfo": { "name": "archify-graft-rs", "version": "0.1.0" }
                 })
             }
+            "ping" => json!({}),
             "tools/list" => ToolHandler::tools_list(),
             "tools/call" => {
                 let tool_name = params.get("name").and_then(|n| n.as_str()).unwrap_or("");
