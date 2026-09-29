@@ -321,12 +321,20 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("graft-esm-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(dir.join("a.mjs"), "export function alpha() {}\n").unwrap();
-        std::fs::write(dir.join("b.cjs"), "function beta() {}\nmodule.exports = beta;\n").unwrap();
+        std::fs::write(
+            dir.join("b.cjs"),
+            "function beta() {}\nmodule.exports = beta;\n",
+        )
+        .unwrap();
         std::fs::write(dir.join("c.mts"), "export function gamma() {}\n").unwrap();
 
         let (graph, hashes) = CodeExtractor::index_directory_with_hashes(&dir).unwrap();
 
-        assert_eq!(hashes.hashes.len(), 3, "all three ESM/TS variants get walked");
+        assert_eq!(
+            hashes.hashes.len(),
+            3,
+            "all three ESM/TS variants get walked"
+        );
         assert!(graph.nodes.iter().any(|n| n.name == "alpha"));
         assert!(graph.nodes.iter().any(|n| n.name == "beta"));
         assert!(graph.nodes.iter().any(|n| n.name == "gamma"));

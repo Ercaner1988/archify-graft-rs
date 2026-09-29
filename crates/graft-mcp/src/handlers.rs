@@ -399,7 +399,10 @@ mod render_diagram_tests {
         assert!(written.contains("<html"));
         assert!(written.contains("pointerdown"), "needs pan support");
         assert!(written.contains("wheel"), "needs zoom support");
-        assert!(written.contains("<svg"), "the diagram itself must still be embedded");
+        assert!(
+            written.contains("<svg"),
+            "the diagram itself must still be embedded"
+        );
         std::fs::remove_dir_all(&dir).ok();
     }
 }
