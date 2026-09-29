@@ -7,6 +7,7 @@ license.workspace = true
 [dependencies]
 graft-model = { path = "../graft-model" }
 graft-i18n = { path = "../graft-i18n" }
+graft-parser = { path = "../graft-parser" }
 serde.workspace = true
 bincode.workspace = true
 memmap2.workspace = true

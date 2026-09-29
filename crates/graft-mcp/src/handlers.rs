@@ -5,7 +5,7 @@ use archify_delta::DeltaEngine;
 use archify_render::SvgRenderer;
 use graft_model::{CodeGraph, EdgeRelation};
 use graft_parser::CodeExtractor;
-use graft_search::{build_repo_map, file_skeleton, grep_graph, Bm25Index, GraphRank};
+use graft_search::{build_repo_map, file_skeleton, grep_graph, Bm25Index, GraphRank, GraphStorage};
 use serde_json::{json, Value};
 
 pub struct ToolHandler;
@@ -121,8 +121,11 @@ impl ToolHandler {
         })
     }
 
+    /// Reuses `.cache/graft-graph.bin` via an incremental rescan when it exists
+    /// (same cache the CLI's `index` command writes) instead of always doing a
+    /// full re-parse — an MCP session used to pay that cost every single time.
     pub fn execute_index(path: &str) -> (Result<(CodeGraph, Bm25Index), String>, Value) {
-        match CodeExtractor::index_directory(path) {
+        match GraphStorage::index_or_refresh(path, ".cache/graft-graph.bin") {
             Ok(g) => {
                 let mut bm25_idx = Bm25Index::new();
                 for node in &g.nodes {

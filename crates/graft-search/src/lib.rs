@@ -201,4 +201,55 @@ impl GraphStorage {
         graph.rebuild_index();
         Ok(graph)
     }
+
+    /// Shared by the CLI's `index` command and the MCP `graft_index` tool: reuse
+    /// the on-disk cache via an incremental hash-based rescan when one exists,
+    /// otherwise a full scan, then persist the result. Without this, an MCP
+    /// caller (a fresh archify-graft process per Claude Code session) did a full
+    /// re-parse in RAM every session and never touched the CLI's cache — cold
+    /// every time, and the CLI cache never saw MCP-driven updates either.
+    pub fn index_or_refresh<P: AsRef<Path>>(path: P, cache: P) -> anyhow::Result<CodeGraph> {
+        let path = path.as_ref();
+        let cache = cache.as_ref();
+        let hash_file = cache.with_extension("hashes.bin");
+
+        let previous = if cache.exists() && hash_file.exists() {
+            Self::load_mmap(cache)
+                .and_then(|g| Ok((g, graft_parser::HashIndex::load_from_file(&hash_file)?)))
+                .ok()
+        } else {
+            None
+        };
+
+        let (graph, dirty) = if let Some((mut prev_graph, mut hash_index)) = previous {
+            let known_before = hash_index.hashes.len();
+            let changed = graft_parser::CodeExtractor::index_directory_incremental(
+                path,
+                &mut prev_graph,
+                &mut hash_index,
+            )?;
+            let dirty = changed > 0 || hash_index.hashes.len() != known_before;
+            if dirty {
+                let _ = hash_index.save_to_file(&hash_file);
+            }
+            (prev_graph, dirty)
+        } else {
+            let (graph, hash_index) =
+                graft_parser::CodeExtractor::index_directory_with_hashes(path)?;
+            if let Some(parent) = hash_file.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
+            let _ = hash_index.save_to_file(&hash_file);
+            (graph, true)
+        };
+
+        if dirty {
+            if let Some(parent) = cache.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+            Self::save(&graph, cache)?;
+        }
+
+        Ok(graph)
+    }
 }
