@@ -1,11 +1,22 @@
 //! Interactive Archify & Graft Desktop Studio Application using egui.
 
 use crate::{CanvasRenderer, NeonPainter, TrilingualUi};
-use archify_ir::{ArchitectureDiagram, VisualPreset};
+use archify_ir::{ArchitectureDiagram, DataflowDiagram, VisualPreset};
 use egui::{Color32, Pos2, Rect, Sense, Vec2};
+
+/// Which diagram the central canvas currently draws. Independent layouts
+/// (grid vs. force-free component placement), so pan/zoom resets on switch.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum DiagramView {
+    #[default]
+    Architecture,
+    Dataflow,
+}
 
 pub struct ArchifyApp {
     pub diagram: Option<ArchitectureDiagram>,
+    pub dataflow: Option<DataflowDiagram>,
+    pub view: DiagramView,
     pub pan: Vec2,
     pub zoom: f32,
     pub selected_id: Option<String>,
@@ -22,6 +33,8 @@ impl Default for ArchifyApp {
     fn default() -> Self {
         Self {
             diagram: None,
+            dataflow: None,
+            view: DiagramView::default(),
             pan: Vec2::new(50.0, 50.0),
             zoom: 1.0,
             selected_id: None,
@@ -37,9 +50,14 @@ impl Default for ArchifyApp {
 }
 
 impl ArchifyApp {
-    pub fn new(diagram: Option<ArchitectureDiagram>, locale: &str) -> Self {
+    pub fn new(
+        diagram: Option<ArchitectureDiagram>,
+        dataflow: Option<DataflowDiagram>,
+        locale: &str,
+    ) -> Self {
         Self {
             diagram,
+            dataflow,
             locale: locale.to_string(),
             ..Default::default()
         }
@@ -142,6 +160,29 @@ impl ArchifyApp {
 
                 ui.separator();
 
+                // View switcher — only when a dataflow diagram was actually
+                // compiled (caller may pass None, e.g. archify-graft-cli's
+                // own `gui` command when the graph is empty).
+                if self.dataflow.is_some() {
+                    if ui
+                        .selectable_label(self.view == DiagramView::Architecture, "🏗 Architecture")
+                        .clicked()
+                    {
+                        self.view = DiagramView::Architecture;
+                        self.pan = Vec2::new(50.0, 50.0);
+                        self.zoom = 1.0;
+                    }
+                    if ui
+                        .selectable_label(self.view == DiagramView::Dataflow, "🌊 Dataflow")
+                        .clicked()
+                    {
+                        self.view = DiagramView::Dataflow;
+                        self.pan = Vec2::new(50.0, 50.0);
+                        self.zoom = 1.0;
+                    }
+                    ui.separator();
+                }
+
                 // Zoom controls
                 if ui.button("🔍 100%").clicked() {
                     self.zoom = 1.0;
@@ -171,6 +212,11 @@ impl ArchifyApp {
 
             let canvas_rect = response.rect;
             CanvasRenderer::draw_grid(&painter, canvas_rect, self.pan, self.zoom);
+
+            if self.view == DiagramView::Dataflow {
+                self.render_dataflow(ui, &painter, canvas_rect);
+                return;
+            }
 
             if let Some(diagram) = &self.diagram {
                 let to_screen = |x: f32, y: f32| -> Pos2 {
@@ -279,6 +325,99 @@ impl ArchifyApp {
                 }
             }
         });
+    }
+
+    /// Dataflow canvas: mirrors `archify_render::DataflowSvgRenderer`'s grid
+    /// layout exactly (same constants, same index-order placement) since
+    /// `DataflowNode` carries no position — only this renderer computes one.
+    /// No route/story-beat/search interaction (the SVG export has none
+    /// either); node hover glow is the only affordance, matching the bar the
+    /// static export already sets.
+    fn render_dataflow(&mut self, ui: &mut egui::Ui, painter: &egui::Painter, canvas_rect: Rect) {
+        let Some(df) = &self.dataflow else {
+            return;
+        };
+
+        const CELL_W: f32 = 160.0;
+        const CELL_H: f32 = 70.0;
+        const GAP_X: f32 = 70.0;
+        const GAP_Y: f32 = 60.0;
+        const COLS: usize = 3;
+
+        let to_screen = |x: f32, y: f32| -> Pos2 {
+            Pos2::new(
+                canvas_rect.min.x + self.pan.x + x * self.zoom,
+                canvas_rect.min.y + self.pan.y + y * self.zoom,
+            )
+        };
+
+        let mut positions: std::collections::HashMap<&str, (f32, f32)> =
+            std::collections::HashMap::with_capacity(df.nodes.len());
+        for (i, node) in df.nodes.iter().enumerate() {
+            let col = (i % COLS) as f32;
+            let row = (i / COLS) as f32;
+            positions.insert(
+                node.id.as_str(),
+                (
+                    60.0 + col * (CELL_W + GAP_X),
+                    100.0 + row * (CELL_H + GAP_Y),
+                ),
+            );
+        }
+
+        for pipe in &df.pipelines {
+            let (Some(&(x1, y1)), Some(&(x2, y2))) = (
+                positions.get(pipe.from.as_str()),
+                positions.get(pipe.to.as_str()),
+            ) else {
+                continue;
+            };
+            let start = to_screen(x1 + CELL_W, y1 + CELL_H / 2.0);
+            let end = to_screen(x2, y2 + CELL_H / 2.0);
+            NeonPainter::paint_neon_line(painter, start, end, Color32::from_rgb(0x38, 0xbd, 0xf8));
+            if let Some(throughput) = &pipe.throughput {
+                painter.text(
+                    Pos2::new(
+                        (start.x + end.x) / 2.0,
+                        (start.y + end.y) / 2.0 - 6.0 * self.zoom,
+                    ),
+                    egui::Align2::CENTER_CENTER,
+                    throughput,
+                    egui::FontId::proportional(9.0 * self.zoom),
+                    Color32::from_rgb(0x94, 0xa3, 0xb8),
+                );
+            }
+        }
+
+        let pointer_pos = ui.input(|i| i.pointer.hover_pos());
+        for node in &df.nodes {
+            let Some(&(x, y)) = positions.get(node.id.as_str()) else {
+                continue;
+            };
+            let min_pos = to_screen(x, y);
+            let size = Vec2::new(CELL_W * self.zoom, CELL_H * self.zoom);
+            let rect = Rect::from_min_size(min_pos, size);
+            let is_hovered = pointer_pos.is_some_and(|pos| rect.contains(pos));
+            NeonPainter::paint_neon_rect(painter, rect, node.role, 8.0 * self.zoom, is_hovered);
+
+            let font_size = 13.0 * self.zoom;
+            painter.text(
+                Pos2::new(rect.center().x, rect.center().y - 4.0 * self.zoom),
+                egui::Align2::CENTER_CENTER,
+                &node.label,
+                egui::FontId::proportional(font_size),
+                Color32::from_rgb(0xf8, 0xfa, 0xfc),
+            );
+            if let Some(rate) = &node.stream_rate {
+                painter.text(
+                    Pos2::new(rect.center().x, rect.center().y + 12.0 * self.zoom),
+                    egui::Align2::CENTER_CENTER,
+                    format!("⚡ {rate}"),
+                    egui::FontId::proportional(font_size * 0.75),
+                    Color32::from_rgb(0x38, 0xbd, 0xf8),
+                );
+            }
+        }
     }
 }
 

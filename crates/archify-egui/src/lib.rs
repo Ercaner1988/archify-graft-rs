@@ -228,6 +228,7 @@ impl TrilingualUi {
 #[cfg(any(feature = "glow", feature = "wgpu"))]
 pub fn run_desktop(
     diagram: Option<archify_ir::ArchitectureDiagram>,
+    dataflow: Option<archify_ir::DataflowDiagram>,
     locale: &str,
 ) -> eframe::Result<()> {
     let native_options = eframe::NativeOptions {
@@ -240,6 +241,6 @@ pub fn run_desktop(
     eframe::run_native(
         TrilingualUi::title(locale),
         native_options,
-        Box::new(move |_cc| Ok(Box::new(ArchifyApp::new(diagram, &loc)))),
+        Box::new(move |_cc| Ok(Box::new(ArchifyApp::new(diagram, dataflow, &loc)))),
     )
 }

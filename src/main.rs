@@ -443,20 +443,25 @@ async fn main() -> anyhow::Result<()> {
             locale,
             cache,
         } => {
-            let diagram = if Path::new(&cache).exists() {
+            let (diagram, dataflow) = if Path::new(&cache).exists() {
                 println!("📖 [Archify-Studio] Loading graph from '{}'...", cache);
                 let graph = GraphStorage::load_mmap(&cache)?;
-                Some(GraftToArchifyBridge::compile(&graph, &title, &locale))
+                (
+                    Some(GraftToArchifyBridge::compile(&graph, &title, &locale)),
+                    Some(GraftToArchifyBridge::compile_dataflow(
+                        &graph, &title, &locale,
+                    )),
+                )
             } else {
                 println!(
                     "ℹ️ [Archify-Studio] No cache found at '{}', opening empty studio canvas...",
                     cache
                 );
-                None
+                (None, None)
             };
 
             println!("🚀 [Archify-Studio] Launching interactive neon desktop studio window (Locale: {})...", locale);
-            archify_egui::run_desktop(diagram, &locale)
+            archify_egui::run_desktop(diagram, dataflow, &locale)
                 .map_err(|e| anyhow::anyhow!("Desktop studio error: {:?}", e))?;
         }
     }
