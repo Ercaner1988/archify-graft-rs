@@ -67,6 +67,7 @@ impl NeonPainter {
             outer_rect,
             rounding + 4.0_f32,
             Stroke::new(6.0_f32, outer_color),
+            egui::StrokeKind::Middle,
         );
 
         // Layer 2: Mid concentrated glow (2.5px expansion)
@@ -81,6 +82,7 @@ impl NeonPainter {
             mid_rect,
             rounding + 2.0_f32,
             Stroke::new(3.0_f32, mid_color),
+            egui::StrokeKind::Middle,
         );
 
         // Layer 3: Solid component body and sharp neon border
@@ -89,6 +91,7 @@ impl NeonPainter {
             rounding,
             fill_color,
             Stroke::new(1.8_f32, stroke_color),
+            egui::StrokeKind::Middle,
         );
     }
 
@@ -141,12 +144,14 @@ impl NeonPainter {
             outer_rect,
             rounding + 2.0_f32,
             Stroke::new(4.0_f32, outer_color),
+            egui::StrokeKind::Middle,
         );
         painter.rect(
             rect,
             rounding,
             fill_color,
             Stroke::new(1.8_f32, stroke_color),
+            egui::StrokeKind::Middle,
         );
     }
 }

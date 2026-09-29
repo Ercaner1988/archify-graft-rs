@@ -46,9 +46,9 @@ impl ArchifyApp {
     }
 
     /// Primary UI rendering function called every frame by eframe/egui
-    pub fn render_ui(&mut self, ctx: &egui::Context) {
+    pub fn render_ui(&mut self, ui: &mut egui::Ui) {
         // Bottom Status Bar with Route Diagnostics & Story Beat Navigator
-        egui::TopBottomPanel::bottom("archify_statusbar").show(ctx, |ui| {
+        egui::Panel::bottom("archify_statusbar").show(ui, |ui| {
             ui.horizontal(|ui| {
                 let status = TrilingualUi::route_label(
                     &self.locale,
@@ -95,7 +95,7 @@ impl ArchifyApp {
         });
 
         // Top Toolbar
-        egui::TopBottomPanel::top("archify_toolbar").show(ctx, |ui| {
+        egui::Panel::top("archify_toolbar").show(ui, |ui| {
             ui.horizontal(|ui| {
                 ui.heading(TrilingualUi::title(&self.locale));
                 ui.separator();
@@ -155,7 +155,7 @@ impl ArchifyApp {
         });
 
         // Central Interactive Canvas
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             let (response, painter) =
                 ui.allocate_painter(ui.available_size(), Sense::click_and_drag());
 
@@ -163,7 +163,7 @@ impl ArchifyApp {
                 self.pan += response.drag_delta();
             }
 
-            let scroll_delta = ui.input(|i| i.raw_scroll_delta.y);
+            let scroll_delta = ui.input(|i| i.smooth_scroll_delta.y);
             if scroll_delta != 0.0 {
                 let zoom_factor = if scroll_delta > 0.0 { 1.1 } else { 0.9 };
                 self.zoom = (self.zoom * zoom_factor).clamp(0.2, 4.0);
@@ -187,7 +187,7 @@ impl ArchifyApp {
                     self.active_route.as_deref(),
                 );
 
-                let pointer_pos = ctx.input(|i| i.pointer.hover_pos());
+                let pointer_pos = ui.input(|i| i.pointer.hover_pos());
                 let mut newly_selected = None;
 
                 for comp in &diagram.components {
@@ -284,7 +284,7 @@ impl ArchifyApp {
 
 #[cfg(any(feature = "glow", feature = "wgpu"))]
 impl eframe::App for ArchifyApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        self.render_ui(ctx);
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        self.render_ui(ui);
     }
 }

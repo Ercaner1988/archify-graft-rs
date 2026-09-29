@@ -37,8 +37,8 @@ env_logger = "0.11"
 clap = { version = "4.5", features = ["derive"] }
 unicode-normalization = "0.1"
 regex = "1.10"
-eframe = { version = "0.29", default-features = false, features = ["default_fonts"] }
-egui = "0.29"
+eframe = { version = "0.36.2", default-features = false, features = ["default_fonts"] }
+egui = "0.36.2"
 
 [package]
 name = "archify-graft-cli"
