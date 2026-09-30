@@ -231,10 +231,17 @@ pub fn run_desktop(
     dataflow: Option<archify_ir::DataflowDiagram>,
     locale: &str,
 ) -> eframe::Result<()> {
+    // Windows'ta glow/OpenGL pencereyi kara açar (Wgl sRGB swap chain) — kesin kural: wgpu.
     let native_options = eframe::NativeOptions {
+        #[cfg(feature = "wgpu")]
+        renderer: eframe::Renderer::Wgpu,
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1280.0, 800.0])
-            .with_title(TrilingualUi::title(locale)),
+            .with_title(TrilingualUi::title(locale))
+            .with_transparent(false),
+        multisampling: 0,
+        depth_buffer: 0,
+        stencil_buffer: 0,
         ..Default::default()
     };
     let loc = locale.to_string();

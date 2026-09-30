@@ -69,8 +69,8 @@ env_logger.workspace = true
 
 [features]
 default = []
-gui = ["dep:archify-egui", "archify-egui/glow"]
-glow = ["gui"]
+gui = ["dep:archify-egui", "archify-egui/wgpu"]
+wgpu = ["gui"]
 
 [dev-dependencies]
 divan = { version = "5.0.2", package = "codspeed-divan-compat" }
