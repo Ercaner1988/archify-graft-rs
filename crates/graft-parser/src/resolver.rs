@@ -164,11 +164,9 @@ impl CallResolver {
         let rust = RustIndex::new(graph);
 
         let mut defs: HashMap<&str, Vec<Def>> = HashMap::new();
-        for n in graph
-            .nodes
-            .iter()
-            .filter(|n| matches!(n.kind, NodeKind::Function | NodeKind::Method))
-        {
+        for n in graph.nodes.iter().filter(|n| {
+            matches!(n.kind, NodeKind::Function | NodeKind::Method) && n.path.ends_with(".rs")
+        }) {
             let path = n.path.replace('\\', "/");
             let rest =
                 n.id.strip_prefix(n.path.as_str())
@@ -228,11 +226,9 @@ impl CallResolver {
 
         let mut seen: HashSet<(&str, &str)> = HashSet::new();
         let mut new_edges = Vec::new();
-        for f in graph
-            .nodes
-            .iter()
-            .filter(|n| matches!(n.kind, NodeKind::Function | NodeKind::Method))
-        {
+        for f in graph.nodes.iter().filter(|n| {
+            matches!(n.kind, NodeKind::Function | NodeKind::Method) && n.path.ends_with(".rs")
+        }) {
             let Some(facts) = graph.facts.get(&f.id) else {
                 continue;
             };

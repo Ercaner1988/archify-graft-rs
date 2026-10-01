@@ -6,6 +6,8 @@ members = [
     "crates/graft-i18n",
     "crates/graft-cargo",
     "crates/graft-rust",
+    "crates/graft-langs",
+    "crates/graft-langs-link",
     "crates/graft-parser",
     "crates/graft-search",
     "crates/archify-ir",

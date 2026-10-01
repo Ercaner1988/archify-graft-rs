@@ -13,3 +13,5 @@ serde.workspace = true
 bincode.workspace = true
 graft-cargo = { path = "../graft-cargo" }
 graft-rust = { path = "../graft-rust" }
+graft-langs = { path = "../graft-langs" }
+graft-langs-link = { path = "../graft-langs-link" }

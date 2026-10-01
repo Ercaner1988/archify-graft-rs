@@ -1,0 +1,9 @@
+[package]
+name = "graft-langs-link"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+graft-model = { path = "../graft-model" }
+graft-langs = { path = "../graft-langs" }

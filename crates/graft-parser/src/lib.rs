@@ -208,6 +208,7 @@ impl CodeExtractor {
         imports::resolve(graph);
         crate_graph::link(graph);
         CallResolver::resolve_calls(graph);
+        graft_langs_link::link(graph);
         flow::link(graph);
         graph.rebuild_index();
     }

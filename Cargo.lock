@@ -1324,6 +1324,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "graft-langs"
+version = "0.1.0"
+dependencies = [
+ "graft-model",
+]
+
+[[package]]
+name = "graft-langs-link"
+version = "0.1.0"
+dependencies = [
+ "graft-langs",
+ "graft-model",
+]
+
+[[package]]
 name = "graft-mcp"
 version = "0.1.0"
 dependencies = [
@@ -1356,6 +1371,8 @@ dependencies = [
  "anyhow",
  "bincode",
  "graft-cargo",
+ "graft-langs",
+ "graft-langs-link",
  "graft-model",
  "graft-rust",
  "lowlevel-sys",
