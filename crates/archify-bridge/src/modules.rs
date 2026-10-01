@@ -89,6 +89,9 @@ fn locate(parts: &[&str], prefix: usize, root: &str) -> Option<(String, String)>
         r => r,
     };
     let stem = file.rsplit_once('.').map_or(*file, |(s, _)| s);
+    if rest.is_empty() && stem == "tests" {
+        return None;
+    }
     let module = rest.first().copied().unwrap_or(stem);
     Some((region.to_string(), module.to_string()))
 }
@@ -96,6 +99,7 @@ fn locate(parts: &[&str], prefix: usize, root: &str) -> Option<(String, String)>
 fn relation_rank(r: &EdgeRelation) -> u8 {
     match r {
         EdgeRelation::Calls => 5,
+        EdgeRelation::DependsOn | EdgeRelation::Reads | EdgeRelation::Writes => 6,
         EdgeRelation::Imports => 4,
         EdgeRelation::Implements => 3,
         EdgeRelation::Extends => 2,
@@ -104,23 +108,52 @@ fn relation_rank(r: &EdgeRelation) -> u8 {
     }
 }
 
+#[cfg(test)]
 pub fn summarize(graph: &CodeGraph) -> ModuleSummary {
+    summarize_in(graph, None)
+}
+
+/// `scope`: `(directory, crate name)` restricts the summary to one crate; its folders and
+/// files become the modules and the crate is the only region.
+pub fn summarize_in(graph: &CodeGraph, scope: Option<(&str, &str)>) -> ModuleSummary {
+    let in_scope = |p: &str| match scope {
+        Some((dir, _)) => p
+            .replace('\\', "/")
+            .strip_prefix(dir)
+            .is_some_and(|r| r.starts_with('/')),
+        None => true,
+    };
+    let counted = |n: &NodeV1| {
+        !matches!(
+            n.kind,
+            NodeKind::Crate | NodeKind::ExternalCrate | NodeKind::Artifact | NodeKind::Test
+        ) && !n.path.is_empty()
+            && !n.path.ends_with(".toml")
+            && !n.path.ends_with(".json")
+            && in_scope(&n.path)
+    };
     let file_parts: Vec<Vec<&str>> = graph
         .nodes
         .iter()
-        .filter(|n| n.kind == NodeKind::File)
+        .filter(|n| n.kind == NodeKind::File && counted(n))
         .map(|n| split(&n.path))
         .collect();
-    let prefix = common_prefix_len(&file_parts);
-    let root = match file_parts.first() {
-        Some(f) if prefix > 0 => f[prefix - 1],
-        _ => "root",
+    let (prefix, root) = match scope {
+        Some((dir, name)) => (split(dir).len(), name),
+        None => {
+            let prefix = common_prefix_len(&file_parts);
+            let root = match file_parts.first() {
+                Some(f) if prefix > 0 => f[prefix - 1],
+                _ => "root",
+            };
+            (prefix, root)
+        }
     };
 
     let mut key_of: HashMap<&str, String> = HashMap::new();
     let mut modules: BTreeMap<String, ModuleInfo> = BTreeMap::new();
     for node in &graph.nodes {
-        if node.path.ends_with(".json") {
+        if !counted(node) {
             continue;
         }
         let Some((region, name)) = locate(&split(&node.path), prefix, root) else {

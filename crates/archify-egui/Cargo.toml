@@ -12,6 +12,15 @@ wgpu = ["dep:eframe", "eframe/wgpu"]
 
 [dependencies]
 archify-ir = { path = "../archify-ir" }
-archify-geometry = { path = "../archify-geometry" }
+archify-route = { path = "../archify-route" }
+archify-style = { path = "../archify-style" }
+archify-scene = { path = "../archify-scene" }
+archify-motion = { path = "../archify-motion" }
+archify-egui-paint = { path = "../archify-egui-paint" }
 egui.workspace = true
 eframe = { workspace = true, optional = true }
+unicode-normalization.workspace = true
+
+[[example]]
+name = "studio"
+required-features = ["wgpu"]

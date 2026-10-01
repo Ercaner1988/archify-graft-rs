@@ -1,0 +1,11 @@
+[package]
+name = "archify-crates"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+graft-model = { path = "../graft-model" }
+graft-i18n = { path = "../graft-i18n" }
+graft-cargo = { path = "../graft-cargo" }
+archify-ir = { path = "../archify-ir" }

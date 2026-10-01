@@ -11,3 +11,5 @@ rayon.workspace = true
 anyhow.workspace = true
 serde.workspace = true
 bincode.workspace = true
+graft-cargo = { path = "../graft-cargo" }
+graft-rust = { path = "../graft-rust" }

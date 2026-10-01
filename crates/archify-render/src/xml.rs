@@ -26,9 +26,28 @@ pub fn fit(s: &str, max: usize) -> String {
     out
 }
 
+/// Number for an SVG attribute: one decimal at most, no trailing zeros.
+pub fn num(v: f32) -> String {
+    let s = format!("{:.1}", v);
+    let s = s.trim_end_matches('0').trim_end_matches('.');
+    if s.is_empty() || s == "-" || s == "-0" {
+        "0".to_string()
+    } else {
+        s.to_string()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn num_trims_zeros() {
+        assert_eq!(num(3.0), "3");
+        assert_eq!(num(3.26), "3.3");
+        assert_eq!(num(-0.01), "0");
+        assert_eq!(num(1527.5), "1527.5");
+    }
 
     #[test]
     fn esc_covers_the_five_xml_specials() {

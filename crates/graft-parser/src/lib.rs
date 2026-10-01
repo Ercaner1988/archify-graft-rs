@@ -1,9 +1,13 @@
-//! graft-parser: Direct DMA unbuffered file reader, parallel AST extractor, incremental hash tracker, and call resolver.
+//! graft-parser: Direct DMA unbuffered file reader, parallel extractor, incremental hash
+//! tracker, and the graph-wide resolvers (imports, crate dependencies, calls, data flow).
 
+pub mod crate_graph;
 pub mod extractor;
+pub mod flow;
 pub mod imports;
 pub mod incremental;
 pub mod resolver;
+mod rust_file;
 
 pub use extractor::AstExtractor;
 pub use incremental::HashIndex;
@@ -16,6 +20,29 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 pub struct CodeExtractor;
+
+/// Folders that hold tool output, vendored code or build products, never the project's
+/// own source: walking them turned a 1500-file Python runtime into "the architecture".
+fn skip_dir(name: &str, parent: &str) -> bool {
+    name.starts_with('.')
+        || name.ends_with("-out")
+        || name.starts_with("pythoncore-")
+        || matches!(
+            name,
+            "target"
+                | "node_modules"
+                | "dist"
+                | "build"
+                | "vendor"
+                | "third_party"
+                | "out"
+                | "coverage"
+                | "__pycache__"
+                | "site-packages"
+                | "venv"
+        )
+        || (parent == "docs" && name == "diyagramlar")
+}
 
 impl CodeExtractor {
     /// Full parallel scan of a codebase directory
@@ -46,13 +73,7 @@ impl CodeExtractor {
         let mut master = CodeGraph::new();
         let mut hashes = HashIndex::new();
         for (sub, path_str, hash) in extracted {
-            for node in sub.nodes {
-                master.add_node(node);
-            }
-            for edge in sub.edges {
-                master.add_edge(edge);
-            }
-            master.imports.extend(sub.imports);
+            master.absorb(sub);
             hashes.update(path_str, hash);
         }
 
@@ -97,26 +118,9 @@ impl CodeExtractor {
                 let path = Path::new(&path_str);
                 changed_count += 1;
                 hash_index.update(path_str.clone(), content_hash);
-
-                let file_prefix = format!("{}:", path_str);
-                let file_node_id = format!("file:{}", path_str);
-                graph
-                    .nodes
-                    .retain(|n| n.id != file_node_id && !n.id.starts_with(&file_prefix));
-                graph.edges.retain(|e| {
-                    !e.source.starts_with(&path_str) && !e.target.starts_with(&path_str)
-                });
-                graph.imports.remove(&file_node_id);
-
+                graph.forget_file(&path_str);
                 let file_name = path.file_name().unwrap_or_default().to_string_lossy();
-                let fresh = AstExtractor::extract_content(&path_str, &file_name, &bytes);
-                for node in fresh.nodes {
-                    graph.add_node(node);
-                }
-                for edge in fresh.edges {
-                    graph.add_edge(edge);
-                }
-                graph.imports.extend(fresh.imports);
+                graph.absorb(AstExtractor::extract_content(&path_str, &file_name, &bytes));
             }
         }
 
@@ -124,15 +128,7 @@ impl CodeExtractor {
         for known in all_known {
             if !current_paths.contains(&known) {
                 hash_index.remove(&known);
-                let file_prefix = format!("{}:", known);
-                let file_node_id = format!("file:{}", known);
-                graph
-                    .nodes
-                    .retain(|n| n.id != file_node_id && !n.id.starts_with(&file_prefix));
-                graph
-                    .edges
-                    .retain(|e| !e.source.starts_with(&known) && !e.target.starts_with(&known));
-                graph.imports.remove(&file_node_id);
+                graph.forget_file(&known);
             }
         }
 
@@ -145,19 +141,11 @@ impl CodeExtractor {
     }
 
     pub fn collect_files(dir: &Path, files: &mut Vec<PathBuf>) -> anyhow::Result<()> {
+        let parent = dir.file_name().and_then(|s| s.to_str()).unwrap_or("");
         if let Ok(entries) = std::fs::read_dir(dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
                 let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
-
-                if file_name.starts_with('.')
-                    || file_name == "target"
-                    || file_name == "node_modules"
-                    || file_name == "dist"
-                    || file_name == "build"
-                {
-                    continue;
-                }
 
                 // The directory listing already carries the entry type; `path.is_dir()`
                 // is one more stat per entry (5 s of a 6 s walk on a 27k-entry tree).
@@ -167,8 +155,10 @@ impl CodeExtractor {
                     _ => path.is_dir(),
                 };
                 if is_dir {
-                    Self::collect_files(&path, files)?;
-                } else if Self::is_supported_extension(&path) {
+                    if !skip_dir(file_name, parent) {
+                        Self::collect_files(&path, files)?;
+                    }
+                } else if !file_name.starts_with('.') && Self::is_supported_file(&path) {
                     files.push(path);
                 }
             }
@@ -176,31 +166,33 @@ impl CodeExtractor {
         Ok(())
     }
 
-    fn is_supported_extension(path: &Path) -> bool {
-        matches!(
-            path.extension().and_then(|s| s.to_str()),
-            Some("rs")
-                | Some("ts")
-                | Some("tsx")
-                | Some("js")
-                | Some("jsx")
-                // ESM/CJS explicit-extension variants (`"type": "module"` packages,
-                // .cjs escape hatches, TS's own ESM/CJS-explicit sources) — without
-                // these a Node project built entirely on `.mjs` (e.g. archify) indexes
-                // as zero source files.
-                | Some("mjs")
-                | Some("cjs")
-                | Some("mts")
-                | Some("cts")
-                | Some("py")
-                | Some("go")
-                | Some("java")
-                | Some("c")
-                | Some("cpp")
-                | Some("h")
-                | Some("hpp")
-                | Some("json")
-        )
+    /// Source files plus `Cargo.toml` (crates and their dependencies). `.json` is data,
+    /// not architecture: it used to make 89 % of one repository's "files".
+    fn is_supported_file(path: &Path) -> bool {
+        path.file_name().and_then(|s| s.to_str()) == Some("Cargo.toml")
+            || matches!(
+                path.extension().and_then(|s| s.to_str()),
+                Some(
+                    "rs" | "ts"
+                        | "tsx"
+                        | "js"
+                        | "jsx"
+                        // ESM/CJS explicit-extension variants (`"type": "module"`
+                        // packages, TS's own ESM/CJS-explicit sources): without these a
+                        // Node project built on `.mjs` indexes as zero source files.
+                        | "mjs"
+                        | "cjs"
+                        | "mts"
+                        | "cts"
+                        | "py"
+                        | "go"
+                        | "java"
+                        | "c"
+                        | "cpp"
+                        | "h"
+                        | "hpp"
+                )
+            )
     }
 
     pub fn extract_file(path: &Path) -> anyhow::Result<CodeGraph> {
@@ -210,9 +202,14 @@ impl CodeExtractor {
         Ok(AstExtractor::extract_content(&path_str, &file_name, &bytes))
     }
 
+    /// Everything that needs the whole file set: imports, crate dependencies, calls,
+    /// data-file flows. Each step rebuilds its own edges from scratch.
     pub fn resolve_inter_symbol_calls(graph: &mut CodeGraph) {
         imports::resolve(graph);
+        crate_graph::link(graph);
         CallResolver::resolve_calls(graph);
+        flow::link(graph);
+        graph.rebuild_index();
     }
 
     pub fn is_fresh<P: AsRef<Path>>(root: P, cache_file: P) -> bool {
@@ -275,47 +272,37 @@ impl CodeExtractor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use graft_model::{EdgeRelation, NodeKind, NodeV1};
+    use graft_model::{EdgeRelation, NodeKind};
 
     #[test]
-    fn test_call_resolution_linking() {
-        let mut graph = CodeGraph::new();
-
-        let caller = NodeV1 {
-            id: "main.rs:run_job".to_string(),
-            path: "main.rs".to_string(),
-            name: "run_job".to_string(),
-            kind: NodeKind::Function,
-            span: None,
-            search_body: "fn run_job() { calculate_total(); }".to_string(),
-            file_residual: "".to_string(),
-        };
-
-        let callee = NodeV1 {
-            id: "calc.rs:calculate_total".to_string(),
-            path: "calc.rs".to_string(),
-            name: "calculate_total".to_string(),
-            kind: NodeKind::Function,
-            span: None,
-            search_body: "fn calculate_total() -> i32 { 42 }".to_string(),
-            file_residual: "".to_string(),
-        };
-
-        graph.add_node(caller);
-        graph.add_node(callee);
-
-        CodeExtractor::resolve_inter_symbol_calls(&mut graph);
-
-        assert_eq!(graph.edges.len(), 1);
-        assert_eq!(graph.edges[0].source, "main.rs:run_job");
-        assert_eq!(graph.edges[0].target, "calc.rs:calculate_total");
-        assert_eq!(graph.edges[0].relation, EdgeRelation::Calls);
+    fn test_call_resolution_links_a_unique_function_of_the_same_crate() {
+        let dir = std::env::temp_dir().join(format!("graft-calls-{}", std::process::id()));
+        std::fs::create_dir_all(dir.join("src")).unwrap();
+        std::fs::write(
+            dir.join("src").join("main.rs"),
+            "fn run_job() { calculate_total(); }\n",
+        )
+        .unwrap();
+        std::fs::write(
+            dir.join("src").join("calc.rs"),
+            "pub fn calculate_total() -> i32 { 42 }\n",
+        )
+        .unwrap();
+        let graph = CodeExtractor::index_directory(&dir).unwrap();
+        let calls: Vec<_> = graph
+            .edges
+            .iter()
+            .filter(|e| e.relation == EdgeRelation::Calls)
+            .collect();
+        assert_eq!(calls.len(), 1);
+        assert!(calls[0].source.ends_with("main.rs:run_job"));
+        assert!(calls[0].target.ends_with("calc.rs:calculate_total"));
+        std::fs::remove_dir_all(&dir).ok();
     }
 
     /// Node's own `"type": "module"` convention (and TS's `.mts`/`.cts`) means a whole
     /// real-world JS/TS project can be 100% `.mjs`/`.cjs` files with not a single bare
-    /// `.js`. Before this fix `is_supported_extension` did not know those extensions
-    /// existed, so such a project indexed as zero source files.
+    /// `.js`.
     #[test]
     fn mjs_cjs_mts_cts_files_are_indexed_not_skipped() {
         let dir = std::env::temp_dir().join(format!("graft-esm-{}", std::process::id()));
@@ -338,6 +325,71 @@ mod tests {
         assert!(graph.nodes.iter().any(|n| n.name == "alpha"));
         assert!(graph.nodes.iter().any(|n| n.name == "beta"));
         assert!(graph.nodes.iter().any(|n| n.name == "gamma"));
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn json_generated_and_vendored_folders_are_not_indexed() {
+        let dir = std::env::temp_dir().join(format!("graft-skip-{}", std::process::id()));
+        for d in [
+            "src",
+            "graphify-rs-out/cache",
+            "Python/pythoncore-3.14/Lib",
+            "vendor/x",
+            "docs/diyagramlar",
+        ] {
+            std::fs::create_dir_all(dir.join(d)).unwrap();
+            std::fs::write(dir.join(d).join("x.rs"), "fn hidden() {}\n").unwrap();
+            std::fs::write(dir.join(d).join("d.json"), "{}").unwrap();
+        }
+        std::fs::write(dir.join("src").join("lib.rs"), "pub fn shown() {}\n").unwrap();
+        let (_, hashes) = CodeExtractor::index_directory_with_hashes(&dir).unwrap();
+        let mut files: Vec<&String> = hashes.hashes.keys().collect();
+        files.sort();
+        assert_eq!(files.len(), 2, "{files:?}");
+        assert!(files.iter().all(|f| f.contains("src")));
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn a_cargo_workspace_becomes_crate_nodes_with_depends_on_edges() {
+        let dir = std::env::temp_dir().join(format!("graft-cargo-{}", std::process::id()));
+        for (krate, deps) in [("core", ""), ("app", "core = { path = \"../core\" }\n")] {
+            std::fs::create_dir_all(dir.join(krate).join("src")).unwrap();
+            std::fs::write(
+                dir.join(krate).join("Cargo.toml"),
+                format!("[package]\nname = \"{krate}\"\n[dependencies]\n{deps}"),
+            )
+            .unwrap();
+        }
+        std::fs::write(dir.join("core/src/lib.rs"), "pub struct Thing;\n").unwrap();
+        std::fs::write(
+            dir.join("app/src/main.rs"),
+            "use core::{Thing};\nfn main() {}\n",
+        )
+        .unwrap();
+        let graph = CodeExtractor::index_directory(&dir).unwrap();
+        assert_eq!(
+            graph
+                .nodes
+                .iter()
+                .filter(|n| n.kind == NodeKind::Crate)
+                .count(),
+            2
+        );
+        assert_eq!(
+            graph
+                .edges
+                .iter()
+                .filter(|e| e.relation == EdgeRelation::DependsOn)
+                .count(),
+            1
+        );
+        // `use core::{Thing}` reaches the crate root file through the brace group.
+        assert!(graph
+            .edges
+            .iter()
+            .any(|e| e.relation == EdgeRelation::Imports && e.target.ends_with("lib.rs")));
         std::fs::remove_dir_all(&dir).ok();
     }
 

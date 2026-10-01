@@ -3,17 +3,19 @@
 //! them into file -> file `Imports` edges once the whole file set is known. std,
 //! third-party packages and anything that is not a file of this graph are dropped.
 
+use graft_cargo::{join_norm, Manifest};
 use graft_model::{CodeGraph, EdgeRelation, EdgeV1, NodeKind};
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 const MAX_SPECS: usize = 400;
 
-/// Raw import specs of one file: `rs:crate::a::b`, `js:./x`, `py:.x`.
-pub fn extract(path: &str, content: &str) -> Vec<String> {
+/// Raw import specs of one file: `rs:crate::a::b`, `js:./x`, `py:.x`. `masked` is the
+/// Rust source with strings and comments blanked (paths in docs are not imports).
+pub fn extract(path: &str, content: &str, masked: Option<&str>) -> Vec<String> {
     let ext = Path::new(path).extension().and_then(|e| e.to_str());
     let specs: Vec<String> = match ext {
-        Some("rs") => tagged("rs", rust_chains(content)),
+        Some("rs") => tagged("rs", rust_chains(masked.unwrap_or(content))),
         Some("ts" | "js" | "tsx" | "jsx" | "mjs" | "cjs" | "mts" | "cts") => {
             tagged("js", js_specs(content))
         }
@@ -36,11 +38,64 @@ fn is_id(b: u8) -> bool {
     b.is_ascii_alphanumeric() || b == b'_'
 }
 
-/// Every maximal `ident::ident::...` chain (at least two segments) in `src`. Covers
-/// `use` statements and inline paths such as `crate::goz::open(..)` alike.
+/// Paths inside a `{a, b::c, d::{e, f}}` group, each prefixed with `prefix`.
+fn expand_group(prefix: &str, group: &str, out: &mut Vec<String>) {
+    let (mut depth, mut start) = (0usize, 0usize);
+    let mut items = Vec::new();
+    for (i, c) in group.char_indices() {
+        match c {
+            '{' => depth += 1,
+            '}' => depth = depth.saturating_sub(1),
+            ',' if depth == 0 => {
+                items.push(&group[start..i]);
+                start = i + 1;
+            }
+            _ => {}
+        }
+    }
+    items.push(&group[start..]);
+    for item in items {
+        let item = item.split(" as ").next().unwrap_or("").trim();
+        if item.is_empty() || item == "*" {
+            continue;
+        }
+        if let Some((head, rest)) = item.split_once("::{") {
+            let head = head.trim();
+            let inner = rest.trim_end_matches('}');
+            let next = if head.is_empty() {
+                prefix.to_string()
+            } else {
+                format!("{prefix}::{head}")
+            };
+            out.push(next.clone());
+            expand_group(&next, inner, out);
+        } else if item != "self" {
+            out.push(format!(
+                "{prefix}::{}",
+                item.split_whitespace().collect::<String>()
+            ));
+        }
+    }
+}
+
+/// Every maximal `ident::ident::...` chain (at least two segments, or one segment
+/// followed by a `::{..}` group) in `src`. Covers `use` statements and inline paths such
+/// as `crate::goz::open(..)` alike; a brace group gives the prefix and each member.
 fn rust_chains(src: &str) -> Vec<String> {
     let b = src.as_bytes();
     let (mut out, mut i) = (Vec::new(), 0);
+    // `use krate;` and `use krate as alias;` have no `::` but name a crate.
+    for (at, _) in src.match_indices("use ") {
+        if at > 0 && is_id(b[at - 1]) {
+            continue;
+        }
+        let rest = &src[at + 4..];
+        let end = rest.bytes().position(|c| !is_id(c)).unwrap_or(rest.len());
+        let after = rest[end..].trim_start();
+        if end > 0 && (after.starts_with(';') || after.starts_with("as ")) {
+            out.push(rest[..end].to_string());
+        }
+    }
     while let Some(off) = src[i..].find("::") {
         let at = i + off;
         let mut start = at;
@@ -74,10 +129,32 @@ fn rust_chains(src: &str) -> Vec<String> {
             }
             end = k;
         }
-        if end > start && src[start..end].contains("::") {
-            out.push(src[start..end].to_string());
+        let mut next_i = end.max(at + 2);
+        let grouped = src[end..].starts_with("::{");
+        if end > start && (src[start..end].contains("::") || grouped) {
+            let chain = src[start..end].to_string();
+            if grouped {
+                let open = end + 2;
+                let mut depth = 0;
+                let close = src[open..]
+                    .char_indices()
+                    .find_map(|(j, c)| {
+                        match c {
+                            '{' => depth += 1,
+                            '}' => depth -= 1,
+                            _ => {}
+                        }
+                        (depth == 0).then_some(open + j)
+                    })
+                    .unwrap_or(src.len());
+                out.push(chain.clone());
+                expand_group(&chain, &src[open + 1..close], &mut out);
+                next_i = close.max(next_i);
+            } else {
+                out.push(chain);
+            }
         }
-        i = end.max(at + 2);
+        i = next_i;
     }
     out
 }
@@ -127,7 +204,7 @@ fn py_specs(src: &str) -> Vec<String> {
 
 /// `(crate root, module path)` of a Rust file below a `src/` folder; `lib.rs` and
 /// `main.rs` are the crate root (empty module path), `x/mod.rs` is module `x`.
-fn rust_module(path: &str) -> Option<(String, String)> {
+pub(crate) fn rust_module(path: &str) -> Option<(String, String)> {
     let (root, rel) = match path.rfind("/src/") {
         Some(i) => (&path[..i], &path[i + 5..]),
         None => ("", path.strip_prefix("src/")?),
@@ -142,29 +219,55 @@ fn rust_module(path: &str) -> Option<(String, String)> {
     Some((root.to_string(), rel.to_string()))
 }
 
-struct RustIndex {
+/// Rust modules of the graph: which file is `crate::a::b` of which crate.
+pub(crate) struct RustIndex {
     by_key: HashMap<(String, String), String>,
-    /// Crate folder name (`-` as `_`) -> crate roots with that name.
+    /// Crate name as written in source (`-` as `_`) -> crate roots with that name.
     crates: HashMap<String, Vec<String>>,
 }
 
 impl RustIndex {
-    fn new(files: &[(String, String)]) -> Self {
+    pub(crate) fn new(graph: &CodeGraph) -> Self {
         let mut idx = RustIndex {
             by_key: HashMap::new(),
             crates: HashMap::new(),
         };
-        for (id, path) in files {
+        let mut files: Vec<(&str, String)> = graph
+            .nodes
+            .iter()
+            .filter(|n| n.kind == NodeKind::File)
+            .map(|n| (n.id.as_str(), n.path.replace('\\', "/")))
+            .collect();
+        // lib.rs wins over main.rs for the crate root.
+        files.sort_by_key(|(_, p)| p.ends_with("/main.rs"));
+        for (id, path) in &files {
             if let Some((root, rel)) = rust_module(path) {
-                let name = root.rsplit('/').next().unwrap_or("").replace('-', "_");
-                let roots = idx.crates.entry(name).or_default();
-                if !roots.contains(&root) {
-                    roots.push(root.clone());
-                }
-                idx.by_key.insert((root, rel), id.clone());
+                let folder = root.rsplit('/').next().unwrap_or("").replace('-', "_");
+                idx.add_crate(folder, &root);
+                idx.by_key
+                    .entry((root, rel))
+                    .or_insert_with(|| (*id).to_string());
+            }
+        }
+        // Real package names from Cargo.toml beat the folder-name guess.
+        for node in graph.nodes.iter().filter(|n| n.kind == NodeKind::Crate) {
+            let Some(specs) = graph.imports.get(&format!("file:{}", node.path)) else {
+                continue;
+            };
+            let path = node.path.replace('\\', "/");
+            let dir = path.rsplit_once('/').map_or("", |(d, _)| d);
+            if let Some(name) = Manifest::from_specs(specs).code_name() {
+                idx.add_crate(name, dir);
             }
         }
         idx
+    }
+
+    fn add_crate(&mut self, name: String, root: &str) {
+        let roots = self.crates.entry(name).or_default();
+        if !roots.iter().any(|r| r == root) {
+            roots.push(root.to_string());
+        }
     }
 
     /// Workspace crate by name. Package names often carry a prefix the folder lacks
@@ -181,19 +284,26 @@ impl RustIndex {
         }
     }
 
-    /// Longest module prefix of `segs` that is a file of the crate at `root`.
+    /// Longest module prefix of `segs` that is a file of the crate at `root`; with no
+    /// such prefix, the crate root itself (`lib.rs`/`main.rs`).
     fn find(&self, root: &str, segs: &[&str]) -> Option<String> {
-        (1..=segs.len()).rev().find_map(|n| {
+        (0..=segs.len()).rev().find_map(|n| {
             let key = (root.to_string(), segs[..n].join("/"));
             self.by_key.get(&key).cloned()
         })
     }
 
-    fn resolve(&self, from_path: &str, chain: &str) -> Option<String> {
+    /// File of `chain` (`crate::a::b::item`, `self::x`, `super::y`, `krate::z`) as seen
+    /// from `from_path`: the deepest module file it names.
+    pub(crate) fn resolve(&self, from_path: &str, chain: &str) -> Option<String> {
+        let segs: Vec<&str> = chain.split("::").collect();
+        self.resolve_segs(from_path, &segs)
+    }
+
+    pub(crate) fn resolve_segs(&self, from_path: &str, segs: &[&str]) -> Option<String> {
         let (root, own) = rust_module(from_path)?;
         let own: Vec<&str> = own.split('/').filter(|s| !s.is_empty()).collect();
-        let segs: Vec<&str> = chain.split("::").collect();
-        let (root, rest): (String, Vec<&str>) = match segs[0] {
+        let (root, rest): (String, Vec<&str>) = match *segs.first()? {
             "crate" => (root, segs[1..].to_vec()),
             "self" => (root, [own.as_slice(), &segs[1..]].concat()),
             "super" => {
@@ -211,20 +321,6 @@ fn dir_of(path: &str) -> &str {
     path.rsplit_once('/').map_or("", |(d, _)| d)
 }
 
-fn join_norm(dir: &str, spec: &str) -> String {
-    let mut parts: Vec<&str> = dir.split('/').collect();
-    for seg in spec.split('/') {
-        match seg {
-            "." | "" => {}
-            ".." => {
-                parts.pop();
-            }
-            s => parts.push(s),
-        }
-    }
-    parts.join("/")
-}
-
 fn lookup(paths: &HashMap<&str, &str>, candidates: &[String]) -> Option<String> {
     candidates
         .iter()
@@ -233,13 +329,23 @@ fn lookup(paths: &HashMap<&str, &str>, candidates: &[String]) -> Option<String> 
 
 fn resolve_js(from: &str, spec: &str, paths: &HashMap<&str, &str>) -> Option<String> {
     let base = join_norm(dir_of(from), spec);
+    let base = if from.starts_with('/') && !base.starts_with('/') {
+        format!("/{base}")
+    } else {
+        base
+    };
     let candidates: Vec<String> = [
         "",
         ".ts",
+        ".tsx",
         ".js",
+        ".jsx",
         ".mjs",
         ".cjs",
+        ".mts",
+        ".cts",
         "/index.ts",
+        "/index.tsx",
         "/index.js",
         "/index.mjs",
         "/index.cjs",
@@ -296,7 +402,7 @@ pub fn resolve(graph: &mut CodeGraph) {
         .iter()
         .map(|(id, p)| (id.as_str(), p.as_str()))
         .collect();
-    let rust = RustIndex::new(&files);
+    let rust = RustIndex::new(graph);
 
     let mut seen = HashSet::new();
     let mut edges = Vec::new();
@@ -379,9 +485,30 @@ mod tests {
         let src = "use crate::goz::{a, b};\nuse super::*;\nfn f() { crate::kopru::x(); std::fs::read(p); Vec::<u8>::new(); }";
         let chains = rust_chains(src);
         assert!(chains.contains(&"crate::goz".to_string()));
+        assert!(chains.contains(&"crate::goz::a".to_string()));
         assert!(chains.contains(&"crate::kopru::x".to_string()));
         assert!(chains.contains(&"std::fs::read".to_string()));
         assert!(!chains.iter().any(|c| c == "super" || c.is_empty()));
+    }
+
+    #[test]
+    fn brace_groups_give_the_crate_root_and_every_member() {
+        let src0 = "use kok;
+use kok2 as k;";
+        assert_eq!(rust_chains(src0), ["kok", "kok2"]);
+        let src = "use fihrist_core::{Kayit, hata::{Hata, Sonuc as S}, self};\nuse graft_model::{CodeGraph};";
+        let chains = rust_chains(src);
+        for c in [
+            "fihrist_core",
+            "fihrist_core::Kayit",
+            "fihrist_core::hata",
+            "fihrist_core::hata::Hata",
+            "fihrist_core::hata::Sonuc",
+            "graft_model",
+            "graft_model::CodeGraph",
+        ] {
+            assert!(chains.contains(&c.to_string()), "{c} in {chains:?}");
+        }
     }
 
     #[test]
@@ -419,6 +546,42 @@ mod tests {
                 ("olcum.rs<uret".to_string(), "mod.rs<uret".to_string()),
             ]
         );
+    }
+
+    #[test]
+    fn a_path_naming_only_the_crate_root_links_to_lib_rs() {
+        let files = [
+            "/w/r/core/src/lib.rs",
+            "/w/r/core/src/a.rs",
+            "/w/r/app/src/main.rs",
+        ];
+        let mut g = graph(
+            &files,
+            &[("/w/r/app/src/main.rs", &["rs:core::Thing", "rs:core"])],
+        );
+        resolve(&mut g);
+        assert_eq!(
+            links(&g),
+            [("main.rs<src".to_string(), "lib.rs<src".to_string())]
+        );
+    }
+
+    #[test]
+    fn package_names_from_cargo_beat_the_folder_guess() {
+        let mut g = graph(
+            &["/w/r/ic/src/lib.rs", "/w/r/app/src/main.rs"],
+            &[("/w/r/app/src/main.rs", &["rs:dis_ad::X"])],
+        );
+        let mut manifest = file("/w/r/ic/Cargo.toml");
+        manifest.kind = NodeKind::Crate;
+        manifest.name = "dis-ad".into();
+        g.add_node(manifest);
+        g.imports.insert(
+            "file:/w/r/ic/Cargo.toml".into(),
+            vec!["cargo:pkg|dis-ad".into()],
+        );
+        resolve(&mut g);
+        assert_eq!(links(&g).len(), 1);
     }
 
     #[test]

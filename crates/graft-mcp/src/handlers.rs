@@ -387,7 +387,7 @@ mod render_diagram_tests {
     }
 
     #[test]
-    fn html_output_wraps_the_svg_in_a_pannable_zoomable_viewer() {
+    fn html_output_wraps_the_svg_without_any_script() {
         let dir = std::env::temp_dir().join(format!("agr-mcp-html-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let out = dir.join("d.html");
@@ -397,8 +397,7 @@ mod render_diagram_tests {
         );
         let written = std::fs::read_to_string(&out).unwrap();
         assert!(written.contains("<html"));
-        assert!(written.contains("pointerdown"), "needs pan support");
-        assert!(written.contains("wheel"), "needs zoom support");
+        assert!(!written.contains("<script"), "output must stay script-free");
         assert!(
             written.contains("<svg"),
             "the diagram itself must still be embedded"

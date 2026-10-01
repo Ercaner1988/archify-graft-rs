@@ -172,42 +172,49 @@ fn test_sequence_diagram_compilation_and_svg() {
 #[test]
 fn test_dataflow_diagram_compilation_and_svg() {
     let mut graph = CodeGraph::new();
-
-    let node_in = NodeV1 {
-        id: "stream_in".to_string(),
-        path: "stream_in.rs".to_string(),
-        name: "IngestPipeline".to_string(),
-        kind: NodeKind::Class,
+    let node = |id: &str, name: &str, kind: NodeKind| NodeV1 {
+        id: id.to_string(),
+        path: if kind == NodeKind::Artifact {
+            String::new()
+        } else {
+            "uret.rs".to_string()
+        },
+        name: name.to_string(),
+        kind,
         span: None,
-        search_body: "class IngestPipeline".to_string(),
-        file_residual: "".to_string(),
+        search_body: String::new(),
+        file_residual: String::new(),
     };
-    let node_out = NodeV1 {
-        id: "stream_out".to_string(),
-        path: "stream_out.rs".to_string(),
-        name: "StorageSink".to_string(),
-        kind: NodeKind::Class,
-        span: None,
-        search_body: "class StorageSink".to_string(),
-        file_residual: "".to_string(),
-    };
-
-    graph.add_node(node_in);
-    graph.add_node(node_out);
-    graph.add_edge(EdgeV1 {
-        source: "stream_in".to_string(),
-        target: "stream_out".to_string(),
-        relation: EdgeRelation::Calls,
-        confidence: 0.95,
-    });
+    graph.add_node(node("uret.rs:uret", "uret", NodeKind::Function));
+    graph.add_node(node("uret.rs:oku", "oku", NodeKind::Function));
+    graph.add_node(node(
+        "artifact:envanter.bin",
+        "envanter.bin",
+        NodeKind::Artifact,
+    ));
+    for (src, tgt, rel) in [
+        (
+            "uret.rs:uret",
+            "artifact:envanter.bin",
+            EdgeRelation::Writes,
+        ),
+        ("uret.rs:oku", "artifact:envanter.bin", EdgeRelation::Reads),
+    ] {
+        graph.add_edge(EdgeV1 {
+            source: src.to_string(),
+            target: tgt.to_string(),
+            relation: rel,
+            confidence: 0.9,
+        });
+    }
 
     let df = GraftToArchifyBridge::compile_dataflow(&graph, "Data Streaming Map", "en");
-    assert_eq!(df.nodes.len(), 2);
-    assert_eq!(df.pipelines.len(), 1);
+    assert_eq!(df.nodes.len(), 3);
+    assert_eq!(df.pipelines.len(), 2);
 
     let svg = SvgRenderer::render_dataflow(&df);
     assert!(svg.contains("Data Streaming Map"));
-    assert!(svg.contains("⚡ Direct DMA"));
-    assert!(svg.contains("95%"));
-    assert!(svg.ends_with("</svg>\n"));
+    assert!(svg.contains("envanter.bin"));
+    assert!(!svg.contains("Direct DMA"));
+    assert!(svg.trim_end().ends_with("</svg>"));
 }

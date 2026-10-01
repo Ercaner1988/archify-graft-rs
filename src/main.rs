@@ -224,7 +224,7 @@ async fn main() -> anyhow::Result<()> {
                     let _ = fs::create_dir_all(parent);
                 }
                 let _ = hash_index.save_to_file(&hash_file);
-                let count = graph.nodes.len();
+                let count = hash_index.hashes.len();
                 (graph, count, true)
             };
             let elapsed_cycles = timer.elapsed_cycles();
@@ -443,25 +443,31 @@ async fn main() -> anyhow::Result<()> {
             locale,
             cache,
         } => {
-            let (diagram, dataflow) = if Path::new(&cache).exists() {
+            let (diagram, dataflow, drill) = if Path::new(&cache).exists() {
                 println!("📖 [Archify-Studio] Loading graph from '{}'...", cache);
                 let graph = GraphStorage::load_mmap(&cache)?;
-                (
-                    Some(GraftToArchifyBridge::compile(&graph, &title, &locale)),
-                    Some(GraftToArchifyBridge::compile_dataflow(
-                        &graph, &title, &locale,
-                    )),
-                )
+                let diagram = GraftToArchifyBridge::compile(&graph, &title, &locale);
+                let dataflow = GraftToArchifyBridge::compile_dataflow(&graph, &title, &locale);
+                let (drill_title, drill_locale) = (title.clone(), locale.clone());
+                let drill: archify_egui::DrillHook = Box::new(move |crate_id| {
+                    GraftToArchifyBridge::compile_module_level(
+                        &graph,
+                        crate_id,
+                        &drill_title,
+                        &drill_locale,
+                    )
+                });
+                (Some(diagram), Some(dataflow), Some(drill))
             } else {
                 println!(
                     "ℹ️ [Archify-Studio] No cache found at '{}', opening empty studio canvas...",
                     cache
                 );
-                (None, None)
+                (None, None, None)
             };
 
             println!("🚀 [Archify-Studio] Launching interactive neon desktop studio window (Locale: {})...", locale);
-            archify_egui::run_desktop(diagram, dataflow, &locale)
+            archify_egui::run_desktop_with_drill(diagram, dataflow, &locale, drill)
                 .map_err(|e| anyhow::anyhow!("Desktop studio error: {:?}", e))?;
         }
     }

@@ -79,6 +79,21 @@ fn split_camel_case(s: &str) -> Vec<String> {
     parts
 }
 
+/// NFC + the one Turkish-safe fold for comparing names: `İ`, `I`, `ı` all become `i`,
+/// everything else is lowercased char by char. Never use bare `str::to_lowercase` on
+/// Turkish text (`I` -> `i` is wrong there, `İ` -> `i̇` is two chars).
+pub fn fold_tr(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for c in s.nfc() {
+        if matches!(c, 'İ' | 'I' | 'ı') {
+            out.push('i');
+        } else {
+            out.extend(c.to_lowercase());
+        }
+    }
+    out
+}
+
 pub fn normalize_trilingual(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
 
@@ -104,13 +119,11 @@ pub fn normalize_trilingual(s: &str) -> String {
             continue;
         }
 
-        // Turkish Locale-Safe Case Folding
-        if c == 'İ' {
+        // Turkish Locale-Safe Case Folding. One dotted `i` for İ, I and ı: folding `I`
+        // to `ı` broke English (`Input` -> `ınput`) and the query side folds the same way,
+        // so `ışık`, `Işık` and `ISIK` still meet.
+        if matches!(c, 'İ' | 'I' | 'ı') {
             out.push('i');
-            continue;
-        }
-        if c == 'I' {
-            out.push('ı');
             continue;
         }
 
@@ -131,7 +144,21 @@ mod tests {
     fn test_turkish_dotless_i_safety() {
         let tokens = TrilingualTokenizer::tokenize("İşlemIşığı ayrıştırıcı");
         assert!(tokens.contains(&"işlem".to_string()));
-        assert!(tokens.contains(&"ışığı".to_string()));
+        assert!(tokens.contains(&"işiği".to_string()));
+        // Query typed with a dotless ı meets the same token.
+        assert_eq!(normalize_trilingual("ışığı"), normalize_trilingual("IŞIĞI"));
+    }
+
+    #[test]
+    fn english_capital_i_is_not_turned_dotless() {
+        let tokens = TrilingualTokenizer::tokenize("Input Index ID");
+        assert!(tokens.contains(&"input".to_string()));
+        assert!(tokens.contains(&"index".to_string()));
+    }
+
+    #[test]
+    fn fold_tr_maps_all_three_i_forms_to_one() {
+        assert_eq!(fold_tr("ISIK İşık ışık Gui"), "isik işik işik gui");
     }
 
     #[test]

@@ -7,3 +7,9 @@ license.workspace = true
 [dependencies]
 graft-model = { path = "../graft-model" }
 archify-ir = { path = "../archify-ir" }
+archify-crates = { path = "../archify-crates" }
+archify-layout = { path = "../archify-layout" }
+
+[dev-dependencies]
+graft-parser = { path = "../graft-parser" }
+graft-cargo = { path = "../graft-cargo" }

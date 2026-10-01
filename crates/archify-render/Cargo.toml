@@ -6,3 +6,6 @@ license.workspace = true
 
 [dependencies]
 archify-ir = { path = "../archify-ir" }
+archify-style = { path = "../archify-style" }
+archify-route = { path = "../archify-route" }
+archify-scene = { path = "../archify-scene" }

@@ -1,11 +1,17 @@
-//! Interactive Archify & Graft Desktop Studio Application using egui.
+//! Interactive Archify & Graft studio (egui): toolbar, canvas, overlays.
 
-use crate::{CanvasRenderer, NeonPainter, TrilingualUi};
+use crate::canvas::{self, Cx};
+use crate::strings::strings;
+use crate::view_data::ViewData;
+use crate::TrilingualUi;
+use archify_egui_paint::theme::c;
 use archify_ir::{ArchitectureDiagram, DataflowDiagram, VisualPreset};
-use egui::{Color32, Pos2, Rect, Sense, Vec2};
+use archify_motion::MotionSettings;
+use archify_scene::{dataflow_scene, Scene};
+use archify_style::{Theme, Tokens};
+use egui::{Frame, Key, Margin, RichText, Stroke};
 
-/// Which diagram the central canvas currently draws. Independent layouts
-/// (grid vs. force-free component placement), so pan/zoom resets on switch.
+/// Which diagram the central canvas currently draws.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DiagramView {
     #[default]
@@ -13,39 +19,33 @@ pub enum DiagramView {
     Dataflow,
 }
 
+/// Called on double click of a box when a deeper level exists. Receives the box id and may
+/// return the diagram of that box's inside (for example the modules of a crate).
+pub type DrillHook = Box<dyn FnMut(&str) -> Option<ArchitectureDiagram>>;
+
 pub struct ArchifyApp {
     pub diagram: Option<ArchitectureDiagram>,
     pub dataflow: Option<DataflowDiagram>,
     pub view: DiagramView,
-    pub pan: Vec2,
-    pub zoom: f32,
-    pub selected_id: Option<String>,
-    pub route_start: Option<String>,
-    pub route_target: Option<String>,
-    pub active_route: Option<Vec<String>>,
-    pub active_story_beat: Option<usize>,
     pub locale: String,
     pub preset: VisualPreset,
+    pub theme: Theme,
     pub search_text: String,
+    pub motion: MotionSettings,
+    pub on_drill: Option<DrillHook>,
+    tokens: Tokens,
+    arch: Option<ViewData>,
+    flow: Option<ViewData>,
+    /// Levels above the current one when drilled in: `(diagram, view)`.
+    history: Vec<(Option<ArchitectureDiagram>, Option<ViewData>)>,
+    clock: f32,
+    route_mode: bool,
+    status: String,
 }
 
 impl Default for ArchifyApp {
     fn default() -> Self {
-        Self {
-            diagram: None,
-            dataflow: None,
-            view: DiagramView::default(),
-            pan: Vec2::new(50.0, 50.0),
-            zoom: 1.0,
-            selected_id: None,
-            route_start: None,
-            route_target: None,
-            active_route: None,
-            active_story_beat: None,
-            locale: "tr".to_string(),
-            preset: VisualPreset::SignalFlow,
-            search_text: String::new(),
-        }
+        Self::new(None, None, "tr")
     }
 }
 
@@ -55,369 +55,297 @@ impl ArchifyApp {
         dataflow: Option<DataflowDiagram>,
         locale: &str,
     ) -> Self {
+        let motion = MotionSettings {
+            ambient: true,
+            ..MotionSettings::default()
+        };
+        let arch = diagram
+            .as_ref()
+            .map(|d| ViewData::new(Scene::from_architecture(d), motion.reduced_motion));
+        let flow = dataflow
+            .as_ref()
+            .map(|d| ViewData::new(dataflow_scene(d), motion.reduced_motion));
+        let preset = VisualPreset::Editorial;
+        let theme = Theme::Dark;
         Self {
             diagram,
             dataflow,
+            view: DiagramView::default(),
             locale: locale.to_string(),
-            ..Default::default()
+            preset,
+            theme,
+            search_text: String::new(),
+            motion,
+            on_drill: None,
+            tokens: Tokens::new(preset, theme),
+            arch,
+            flow,
+            history: Vec::new(),
+            clock: 0.0,
+            route_mode: false,
+            status: String::new(),
         }
     }
 
-    /// Primary UI rendering function called every frame by eframe/egui
-    pub fn render_ui(&mut self, ui: &mut egui::Ui) {
-        // Bottom Status Bar with Route Diagnostics & Story Beat Navigator
-        egui::Panel::bottom("archify_statusbar").show(ui, |ui| {
-            ui.horizontal(|ui| {
-                let status = TrilingualUi::route_label(
-                    &self.locale,
-                    self.route_start.as_deref(),
-                    self.route_target.as_deref(),
-                    self.active_route.is_some(),
-                );
-                ui.label(status);
-                if self.route_start.is_some() && ui.button("✖").clicked() {
-                    self.route_start = None;
-                    self.route_target = None;
-                    self.active_route = None;
-                }
+    /// Replaces the architecture diagram (resets the camera and the tour).
+    pub fn set_diagram(&mut self, diagram: ArchitectureDiagram) {
+        self.arch = Some(ViewData::new(
+            Scene::from_architecture(&diagram),
+            self.motion.reduced_motion,
+        ));
+        self.diagram = Some(diagram);
+        self.view = DiagramView::Architecture;
+    }
 
-                if let Some(diag) = &self.diagram {
-                    if !diag.story_beats.is_empty() {
-                        ui.separator();
-                        ui.label("📖 Story:");
-                        if ui.button("◀").clicked() {
-                            let curr = self.active_story_beat.unwrap_or(0);
-                            if curr > 0 {
-                                self.active_story_beat = Some(curr - 1);
-                            }
-                        }
-                        if let Some(idx) = self.active_story_beat {
-                            if let Some(beat) = diag.story_beats.get(idx) {
-                                ui.colored_label(Color32::from_rgb(0x38, 0xbd, 0xf8), &beat.title);
-                            }
-                        } else {
-                            ui.label("Overview");
-                        }
-                        if ui.button("▶").clicked() {
-                            let curr = self.active_story_beat.map_or(0, |c| c + 1);
-                            if curr < diag.story_beats.len() {
-                                self.active_story_beat = Some(curr);
-                            }
-                        }
-                        if self.active_story_beat.is_some() && ui.button("⏹").clicked() {
-                            self.active_story_beat = None;
-                        }
-                    }
+    fn current(&mut self) -> Option<&mut ViewData> {
+        match self.view {
+            DiagramView::Architecture => self.arch.as_mut(),
+            DiagramView::Dataflow => self.flow.as_mut(),
+        }
+    }
+
+    fn sync_tokens(&mut self) {
+        if self.tokens.preset != self.preset || self.tokens.theme != self.theme {
+            self.tokens = Tokens::new(self.preset, self.theme);
+        }
+    }
+
+    fn drill(&mut self, id: &str) {
+        let Some(hook) = self.on_drill.as_mut() else {
+            return;
+        };
+        if let Some(inner) = hook(id) {
+            let scene = Scene::from_architecture(&inner);
+            let view = ViewData::new(scene, self.motion.reduced_motion);
+            let old_view = self.arch.replace(view);
+            let old_diagram = self.diagram.replace(inner);
+            self.history.push((old_diagram, old_view));
+            self.view = DiagramView::Architecture;
+        }
+    }
+
+    fn global_keys(&mut self, ctx: &egui::Context) {
+        if ctx.egui_wants_keyboard_input() {
+            return;
+        }
+        let (theme, style, route) = ctx.input(|i| {
+            (
+                i.key_pressed(Key::T),
+                i.key_pressed(Key::S),
+                i.key_pressed(Key::R),
+            )
+        });
+        if theme {
+            self.theme = self.theme.toggled();
+        }
+        if style {
+            self.preset = next_preset(self.preset);
+        }
+        if route {
+            self.route_mode = !self.route_mode;
+        }
+    }
+
+    /// Primary UI function, called every frame by the host (eframe or an embedding app).
+    pub fn render_ui(&mut self, ui: &mut egui::Ui) {
+        let ctx = ui.ctx().clone();
+        let dt = ctx.input(|i| i.stable_dt).clamp(0.0, 0.1);
+        self.clock += dt;
+        self.global_keys(&ctx);
+        self.sync_tokens();
+        let t = self.tokens.clone();
+        let s = strings(&self.locale);
+
+        egui::Panel::bottom("archify_statusbar")
+            .frame(
+                Frame::new()
+                    .fill(c(t.panel))
+                    .stroke(Stroke::new(1.0, c(t.panel_border)))
+                    .inner_margin(Margin::symmetric(10, 4)),
+            )
+            .show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    archify_egui_paint::theme::style_ui(ui, &t);
+                    ui.style_mut().visuals.override_text_color = Some(c(t.muted));
+                    let text = if self.route_mode {
+                        let (start, target, active) = self.route_state();
+                        TrilingualUi::route_label(
+                            &self.locale,
+                            start.as_deref(),
+                            target.as_deref(),
+                            active,
+                        )
+                    } else if self.status.is_empty() {
+                        s.hint.to_string()
+                    } else {
+                        self.status.clone()
+                    };
+                    ui.label(RichText::new(text).font(archify_egui_paint::paint::mono(11.0)));
+                });
+            });
+
+        self.toolbar(ui, &t);
+
+        let locale_now = self.locale.clone();
+        if let Some(vd) = self.current() {
+            if vd.tour.is_active() {
+                crate::overlay::tour_bar(ui, &t, vd, &locale_now);
+            }
+        }
+        let mut drill = None;
+        let mut status = String::new();
+        egui::CentralPanel::default()
+            .frame(Frame::new().fill(c(t.bg)))
+            .show(ui, |ui| {
+                let (search, locale, motion, clock, route_mode) = (
+                    self.search_text.clone(),
+                    self.locale.clone(),
+                    self.motion,
+                    self.clock,
+                    self.route_mode,
+                );
+                let can_drill = self.on_drill.is_some();
+                if let Some(vd) = self.current() {
+                    let cx = Cx {
+                        tokens: &t,
+                        motion,
+                        clock,
+                        dt,
+                        search: &search,
+                        locale: &locale,
+                        route_mode,
+                        can_drill,
+                    };
+                    let out = canvas::show(ui, vd, &cx);
+                    drill = out.drill;
+                    status = out.status;
+                } else {
+                    ui.centered_and_justified(|ui| {
+                        ui.label(
+                            RichText::new(TrilingualUi::search_label(&locale)).color(c(t.muted)),
+                        );
+                    });
                 }
             });
-        });
+        self.status = status;
+        if let Some(id) = drill {
+            self.drill(&id);
+        }
+    }
 
-        // Top Toolbar
-        egui::Panel::top("archify_toolbar").show(ui, |ui| {
-            ui.horizontal(|ui| {
-                ui.heading(TrilingualUi::title(&self.locale));
-                ui.separator();
+    fn route_state(&mut self) -> (Option<String>, Option<String>, bool) {
+        let Some(vd) = self.current() else {
+            return (None, None, false);
+        };
+        let name = |i: usize| vd.scene.nodes[i].label.text.clone();
+        let start = vd.route_start.map(name);
+        let (target, active) = match (vd.route.first(), vd.route.last()) {
+            (Some(_), Some(&l)) if vd.route.len() > 1 => (Some(name(l)), true),
+            _ => (None, false),
+        };
+        let start = start.or_else(|| vd.route.first().map(|&i| name(i)));
+        (start, target, active)
+    }
 
-                // Language Switcher
-                ui.label("🌐");
-                if ui.selectable_label(self.locale == "tr", "Türkçe").clicked() {
-                    self.locale = "tr".to_string();
-                }
-                if ui
-                    .selectable_label(self.locale == "ar", "العربية")
-                    .clicked()
-                {
-                    self.locale = "ar".to_string();
-                }
-                if ui
-                    .selectable_label(self.locale == "en", "English")
-                    .clicked()
-                {
-                    self.locale = "en".to_string();
-                }
-
-                ui.separator();
-
-                // Preset Selector
-                if ui
-                    .selectable_label(self.preset == VisualPreset::SignalFlow, "⚡ Neon")
-                    .clicked()
-                {
-                    self.preset = VisualPreset::SignalFlow;
-                }
-                if ui
-                    .selectable_label(self.preset == VisualPreset::Classic, "🌙 Classic")
-                    .clicked()
-                {
-                    self.preset = VisualPreset::Classic;
-                }
-                if ui
-                    .selectable_label(self.preset == VisualPreset::Blueprint, "📐 Blueprint")
-                    .clicked()
-                {
-                    self.preset = VisualPreset::Blueprint;
-                }
-
-                ui.separator();
-
-                // View switcher — only when a dataflow diagram was actually
-                // compiled (caller may pass None, e.g. archify-graft-cli's
-                // own `gui` command when the graph is empty).
-                if self.dataflow.is_some() {
-                    if ui
-                        .selectable_label(self.view == DiagramView::Architecture, "🏗 Architecture")
-                        .clicked()
-                    {
-                        self.view = DiagramView::Architecture;
-                        self.pan = Vec2::new(50.0, 50.0);
-                        self.zoom = 1.0;
-                    }
-                    if ui
-                        .selectable_label(self.view == DiagramView::Dataflow, "🌊 Dataflow")
-                        .clicked()
-                    {
-                        self.view = DiagramView::Dataflow;
-                        self.pan = Vec2::new(50.0, 50.0);
-                        self.zoom = 1.0;
+    fn toolbar(&mut self, ui: &mut egui::Ui, t: &Tokens) {
+        let s = strings(&self.locale);
+        egui::Panel::top("archify_toolbar")
+            .frame(
+                Frame::new()
+                    .fill(c(t.panel))
+                    .stroke(Stroke::new(1.0, c(t.panel_border)))
+                    .inner_margin(Margin::symmetric(10, 6)),
+            )
+            .show(ui, |ui| {
+                archify_egui_paint::theme::style_ui(ui, t);
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(RichText::new(s.title).strong());
+                    ui.separator();
+                    egui::ComboBox::from_id_salt("archify_preset")
+                        .selected_text(Tokens::preset_name(self.preset))
+                        .show_ui(ui, |ui| {
+                            for p in [
+                                VisualPreset::Editorial,
+                                VisualPreset::Classic,
+                                VisualPreset::SignalFlow,
+                                VisualPreset::Blueprint,
+                            ] {
+                                ui.selectable_value(&mut self.preset, p, Tokens::preset_name(p));
+                            }
+                        });
+                    let theme_label = if self.theme == Theme::Dark {
+                        s.dark
+                    } else {
+                        s.light
+                    };
+                    if ui.button(theme_label).on_hover_text("T").clicked() {
+                        self.theme = self.theme.toggled();
                     }
                     ui.separator();
-                }
-
-                // Zoom controls
-                if ui.button("🔍 100%").clicked() {
-                    self.zoom = 1.0;
-                    self.pan = Vec2::new(50.0, 50.0);
-                }
-                ui.label(format!("{:.0}%", self.zoom * 100.0));
-
-                ui.separator();
-                ui.text_edit_singleline(&mut self.search_text);
-            });
-        });
-
-        // Central Interactive Canvas
-        egui::CentralPanel::default().show(ui, |ui| {
-            let (response, painter) =
-                ui.allocate_painter(ui.available_size(), Sense::click_and_drag());
-
-            if response.dragged() {
-                self.pan += response.drag_delta();
-            }
-
-            let scroll_delta = ui.input(|i| i.smooth_scroll_delta.y);
-            if scroll_delta != 0.0 {
-                let zoom_factor = if scroll_delta > 0.0 { 1.1 } else { 0.9 };
-                self.zoom = (self.zoom * zoom_factor).clamp(0.2, 4.0);
-            }
-
-            let canvas_rect = response.rect;
-            CanvasRenderer::draw_grid(&painter, canvas_rect, self.pan, self.zoom);
-
-            if self.view == DiagramView::Dataflow {
-                self.render_dataflow(ui, &painter, canvas_rect);
-                return;
-            }
-
-            if let Some(diagram) = &self.diagram {
-                let to_screen = |x: f32, y: f32| -> Pos2 {
-                    Pos2::new(
-                        canvas_rect.min.x + self.pan.x + x * self.zoom,
-                        canvas_rect.min.y + self.pan.y + y * self.zoom,
-                    )
-                };
-
-                CanvasRenderer::draw_connections(
-                    &painter,
-                    diagram,
-                    to_screen,
-                    self.active_route.as_deref(),
-                );
-
-                let pointer_pos = ui.input(|i| i.pointer.hover_pos());
-                let mut newly_selected = None;
-
-                for comp in &diagram.components {
-                    if !self.search_text.is_empty()
-                        && !comp
-                            .label
-                            .to_lowercase()
-                            .contains(&self.search_text.to_lowercase())
-                    {
-                        continue;
+                    if self.dataflow.is_some() && self.diagram.is_some() {
+                        ui.selectable_value(
+                            &mut self.view,
+                            DiagramView::Architecture,
+                            s.architecture,
+                        );
+                        ui.selectable_value(&mut self.view, DiagramView::Dataflow, s.dataflow);
+                        ui.separator();
                     }
-
-                    let min_pos = to_screen(comp.x, comp.y);
-                    let size = Vec2::new(comp.width * self.zoom, comp.height * self.zoom);
-                    let rect = Rect::from_min_size(min_pos, size);
-
-                    let is_hovered = pointer_pos.is_some_and(|pos| rect.contains(pos));
-                    if is_hovered && response.clicked() {
-                        newly_selected = Some(comp.id.clone());
-                        if self.route_start.is_none() {
-                            self.route_start = Some(comp.id.clone());
-                            self.route_target = None;
-                            self.active_route = None;
-                        } else if self.route_start.as_deref() == Some(&comp.id) {
-                            self.route_start = None;
-                            self.route_target = None;
-                            self.active_route = None;
-                        } else {
-                            self.route_target = Some(comp.id.clone());
-                            self.active_route = archify_geometry::ReachabilityEngine::find_route(
-                                diagram,
-                                self.route_start.as_ref().unwrap(),
-                                &comp.id,
+                    if !self.history.is_empty() && ui.button(format!("◀ {}", s.back)).clicked() {
+                        if let Some((d, v)) = self.history.pop() {
+                            self.diagram = d;
+                            self.arch = v;
+                        }
+                    }
+                    if ui.button(s.fit).on_hover_text("F").clicked() {
+                        if let Some(vd) = self.current() {
+                            let vp = vd.vs.viewport;
+                            vd.vs.fly_to_rect(
+                                vd.content_rect(),
+                                vp,
+                                56.0,
+                                1.25,
+                                archify_motion::CAMERA_SECS,
                             );
                         }
                     }
-
-                    let is_selected = self.selected_id.as_deref() == Some(&comp.id);
-                    let is_in_route = self
-                        .active_route
-                        .as_ref()
-                        .is_some_and(|r| r.contains(&comp.id))
-                        || self.route_start.as_deref() == Some(&comp.id);
-
-                    let is_beat_active = self
-                        .active_story_beat
-                        .and_then(|idx| {
-                            diagram
-                                .story_beats
-                                .get(idx)
-                                .map(|b| b.highlighted_nodes.contains(&comp.id))
-                        })
-                        .unwrap_or(true);
-
-                    NeonPainter::paint_neon_rect(
-                        &painter,
-                        rect,
-                        comp.role,
-                        6.0 * self.zoom,
-                        (is_hovered || is_selected || is_in_route) && is_beat_active,
+                    ui.separator();
+                    ui.add(
+                        egui::TextEdit::singleline(&mut self.search_text)
+                            .hint_text(s.search_hint)
+                            .desired_width(150.0),
                     );
-
-                    let text_alpha = if is_beat_active { 255 } else { 70 };
-                    let text_color = Color32::from_rgba_unmultiplied(0xf8, 0xfa, 0xfc, text_alpha);
-                    let font_size = 13.0 * self.zoom;
-                    painter.text(
-                        Pos2::new(rect.center().x, rect.center().y - 4.0 * self.zoom),
-                        egui::Align2::CENTER_CENTER,
-                        &comp.label,
-                        egui::FontId::proportional(font_size),
-                        text_color,
-                    );
-
-                    if let Some(sub) = &comp.sublabel {
-                        let sub_color =
-                            Color32::from_rgba_unmultiplied(0x94, 0xa3, 0xb8, text_alpha);
-                        painter.text(
-                            Pos2::new(rect.center().x, rect.center().y + 10.0 * self.zoom),
-                            egui::Align2::CENTER_CENTER,
-                            sub,
-                            egui::FontId::proportional(font_size * 0.75),
-                            sub_color,
-                        );
+                    ui.separator();
+                    ui.checkbox(&mut self.motion.ambient, s.ambient);
+                    if ui
+                        .checkbox(&mut self.motion.reduced_motion, s.reduced)
+                        .changed()
+                    {
+                        let r = self.motion.reduced_motion;
+                        for vd in [self.arch.as_mut(), self.flow.as_mut()]
+                            .into_iter()
+                            .flatten()
+                        {
+                            vd.set_reduced_motion(r);
+                        }
                     }
-                }
-
-                if let Some(sel) = newly_selected {
-                    self.selected_id = Some(sel);
-                }
-            }
-        });
+                    ui.separator();
+                    for (code, name) in [("tr", "TR"), ("en", "EN"), ("ar", "AR")] {
+                        if ui.selectable_label(self.locale == code, name).clicked() {
+                            self.locale = code.to_string();
+                        }
+                    }
+                });
+            });
     }
+}
 
-    /// Dataflow canvas: mirrors `archify_render::DataflowSvgRenderer`'s grid
-    /// layout exactly (same constants, same index-order placement) since
-    /// `DataflowNode` carries no position — only this renderer computes one.
-    /// No route/story-beat/search interaction (the SVG export has none
-    /// either); node hover glow is the only affordance, matching the bar the
-    /// static export already sets.
-    fn render_dataflow(&mut self, ui: &mut egui::Ui, painter: &egui::Painter, canvas_rect: Rect) {
-        let Some(df) = &self.dataflow else {
-            return;
-        };
-
-        const CELL_W: f32 = 160.0;
-        const CELL_H: f32 = 70.0;
-        const GAP_X: f32 = 70.0;
-        const GAP_Y: f32 = 60.0;
-        const COLS: usize = 3;
-
-        let to_screen = |x: f32, y: f32| -> Pos2 {
-            Pos2::new(
-                canvas_rect.min.x + self.pan.x + x * self.zoom,
-                canvas_rect.min.y + self.pan.y + y * self.zoom,
-            )
-        };
-
-        let mut positions: std::collections::HashMap<&str, (f32, f32)> =
-            std::collections::HashMap::with_capacity(df.nodes.len());
-        for (i, node) in df.nodes.iter().enumerate() {
-            let col = (i % COLS) as f32;
-            let row = (i / COLS) as f32;
-            positions.insert(
-                node.id.as_str(),
-                (
-                    60.0 + col * (CELL_W + GAP_X),
-                    100.0 + row * (CELL_H + GAP_Y),
-                ),
-            );
-        }
-
-        for pipe in &df.pipelines {
-            let (Some(&(x1, y1)), Some(&(x2, y2))) = (
-                positions.get(pipe.from.as_str()),
-                positions.get(pipe.to.as_str()),
-            ) else {
-                continue;
-            };
-            let start = to_screen(x1 + CELL_W, y1 + CELL_H / 2.0);
-            let end = to_screen(x2, y2 + CELL_H / 2.0);
-            NeonPainter::paint_neon_line(painter, start, end, Color32::from_rgb(0x38, 0xbd, 0xf8));
-            if let Some(throughput) = &pipe.throughput {
-                painter.text(
-                    Pos2::new(
-                        (start.x + end.x) / 2.0,
-                        (start.y + end.y) / 2.0 - 6.0 * self.zoom,
-                    ),
-                    egui::Align2::CENTER_CENTER,
-                    throughput,
-                    egui::FontId::proportional(9.0 * self.zoom),
-                    Color32::from_rgb(0x94, 0xa3, 0xb8),
-                );
-            }
-        }
-
-        let pointer_pos = ui.input(|i| i.pointer.hover_pos());
-        for node in &df.nodes {
-            let Some(&(x, y)) = positions.get(node.id.as_str()) else {
-                continue;
-            };
-            let min_pos = to_screen(x, y);
-            let size = Vec2::new(CELL_W * self.zoom, CELL_H * self.zoom);
-            let rect = Rect::from_min_size(min_pos, size);
-            let is_hovered = pointer_pos.is_some_and(|pos| rect.contains(pos));
-            NeonPainter::paint_neon_rect(painter, rect, node.role, 8.0 * self.zoom, is_hovered);
-
-            let font_size = 13.0 * self.zoom;
-            painter.text(
-                Pos2::new(rect.center().x, rect.center().y - 4.0 * self.zoom),
-                egui::Align2::CENTER_CENTER,
-                &node.label,
-                egui::FontId::proportional(font_size),
-                Color32::from_rgb(0xf8, 0xfa, 0xfc),
-            );
-            if let Some(rate) = &node.stream_rate {
-                painter.text(
-                    Pos2::new(rect.center().x, rect.center().y + 12.0 * self.zoom),
-                    egui::Align2::CENTER_CENTER,
-                    format!("⚡ {rate}"),
-                    egui::FontId::proportional(font_size * 0.75),
-                    Color32::from_rgb(0x38, 0xbd, 0xf8),
-                );
-            }
-        }
+fn next_preset(p: VisualPreset) -> VisualPreset {
+    match p {
+        VisualPreset::Editorial => VisualPreset::Classic,
+        VisualPreset::Classic => VisualPreset::SignalFlow,
+        VisualPreset::SignalFlow => VisualPreset::Blueprint,
+        VisualPreset::Blueprint => VisualPreset::Editorial,
     }
 }
 

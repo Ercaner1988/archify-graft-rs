@@ -190,8 +190,8 @@ fn test_neon_svg_rendering_structure() {
         "Arabic SVG must have dir='rtl' attribute"
     );
     assert!(
-        svg.contains("filter:drop-shadow(0 0 8px #34d399)"),
-        "Must contain Proof Green neon bloom for Backend role"
+        svg.contains("--backend-stroke:#5eead4") && svg.contains("filter:drop-shadow("),
+        "Must carry the Backend role colour and a hover bloom"
     );
     assert!(svg.contains("الخادم"), "Must render Arabic text label");
     assert!(svg.ends_with("</svg>\n"));
