@@ -4,7 +4,18 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
 
-#[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq, Eq)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Default,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+)]
 pub struct HashIndex {
     /// File path -> 64-bit FNV-1a content hash
     pub hashes: HashMap<String, u64>,
@@ -40,20 +51,18 @@ impl HashIndex {
         self.hashes.remove(path)
     }
 
-    /// Save hash index to disk (bincode)
+    /// Save hash index to disk (rkyv, see `graft_model::ikili`)
     pub fn save_to_file<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()> {
-        std::fs::write(
-            path,
-            bincode::serde::encode_to_vec(self, bincode::config::standard())?,
-        )?;
+        let bytes = graft_model::ikili::kodla(self).map_err(|e| anyhow::anyhow!(e))?;
+        std::fs::write(path, bytes)?;
         Ok(())
     }
 
     /// Load hash index from disk
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> anyhow::Result<Self> {
         let bytes = std::fs::read(path)?;
-        let (index, _) = bincode::serde::decode_from_slice(&bytes, bincode::config::standard())?;
-        Ok(index)
+        graft_model::ikili::coz(&bytes)
+            .ok_or_else(|| anyhow::anyhow!("hash index is unreadable (older layout?)"))
     }
 }
 

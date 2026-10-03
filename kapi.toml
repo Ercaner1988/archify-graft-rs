@@ -1,0 +1,27 @@
+# archify-graft-rs'in altin-kapi beyanı. Değer: "uygulanir" ya da "uygulanmaz".
+# Anahtarlar altin-kapi CONTEXT.md'deki on altı boyuttur.
+
+# Taban çizgilerindeki ad: klasör adı klonlayana göre değişir, bu değişmez.
+repo = "archify-graft-rs"
+
+[boyut]
+arkayuz = "uygulanir"                  # graft-mcp: JSON-RPC sunucusu
+onyuz = "uygulanir"                    # archify-egui stüdyosu (egui + wgpu)
+veritabani = "uygulanmaz"              # veritabanı yok; kendi ikili dizini var
+makine_zararsizligi = "uygulanir"      # doğrudan G/Ç (sayfa önbelleğini atlar), çekirdek ilgisi
+tedarik_guvenligi = "uygulanir"
+bellek_guvenligi = "uygulanir"         # lowlevel-sys, graft-search: unsafe
+kimlik_yolu = "uygulanmaz"             # kimlik doğrulama ve ağ yok
+yayina_hazirlik = "uygulanir"
+kaynak_tuketimi = "uygulanir"          # büyük kod tabanı dizini, paralel ayrıştırma
+birlikte_calisabilirlik = "uygulanir"  # MCP protokolü, SVG dışa aktarımı
+karakter_yazimi = "uygulanir"          # Türkçe/Arapça belirteçleme
+hata_disiplini = "uygulanir"
+test_gercekciligi = "uygulanir"
+veri_dayanikliligi = "uygulanir"       # dizin dosyaları diske yazılır
+surum_izi = "uygulanir"
+belge_dogrulugu = "uygulanir"
+
+[karakter.muaf]
+"crates/graft-i18n/src/lib.rs" = "Türkçe katlamanın kendisi (fold_tr, normalize_trilingual): İ/I/ı elle i'ye çevrilir, kalan harflere harf harf char::to_lowercase uygulanır, aksan korunur; sınamaları var. Ortak katla'ya geçmek davranışı (aksan atma) değiştirir, ayrı karar"
+"crates/archify-egui/src/search.rs" = "Stüdyo arama katlaması: aynı kural (İ/I/ı → i, kalan harf harf küçük); graft-i18n ile aynı sonucu vermeli, sınaması var"

@@ -185,7 +185,7 @@ pub struct GraphStorage;
 
 impl GraphStorage {
     pub fn save<P: AsRef<Path>>(graph: &CodeGraph, path: P) -> anyhow::Result<()> {
-        let bytes = bincode::serde::encode_to_vec(graph, bincode::config::standard())?;
+        let bytes = graft_model::ikili::kodla(graph).map_err(|e| anyhow::anyhow!(e))?;
         let mut file = File::create(path)?;
         file.write_all(&bytes)?;
         file.flush()?;
@@ -195,9 +195,8 @@ impl GraphStorage {
     pub fn load_mmap<P: AsRef<Path>>(path: P) -> anyhow::Result<CodeGraph> {
         let file = File::open(path)?;
         let mmap = unsafe { Mmap::map(&file)? };
-        let (mut graph, _): (CodeGraph, usize) =
-            bincode::serde::decode_from_slice(&mmap, bincode::config::standard())
-                .context("graph cache is unreadable (older layout?); run `index` again")?;
+        let mut graph: CodeGraph = graft_model::ikili::coz(&mmap)
+            .context("graph cache is unreadable (older layout?); run `index` again")?;
         graph.rebuild_index();
         Ok(graph)
     }

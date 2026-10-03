@@ -1,6 +1,8 @@
-//! `wiring.bin` is read by other tools (pasli-beyin mirrors `WiringMeta`). bincode is
-//! not self-describing, so this pins the exact bytes: a reader that drifts from the
-//! field order fails here instead of silently misreading counts.
+//! `wiring.bin` is read by other tools (pasli-beyin mirrors `WiringMeta`). The layout is
+//! hand-specified and field order is the format, so this pins the exact bytes: a reader
+//! that drifts from the field order fails here instead of silently misreading counts.
+//! The bytes are the ones bincode 2 `standard()` used to write, so existing readers keep
+//! working unchanged.
 
 use graft_model::WiringMeta;
 
@@ -12,11 +14,7 @@ fn wiring_meta_bytes_are_pinned() {
         edge_count: 3,
         languages: vec!["rust".to_string()],
     };
-    let bytes = bincode::serde::encode_to_vec(&meta, bincode::config::standard()).unwrap();
+    let bytes = meta.to_bytes();
     assert_eq!(bytes, [1, 2, 3, 1, 4, b'r', b'u', b's', b't']);
-
-    let (back, used): (WiringMeta, usize) =
-        bincode::serde::decode_from_slice(&bytes, bincode::config::standard()).unwrap();
-    assert_eq!(back, meta);
-    assert_eq!(used, bytes.len());
+    assert_eq!(WiringMeta::from_bytes(&bytes), Some(meta));
 }

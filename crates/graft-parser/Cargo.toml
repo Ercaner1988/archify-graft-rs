@@ -10,7 +10,7 @@ lowlevel-sys = { path = "../lowlevel-sys" }
 rayon.workspace = true
 anyhow.workspace = true
 serde.workspace = true
-bincode.workspace = true
+rkyv.workspace = true
 graft-cargo = { path = "../graft-cargo" }
 graft-rust = { path = "../graft-rust" }
 graft-langs = { path = "../graft-langs" }

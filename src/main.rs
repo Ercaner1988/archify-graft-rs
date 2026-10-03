@@ -10,9 +10,9 @@ use std::fs;
 use std::path::Path;
 
 /// `graft/.graph/wiring.bin` başlığı — pasli-beyin'in `kopru.rs::graft_koprusu`
-/// köprüsünün okuduğu KÜÇÜK, sürümlü sözleşme (`graft_model::WiringMeta`, bincode
-/// `config::standard()`). JSON değil: alan SIRASI biçimin parçasıdır ve pasli-beyin
-/// aynı yapıyı aynı sırayla yansıtır. Düğüm/kenar dizisinin tamamı yazılmaz; köprü
+/// köprüsünün okuduğu KÜÇÜK, sürümlü sözleşme (`graft_model::WiringMeta`, elle
+/// belirtilmiş varint düzeni; bincode `standard()` ile bayt bayt aynı). JSON değil: alan
+/// SIRASI biçimin parçasıdır ve pasli-beyin aynı yapıyı aynı sırayla yansıtır. Düğüm/kenar dizisinin tamamı yazılmaz; köprü
 /// onlara dokunmuyor. Eski Node.js `@nanonets/graft`'ın yerini alan en ucuz adım.
 fn write_wiring_meta(indexed_path: &str, graph: &graft_model::CodeGraph) -> anyhow::Result<()> {
     let languages: BTreeSet<&'static str> = graph
@@ -31,10 +31,7 @@ fn write_wiring_meta(indexed_path: &str, graph: &graft_model::CodeGraph) -> anyh
 
     let dir = Path::new(indexed_path).join("graft").join(".graph");
     fs::create_dir_all(&dir)?;
-    fs::write(
-        dir.join("wiring.bin"),
-        bincode::serde::encode_to_vec(&wiring, bincode::config::standard())?,
-    )?;
+    fs::write(dir.join("wiring.bin"), wiring.to_bytes())?;
     Ok(())
 }
 
@@ -313,7 +310,7 @@ async fn main() -> anyhow::Result<()> {
             println!("📖 [Graft-Core] Loading graph from '{}'...", cache);
             let graph = GraphStorage::load_mmap(&cache)?;
 
-            let svg = match diagram_type.to_lowercase().as_str() {
+            let svg = match diagram_type.to_ascii_lowercase().as_str() {
                 "sequence" => {
                     println!(
                         "🎨 [Archify-Core] Compiling Sequence Diagram for entrypoint '{}'...",

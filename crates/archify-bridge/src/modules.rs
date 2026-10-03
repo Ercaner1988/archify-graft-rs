@@ -74,7 +74,7 @@ fn locate(parts: &[&str], prefix: usize, root: &str) -> Option<(String, String)>
     let (file, dirs) = parts.get(prefix..)?.split_last()?;
     if dirs
         .iter()
-        .any(|d| SKIP_DIRS.contains(&d.to_lowercase().as_str()))
+        .any(|d| SKIP_DIRS.contains(&d.to_ascii_lowercase().as_str()))
     {
         return None;
     }

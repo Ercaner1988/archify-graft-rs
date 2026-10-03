@@ -36,7 +36,7 @@ license = "MIT"
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-bincode = { version = "2.0.1", features = ["serde"] }
+rkyv = "0.8"
 rayon = "1.10"
 tokio = { version = "1.40", features = ["full"] }
 memmap2 = "0.9"
@@ -71,7 +71,6 @@ archify-delta = { path = "crates/archify-delta" }
 archify-egui = { path = "crates/archify-egui", optional = true }
 graft-mcp = { path = "crates/graft-mcp" }
 serde.workspace = true
-bincode.workspace = true
 clap.workspace = true
 anyhow.workspace = true
 tokio.workspace = true

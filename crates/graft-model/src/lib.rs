@@ -2,7 +2,21 @@
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub mod ikili;
+mod wiring;
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+)]
 pub enum NodeKind {
     File,
     Function,
@@ -13,7 +27,7 @@ pub enum NodeKind {
     Enum,
     Module,
     Constant,
-    // Appended (bincode encodes the variant index, so older caches still decode).
+    // Appended (the archive stores the variant index, so older caches still decode).
     /// A Cargo package of the indexed tree (`path` = its Cargo.toml).
     Crate,
     /// A path dependency that lives outside the indexed tree (sibling repository).
@@ -24,7 +38,9 @@ pub enum NodeKind {
     Test,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize,
+)]
 pub struct Span {
     pub start_line: usize,
     pub start_col: usize,
@@ -32,7 +48,9 @@ pub struct Span {
     pub end_col: usize,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize,
+)]
 pub struct NodeV1 {
     pub id: String,
     pub path: String,
@@ -43,7 +61,18 @@ pub struct NodeV1 {
     pub file_residual: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+)]
 pub enum EdgeRelation {
     Calls,
     Extends,
@@ -59,7 +88,9 @@ pub enum EdgeRelation {
     Writes,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize,
+)]
 pub struct EdgeV1 {
     pub source: String,
     pub target: String,
@@ -67,7 +98,9 @@ pub struct EdgeV1 {
     pub confidence: f32,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Default, Serialize, Deserialize, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize,
+)]
 pub struct CodeGraph {
     pub nodes: Vec<NodeV1>,
     pub edges: Vec<EdgeV1>,
@@ -80,13 +113,15 @@ pub struct CodeGraph {
     /// `imports`, edges are derived from it from scratch, so nothing goes stale.
     pub facts: BTreeMap<String, Vec<String>>,
     #[serde(skip)]
+    #[rkyv(with = rkyv::with::Skip)]
     node_index_map: HashMap<String, usize>,
 }
 
 /// `graft/.graph/wiring.bin`: the small versioned record other tools read to learn
-/// that a repository was indexed. bincode is not self-describing, so FIELD ORDER IS
-/// THE FORMAT: readers mirror this struct exactly and `version` bumps on any change.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// that a repository was indexed. The layout is hand-specified (see `wiring.rs`), not
+/// tied to a serialization crate: FIELD ORDER IS THE FORMAT, readers mirror this struct
+/// exactly and `version` bumps on any change.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WiringMeta {
     pub version: u32,
     pub node_count: u64,
