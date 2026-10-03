@@ -32,5 +32,8 @@ jobs:
       - name: Clippy Lints
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+      - name: Check GUI Feature (egui + wgpu)
+        run: cargo check --all-targets --features gui
+
       - name: Run Workspace Unit & Integration Tests
         run: cargo test --workspace --all-targets
