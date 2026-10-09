@@ -33,6 +33,7 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Check GUI Feature (egui + wgpu)
+        if: matrix.os != 'ubuntu-latest'
         run: cargo check --all-targets --features gui
 
       - name: Run Workspace Unit & Integration Tests
