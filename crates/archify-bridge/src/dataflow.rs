@@ -40,6 +40,9 @@ fn role_at(s: &Option<CrateSummary>, path: &str) -> (SemanticRole, String) {
 }
 
 fn fn_label(n: &NodeV1) -> String {
+    if n.kind == NodeKind::Skill {
+        return format!("Skill: {}", n.name);
+    }
     let rest =
         n.id.strip_prefix(n.path.as_str())
             .and_then(|r| r.strip_prefix(':'))
@@ -68,8 +71,8 @@ pub fn compile(graph: &CodeGraph, title: &str, locale: &str) -> DataflowDiagram 
         };
         let slot = users.entry(n.id.as_str()).or_default();
         match e.relation {
-            EdgeRelation::Writes => slot.0.insert(e.source.as_str()),
-            EdgeRelation::Reads => slot.1.insert(e.source.as_str()),
+            EdgeRelation::Writes | EdgeRelation::Produces => slot.0.insert(e.source.as_str()),
+            EdgeRelation::Reads | EdgeRelation::Transforms => slot.1.insert(e.source.as_str()),
             _ => continue,
         };
     }
@@ -133,7 +136,11 @@ pub fn compile(graph: &CodeGraph, title: &str, locale: &str) -> DataflowDiagram 
     }
     for fid in &fns {
         let n = by_id[fid];
-        let (role, krate) = role_at(&crates, &n.path);
+        let (role, krate) = if n.kind == NodeKind::Skill {
+            (SemanticRole::Frontend, "Skill".to_string())
+        } else {
+            role_at(&crates, &n.path)
+        };
         let place = if krate.is_empty() {
             file_name(&n.path).to_string()
         } else {

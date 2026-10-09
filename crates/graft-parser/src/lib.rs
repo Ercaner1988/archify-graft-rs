@@ -25,7 +25,7 @@ pub struct CodeExtractor;
 /// Folders that hold tool output, vendored code or build products, never the project's
 /// own source: walking them turned a 1500-file Python runtime into "the architecture".
 fn skip_dir(name: &str, parent: &str) -> bool {
-    name.starts_with('.')
+    (name.starts_with('.') && name != ".agents" && name != ".claude")
         || name.ends_with("-out")
         || name.starts_with("pythoncore-")
         || matches!(
@@ -217,6 +217,7 @@ impl CodeExtractor {
         CallResolver::resolve_calls(graph);
         graft_langs_link::link(graph);
         flow::link(graph);
+        ecosystem::link(graph);
         graph.rebuild_index();
     }
 

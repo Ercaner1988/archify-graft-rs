@@ -205,12 +205,28 @@ impl ToolHandler {
     /// dosyalarınkiyle karşılaştırır (bkz. `CodeExtractor::freshness_report`).
     /// Bu yüzden `path`/`cache` parametre alır, oturumdaki grafı kullanmaz.
     pub fn execute_check_freshness(path: &str, cache: &str) -> Value {
+        let nazar_suffix = {
+            #[cfg(windows)]
+            {
+                if std::path::Path::new(r"\\.\pipe\nazar-v1").exists() {
+                    " (Nazar daemon active on \\\\.\\pipe\\nazar-v1)"
+                } else {
+                    ""
+                }
+            }
+            #[cfg(not(windows))]
+            {
+                ""
+            }
+        };
         match CodeExtractor::freshness_report(path.to_string(), cache.to_string()) {
-            Ok((true, _)) => json!({ "content": [{ "type": "text", "text": "fresh" }] }),
+            Ok((true, _)) => {
+                json!({ "content": [{ "type": "text", "text": format!("fresh{nazar_suffix}") }] })
+            }
             Ok((false, bayat)) => json!({
                 "content": [{
                     "type": "text",
-                    "text": format!("stale: {} dosya kaynaktan daha eski:\n{}", bayat.len(), bayat.join("\n"))
+                    "text": format!("stale{nazar_suffix}: {} dosya kaynaktan daha eski:\n{}", bayat.len(), bayat.join("\n"))
                 }]
             }),
             Err(e) => {

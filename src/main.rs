@@ -148,6 +148,21 @@ enum Commands {
         #[arg(short, long, default_value = ".cache/graft-graph.bin")]
         cache: String,
     },
+    /// Watch codebase continuously and re-index incrementally on changes
+    Watch {
+        /// Codebase directory to watch and index
+        #[arg(default_value = ".")]
+        path: String,
+        /// Cache path to store the memory-mapped graph index
+        #[arg(short, long, default_value = ".cache/graft-graph.bin")]
+        cache: String,
+        /// Polling interval in seconds
+        #[arg(short, long, default_value_t = 5)]
+        interval: u64,
+        /// Skip writing wiring.bin metadata
+        #[arg(long)]
+        no_wiring: bool,
+    },
     /// Start the Model Context Protocol (MCP) JSON-RPC stdio server for AI agents
     Mcp,
     /// Launch the interactive pure-Rust desktop Archify studio window
@@ -163,6 +178,17 @@ enum Commands {
         #[arg(short, long, default_value = ".cache/graft-graph.bin")]
         cache: String,
     },
+}
+
+fn probe_nazar() {
+    #[cfg(windows)]
+    {
+        if Path::new(r"\\.\pipe\nazar-v1").exists() {
+            println!("👁️ [Nazar-Daemon] Windows Named Pipe '\\\\.\\pipe\\nazar-v1' aktif — Nazar arka planda izliyor.");
+            return;
+        }
+    }
+    println!("ℹ️ [Nazar-Daemon] Bağımsız mod — yerel dosya tarayıcısı aktif.");
 }
 
 #[tokio::main]
@@ -416,7 +442,8 @@ async fn main() -> anyhow::Result<()> {
             print!("{}", file_skeleton(&graph, &file));
         }
         Commands::Check { path, cache } => {
-            let (taze, bayat) = CodeExtractor::freshness_report(path, cache)?;
+            let (taze, bayat) = CodeExtractor::freshness_report(&path, &cache)?;
+            probe_nazar();
             if taze {
                 println!("✅ graft cache güncel.");
             } else {
@@ -428,6 +455,73 @@ async fn main() -> anyhow::Result<()> {
                     println!("  {f}");
                 }
                 std::process::exit(1);
+            }
+        }
+        Commands::Watch {
+            path,
+            cache,
+            interval,
+            no_wiring,
+        } => {
+            println!(
+                "👁️ [Graft-Watch] Starting continuous codebase monitor for '{}' (interval: {}s)...",
+                path, interval
+            );
+            probe_nazar();
+            let hash_file = Path::new(&cache)
+                .parent()
+                .unwrap_or_else(|| Path::new("."))
+                .join("graft-hashes.bin");
+
+            let mut graph = if Path::new(&cache).exists() {
+                GraphStorage::load_mmap(&cache).unwrap_or_default()
+            } else {
+                graft_model::CodeGraph::new()
+            };
+            let mut hash_index = if hash_file.exists() {
+                graft_parser::HashIndex::load_from_file(&hash_file).unwrap_or_default()
+            } else {
+                graft_parser::HashIndex::new()
+            };
+
+            loop {
+                let known_before = hash_index.hashes.len();
+                match CodeExtractor::index_directory_incremental(&path, &mut graph, &mut hash_index)
+                {
+                    Ok(changed) => {
+                        let dirty = changed > 0 || hash_index.hashes.len() != known_before;
+                        if dirty {
+                            println!(
+                                "⚡ [Graft-Watch] Detected {} changed/removed files. Updating graph ({} nodes, {} edges)...",
+                                changed,
+                                graph.nodes.len(),
+                                graph.edges.len()
+                            );
+                            if let Err(e) = hash_index.save_to_file(&hash_file) {
+                                eprintln!("⚠️ [Graft-Watch] Failed to save hash index: {e}");
+                            }
+                            if let Some(parent) = Path::new(&cache).parent() {
+                                if let Err(e) = fs::create_dir_all(parent) {
+                                    eprintln!(
+                                        "⚠️ [Graft-Watch] Failed to create cache directory: {e}"
+                                    );
+                                }
+                            }
+                            if let Err(e) = GraphStorage::save(&graph, &cache) {
+                                eprintln!("⚠️ [Graft-Watch] Failed to save graph cache: {e}");
+                            }
+                            if !no_wiring {
+                                if let Err(e) = write_wiring_meta(&path, &graph) {
+                                    eprintln!("⚠️ [Graft-Watch] Failed to write wiring meta: {e}");
+                                }
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("⚠️ [Graft-Watch] Scan error: {e}");
+                    }
+                }
+                tokio::time::sleep(tokio::time::Duration::from_secs(interval)).await;
             }
         }
         Commands::Mcp => {
