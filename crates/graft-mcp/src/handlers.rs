@@ -318,8 +318,16 @@ impl ToolHandler {
             .extension()
             .and_then(|e| e.to_str())
             .is_some_and(|e| e.eq_ignore_ascii_case("html") || e.eq_ignore_ascii_case("htm"));
+        let interactive = args
+            .get("interactive")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
         let contents = if is_html {
-            archify_render::wrap_html(&svg, title)
+            if interactive {
+                archify_render::wrap_interactive_html(&svg, title)
+            } else {
+                archify_render::wrap_html(&svg, title)
+            }
         } else {
             svg
         };

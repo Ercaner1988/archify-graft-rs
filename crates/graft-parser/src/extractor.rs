@@ -45,6 +45,9 @@ impl AstExtractor {
             rust_file::extract(&mut graph, path_str, &file_id, &content);
             return graph;
         }
+        if crate::ecosystem::extract_ecosystem(&mut graph, path_str, file_name, &content) {
+            return graph;
+        }
         if graft_langs::extract(&mut graph, path_str, &file_id, &content) {
             let specs = crate::imports::extract(path_str, &content, None);
             if !specs.is_empty() {

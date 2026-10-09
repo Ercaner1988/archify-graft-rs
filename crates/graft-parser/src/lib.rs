@@ -2,6 +2,7 @@
 //! tracker, and the graph-wide resolvers (imports, crate dependencies, calls, data flow).
 
 pub mod crate_graph;
+pub mod ecosystem;
 pub mod extractor;
 pub mod flow;
 pub mod imports;
@@ -169,30 +170,36 @@ impl CodeExtractor {
     /// Source files plus `Cargo.toml` (crates and their dependencies). `.json` is data,
     /// not architecture: it used to make 89 % of one repository's "files".
     fn is_supported_file(path: &Path) -> bool {
-        path.file_name().and_then(|s| s.to_str()) == Some("Cargo.toml")
-            || matches!(
-                path.extension().and_then(|s| s.to_str()),
-                Some(
-                    "rs" | "ts"
-                        | "tsx"
-                        | "js"
-                        | "jsx"
-                        // ESM/CJS explicit-extension variants (`"type": "module"`
-                        // packages, TS's own ESM/CJS-explicit sources): without these a
-                        // Node project built on `.mjs` indexes as zero source files.
-                        | "mjs"
-                        | "cjs"
-                        | "mts"
-                        | "cts"
-                        | "py"
-                        | "go"
-                        | "java"
-                        | "c"
-                        | "cpp"
-                        | "h"
-                        | "hpp"
-                )
+        let name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+        if name == "Cargo.toml" || name.eq_ignore_ascii_case("SKILL.md") {
+            return true;
+        }
+        matches!(
+            path.extension().and_then(|s| s.to_str()),
+            Some(
+                "rs" | "ts"
+                    | "tsx"
+                    | "js"
+                    | "jsx"
+                    | "mjs"
+                    | "cjs"
+                    | "mts"
+                    | "cts"
+                    | "py"
+                    | "go"
+                    | "java"
+                    | "c"
+                    | "cpp"
+                    | "h"
+                    | "hpp"
+                    // Ekosistem dosyaları: belgeler, veri depoları, atıflar
+                    | "docx"
+                    | "pdf"
+                    | "ris"
+                    | "csl"
+                    | "sqlite"
             )
+        )
     }
 
     pub fn extract_file(path: &Path) -> anyhow::Result<CodeGraph> {

@@ -1,5 +1,5 @@
 use archify_bridge::GraftToArchifyBridge;
-use archify_render::{wrap_html, SvgRenderer};
+use archify_render::{wrap_interactive_html, SvgRenderer};
 use clap::{Parser, Subcommand};
 use graft_mcp::McpServer;
 use graft_parser::CodeExtractor;
@@ -362,7 +362,7 @@ async fn main() -> anyhow::Result<()> {
                 .and_then(|e| e.to_str())
                 .is_some_and(|e| e.eq_ignore_ascii_case("html") || e.eq_ignore_ascii_case("htm"));
             let contents = if is_html {
-                wrap_html(&svg, &title)
+                wrap_interactive_html(&svg, &title)
             } else {
                 svg
             };

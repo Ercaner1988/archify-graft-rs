@@ -58,10 +58,12 @@ pub fn compile(graph: &CodeGraph, title: &str, locale: &str) -> DataflowDiagram 
     // artifact -> (writers, readers)
     let mut users: BTreeMap<&str, (BTreeSet<&str>, BTreeSet<&str>)> = BTreeMap::new();
     for e in &graph.edges {
-        let Some(n) = by_id
-            .get(e.target.as_str())
-            .filter(|n| n.kind == NodeKind::Artifact)
-        else {
+        let Some(n) = by_id.get(e.target.as_str()).filter(|n| {
+            matches!(
+                n.kind,
+                NodeKind::Artifact | NodeKind::Document | NodeKind::DataStore
+            )
+        }) else {
             continue;
         };
         let slot = users.entry(n.id.as_str()).or_default();

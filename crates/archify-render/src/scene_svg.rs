@@ -421,9 +421,10 @@ fn draw_legend(
             (cursor, cursor + 22.0, "start")
         };
         let rx = if kind == LegendKind::Status { 2.0 } else { 2.5 };
+        let entry_kind = swatch.strip_prefix("sw-").unwrap_or(swatch);
         let _ = writeln!(
             o,
-            "<rect class=\"{swatch}\" x=\"{}\" y=\"{}\" width=\"16\" height=\"10\" rx=\"{rx}\"/><text class=\"{}\" x=\"{}\" y=\"{}\" font-size=\"{}\" text-anchor=\"{anchor}\">{}</text>",
+            "<g class=\"legend-item\" data-legend-kind=\"{entry_kind}\" style=\"cursor:pointer\"><rect class=\"{swatch}\" x=\"{}\" y=\"{}\" width=\"16\" height=\"10\" rx=\"{rx}\"/><text class=\"{}\" x=\"{}\" y=\"{}\" font-size=\"{}\" text-anchor=\"{anchor}\">{}</text>",
             num(sx),
             num(y - 9.0),
             if kind == LegendKind::Status { swatch.replace("sw-", "l-") } else { "t-primary".to_string() },
@@ -446,6 +447,7 @@ fn draw_legend(
                 esc(count)
             );
         }
+        o.push_str("</g>\n");
         if rtl {
             cursor -= w;
         } else {

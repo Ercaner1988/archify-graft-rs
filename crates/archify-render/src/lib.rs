@@ -16,7 +16,7 @@ pub mod xml;
 pub use architecture_svg::ArchitectureSvgRenderer;
 pub use dataflow_svg::DataflowSvgRenderer;
 pub use delta_svg::DeltaSvgRenderer;
-pub use html::wrap_html;
+pub use html::{wrap_html, wrap_interactive_html};
 pub use sequence_svg::SequenceSvgRenderer;
 
 use archify_ir::ArchitectureDiagram;

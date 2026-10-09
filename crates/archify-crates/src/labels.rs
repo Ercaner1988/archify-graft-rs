@@ -23,6 +23,8 @@ pub fn relation_label(rel: &EdgeRelation, locale: &str) -> &'static str {
         EdgeRelation::DependsOn => pick(locale, "kullanır", "يستخدم", "uses"),
         EdgeRelation::Reads => pick(locale, "okur", "يقرأ", "reads"),
         EdgeRelation::Writes => pick(locale, "yazar", "يكتب", "writes"),
+        EdgeRelation::Transforms => pick(locale, "dönüştürür", "يحوّل", "transforms"),
+        EdgeRelation::Produces => pick(locale, "üretir", "ينتج", "produces"),
     }
 }
 

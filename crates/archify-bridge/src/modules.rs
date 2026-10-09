@@ -99,7 +99,11 @@ fn locate(parts: &[&str], prefix: usize, root: &str) -> Option<(String, String)>
 fn relation_rank(r: &EdgeRelation) -> u8 {
     match r {
         EdgeRelation::Calls => 5,
-        EdgeRelation::DependsOn | EdgeRelation::Reads | EdgeRelation::Writes => 6,
+        EdgeRelation::DependsOn
+        | EdgeRelation::Reads
+        | EdgeRelation::Writes
+        | EdgeRelation::Transforms
+        | EdgeRelation::Produces => 6,
         EdgeRelation::Imports => 4,
         EdgeRelation::Implements => 3,
         EdgeRelation::Extends => 2,

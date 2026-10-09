@@ -36,6 +36,12 @@ pub enum NodeKind {
     Artifact,
     /// A function or type that only exists for tests (`#[test]`, `#[cfg(test)]`, `tests/`).
     Test,
+    /// A capability / skill specification (`.claude/skills/*/SKILL.md` or `.agents/skills`).
+    Skill,
+    /// A document artifact (.docx, .pdf, .md, .ris, .csl) entering or leaving the pipeline.
+    Document,
+    /// A structured storage / database (Zotero SQLite, JSON catalog).
+    DataStore,
 }
 
 #[derive(
@@ -86,6 +92,10 @@ pub enum EdgeRelation {
     Reads,
     /// Function -> artifact it writes.
     Writes,
+    /// Pipeline step / script transforms input document into output document.
+    Transforms,
+    /// Skill or Agent produces an artifact or document.
+    Produces,
 }
 
 #[derive(
