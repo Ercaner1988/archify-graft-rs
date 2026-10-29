@@ -5,7 +5,7 @@ use archify_egui::ArchifyApp;
 use archify_ir::{
     ArchitectureDiagram, Component, Connection, DiagramMeta, SemanticRole as R, VisualPreset,
 };
-use egui::{Event, Modifiers, MouseWheelUnit, Pos2, RawInput, Rect, Vec2};
+use egui::{Event, Modifiers, MouseWheelSource, MouseWheelUnit, Pos2, RawInput, Rect, Vec2};
 use std::time::Duration;
 
 fn comp(id: &str, x: f32, y: f32, role: R) -> Component {
@@ -158,6 +158,7 @@ fn wheel_zoom_is_smooth_over_many_frames() {
     h.busy_frames(vec![Event::PointerMoved(at)]);
     let wheel = Event::MouseWheel {
         unit: MouseWheelUnit::Point,
+        source: MouseWheelSource::Unknown,
         delta: Vec2::new(0.0, 400.0),
         phase: egui::TouchPhase::Move,
         modifiers: Modifiers::NONE,

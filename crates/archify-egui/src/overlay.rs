@@ -75,7 +75,7 @@ fn legend(ui: &mut Ui, painter: &Painter, rect: Rect, t: &Tokens, vd: &mut ViewD
         let name = role_name(*role, cx.locale);
         let w = 34.0 + name.chars().count() as f32 * 6.1 + 22.0;
         let r = Rect::from_min_size(Pos2::new(x, y), egui::vec2(w, 22.0));
-        let resp = ui.interact(r, Id::new(("archify-legend", i)), Sense::click());
+        let resp = ui.interact(r, Id::unique(("archify-legend", i)), Sense::click());
         let active = vd.legend_role == Some(*role);
         if resp.hovered() || active {
             painter.rect_filled(r, 6.0, fade(t.panel, 0.9));
@@ -131,7 +131,7 @@ fn tour_pill(ui: &mut Ui, rect: Rect, t: &Tokens, vd: &mut ViewData, cx: &Cx, ou
         .stroke(Stroke::new(1.0, c(t.panel_border)))
         .corner_radius(10.0)
         .inner_margin(Margin::symmetric(14, 10));
-    Area::new(Id::new("archify-tour-start"))
+    Area::new(Id::unique("archify-tour-start"))
         .pivot(Align2::RIGHT_TOP)
         .fixed_pos(rect.right_top() + egui::vec2(-18.0, 16.0))
         .order(Order::Foreground)

@@ -48,8 +48,8 @@ env_logger = "0.11"
 clap = { version = "4.5", features = ["derive"] }
 unicode-normalization = "0.1"
 regex = "1.10"
-eframe = { version = "0.36.2", default-features = false, features = ["default_fonts"] }
-egui = "0.36.2"
+eframe = { version = "0.37.0", default-features = false, features = ["default_fonts"] }
+egui = "0.37.0"
 
 [package]
 name = "archify-graft-cli"
@@ -101,3 +101,13 @@ harness = false
 [[bench]]
 name = "diagram"
 harness = false
+
+# egui 0.37 / wgpu 30: yüzey kimliği sızıntısı düzeltmesi (wbc-rs ve kilim-tema ile aynı rev).
+[patch.crates-io]
+wgpu = { git = "https://github.com/gfx-rs/wgpu", rev = "2508e37" }
+wgpu-core = { git = "https://github.com/gfx-rs/wgpu", rev = "2508e37" }
+naga = { git = "https://github.com/gfx-rs/wgpu", rev = "2508e37" }
+naga-types = { git = "https://github.com/gfx-rs/wgpu", rev = "2508e37" }
+wgpu-hal = { git = "https://github.com/gfx-rs/wgpu", rev = "2508e37" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu", rev = "2508e37" }
+wgpu-naga-bridge = { git = "https://github.com/gfx-rs/wgpu", rev = "2508e37" }
