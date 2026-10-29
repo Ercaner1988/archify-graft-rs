@@ -49,7 +49,7 @@ clap = { version = "4.5", features = ["derive"] }
 unicode-normalization = "0.1"
 regex = "1.10"
 eframe = { version = "0.37.0", default-features = false, features = ["default_fonts"] }
-egui = "0.37.0"
+egui = { version = "0.37.0", features = ["monochrome_emoji_fonts"] }
 
 [package]
 name = "archify-graft-cli"
