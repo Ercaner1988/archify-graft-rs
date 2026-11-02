@@ -23,6 +23,8 @@ Okuma sırası `archify-hedef` içinde sabittir:
 Geçiş kuralı: eski dosya silinmek zorunda değil, ama ortak şema dosyası varsa eski
 dosya **gölgede kalır**. İki gerçeğin aynı anda geçerli olmasına izin verilmez.
 
+Geçişin kim tarafından, nasıl yapılacağı: `docs/HEDEF_GECIS_TALIMATI.md`.
+
 Bozuk ortak şema dosyası eski dosyaya **düşmez**: bozuk beyan, eski veriyle
 maskelenirse tahta yanlış şeyi güncel sanır. Okuma hata verir, çıkış kodu 1 olur.
 
