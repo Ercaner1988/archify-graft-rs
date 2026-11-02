@@ -105,7 +105,7 @@ impl ToolHandler {
                 },
                 {
                     "name": "graft_hedef",
-                    "description": "A repository's aim board: its `.harness/feature-list.json` normalized into one record (mission + goals). Unrecognized status words and rows without a status are reported as unread and make the call an error — an unmeasured goal is never counted as green.",
+                    "description": "A repository's aim board: `.harness/hedefler.json` (shared `archify-hedef/1` schema), falling back to the older `.harness/feature-list.json` and marking it as translated. Unrecognized status words, an unknown schema tag, and rows without a status are reported as unread and make the call an error — an unmeasured goal is never counted as green.",
                     "inputSchema": {
                         "type": "object",
                         "properties": {

@@ -163,8 +163,10 @@ enum Commands {
         #[arg(long)]
         no_wiring: bool,
     },
-    /// Show a repository's aim board: its `.harness/feature-list.json` normalized into
-    /// one record. Unrecognized status words are reported as "okunamadı", never as green
+    /// Show a repository's aim board: `.harness/hedefler.json` (shared `archify-hedef/1`
+    /// schema), falling back to the older `.harness/feature-list.json` and marking that
+    /// in the report. Unrecognized status words, an unknown schema tag, or a missing
+    /// status are reported as "okunamadı", never as green
     Hedef {
         /// Repository directory (the one that holds `.harness/`)
         #[arg(default_value = ".")]

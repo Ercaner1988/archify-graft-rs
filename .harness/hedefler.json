@@ -18,7 +18,8 @@
       "id": "H-3",
       "ad": "Sekiz deponun ortak şemaya geçişi",
       "durum": "devam",
-      "kanit": "1/9 depo ortak şemada (bu depo); diğerleri hâlâ .harness/feature-list.json, tahta onları 'çevirici (eski şema)' diye işaretliyor"
+      "kanit": "1/9 depo ortak şemada (bu depo); diğerleri hâlâ .harness/feature-list.json, tahta onları 'çevirici (eski şema)' diye işaretliyor",
+      "engel": "Her depo kendi niyetini kendi oturumunda yazmalı; mekanik çeviri şemayı döndürür ama niyeti yazmaz (A'nın ruhuna aykırı)"
     },
     {
       "id": "H-4",
@@ -35,14 +36,14 @@
     {
       "id": "H-6",
       "ad": "Kurulu MCP ikilisinin (mcp-tools/archify-graft) güncel sürümle değiştirilmesi",
-      "durum": "bekliyor",
-      "engel": "10 archify-graft-cli süreci dosyayı kilitliyor; yeni ikili .cargo/bin içinde hazır"
+      "durum": "tamam",
+      "kanit": "SHA-256 13C421CD…FEA45 üç konuma kuruldu (mcp-tools\\archify-graft, .cargo\\bin, AppData\\Local\\Nazar\\bin); canlı MCP sınavı tools/list 10 araç + graft_hedef '10 hedef · 5 tamam · 1 devam · 3 bekliyor · 1 ertelendi · 0 okunamadı'. Kilitli dosya silinmeden yeniden adlandırıldı (…-20261102-1926.eski.exe), çalışan süreçler öldürülmedi"
     },
     {
       "id": "H-7",
       "ad": "CodSpeed sürekli başarım ölçümü",
-      "durum": "ertelendi",
-      "engel": "GitHub Actions ödeme sınırı; benches/ dört takım hazır ama rapor üretilemiyor"
+      "durum": "tamam",
+      "kanit": "Actions ödeme sınırı kalktı; run 41470330316 (CodSpeed, d68c1b1) success 1m31s, CodSpeed run 6ae8aa27a8d745b1dd4d7bb5 — 41 benchmark raporlandı (bm25_build[12] 25.8 ms, render_architecture 1.1 ms)"
     },
     {
       "id": "H-8",
