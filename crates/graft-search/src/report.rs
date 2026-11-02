@@ -105,7 +105,7 @@ pub fn build_repo_map(graph: &CodeGraph, max_dirs: usize) -> String {
             .collect();
         let _ = write!(
             out,
-            "{:<45}{} dosya · {} sembol",
+            "{:<45} {} dosya · {} sembol",
             if dizin.is_empty() { "(kök)" } else { dizin },
             ist.dosya,
             ist.sembol
