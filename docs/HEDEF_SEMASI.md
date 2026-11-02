@@ -90,6 +90,26 @@ Eksik veri yeşil sayılmaz; bu `kapi`'nın kendi ilkesidir.
 ## Çıkış davranışı
 
 - `archify-graft-cli hedef <dizin>`: okunamayan satır varsa **çıkış kodu 1**.
+- `archify-graft-cli hedef <dizin> --json`: makine okunur tahta. Alanlar:
+
+  ```json
+  {
+    "sema": "archify-hedef/1",
+    "sema_gecerli": true,
+    "kaynak": {"yol": ".harness/hedefler.json", "tur": "ortak-sema", "etiket": "ortak şema"},
+    "misyon": "…",
+    "yesil": false,
+    "sayim": {"toplam": 10, "tamam": 7, "kismi": 0, "devam": 1,
+              "bekliyor": 2, "ertelendi": 0, "okunamadi": 0},
+    "hedefler": [{"id": "H-1", "ad": "…", "durum": "tamam",
+                  "ham_durum": "tamam", "not": "…"}]
+  }
+  ```
+
+  `kaynak.tur` iki değer alır: `ortak-sema` ya da `cevirici`. `yesil` **tek**
+  ölçüttür (`tamamen_tamam`); `sema_gecerli` ayrıca durur ki tüketici "satırlar
+  tamam ama şema tanınmıyor" hâlini ayırt edebilsin — o hâlde `yesil` false'tur
+  ve sebebi alanda yazılıdır. `--json` ile `--ozet` birlikte verilemez.
 - MCP `graft_hedef`: okunamayan satır varsa yanıt `isError: true` ve
   `UYARI: N satır okunamadı — yeşil sayılmadı` metni taşır.
 - Beyan hiç yoksa: `hedef beyanı yok (<dizin>): ne .harness/hedefler.json ...

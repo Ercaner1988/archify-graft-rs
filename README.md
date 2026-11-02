@@ -87,6 +87,8 @@ cargo run -- mcp
 
 # Show a repository's aim board (.harness/hedefler.json, shared schema); --ozet = counts only
 cargo run -- hedef . --ozet
+# Machine-readable board: schema tag, source (ortak-sema|cevirici), per-goal statuses, yesil
+cargo run -- hedef . --json
 ```
 
 ---

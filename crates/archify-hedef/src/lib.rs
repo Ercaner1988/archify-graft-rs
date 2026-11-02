@@ -1,5 +1,6 @@
-//! Amaç katmanı: bir deponun hedef beyanını (`.harness/feature-list.json`) tek bir
-//! kayda çevirir.
+//! Amaç katmanı: bir deponun hedef beyanını (`.harness/hedefler.json`, ortak
+//! `archify-hedef/1` şeması) tek bir kayda çevirir; şema yoksa eski
+//! `.harness/feature-list.json`'ı çeviriciyle okur ve bunu raporda işaretler.
 //!
 //! Neden ayrı bir crate? `docs/AMAC_KATMANI.md`'de ölçüldüğü gibi aynı adı taşıyan
 //! sekiz dosyanın hiçbiri aynı şemada değil: 91 özellik satırı, üç adlandırma dili
@@ -329,6 +330,64 @@ impl Tahta {
         )
     }
 
+    /// Makine okunur tahta (`hedef --json`).
+    ///
+    /// Alanlar insan raporuyla aynı gerçeği taşır; `yesil` **tek** ölçüttür
+    /// (`tamamen_tamam`). `sema_gecerli` ayrıca durur ki tüketici "satırlar
+    /// tamam ama şema tanınmıyor" hâlini ayırt edebilsin — bu durumda `yesil`
+    /// false'tur ve sebebi alanda yazılıdır.
+    pub fn json(&self) -> String {
+        let s = self.sayim();
+        let hedefler = self
+            .hedefler
+            .iter()
+            .map(|h| {
+                serde_json::json!({
+                    "id": h.id,
+                    "ad": h.ad,
+                    "durum": h.durum.etiket(),
+                    "ham_durum": h.ham_durum,
+                    "not": h.not,
+                })
+            })
+            .collect::<Vec<_>>();
+
+        let kaynak = match &self.kaynak {
+            Some(k) => serde_json::json!({
+                "yol": k.yol().display().to_string(),
+                "tur": match k {
+                    Kaynak::OrtakSema(_) => "ortak-sema",
+                    Kaynak::Ceviri(_) => "cevirici",
+                },
+                "etiket": k.etiket(),
+            }),
+            None => serde_json::Value::Null,
+        };
+
+        let belge = serde_json::json!({
+            "sema": self.sema,
+            "sema_gecerli": self.sema_gecerli(),
+            "kaynak": kaynak,
+            "misyon": self.misyon,
+            "yesil": self.tamamen_tamam(),
+            "sayim": {
+                "toplam": self.hedefler.len(),
+                "tamam": s[0],
+                "kismi": s[1],
+                "devam": s[2],
+                "bekliyor": s[3],
+                "ertelendi": s[4],
+                "okunamadi": s[5],
+            },
+            "hedefler": hedefler,
+        });
+
+        // `Value` → `String` dönüşümü pratikte hata vermez; yine de `expect`
+        // yerine boş nesne dönülür: başarısız olursa geçerli ama boş bir belge
+        // çıkar ve çağıran `yesil` alanının yokluğundan durumu anlar.
+        serde_json::to_string_pretty(&belge).unwrap_or_else(|_| "{}".to_string())
+    }
+
     /// İnsan için tahta metni. `kaynak` yalnız başlıkta görünür.
     ///
     /// Satırlar `format!` + `push_str` ile kurulur: `writeln!` bir `Result`
@@ -638,6 +697,62 @@ mod tests {
         assert!(!t.tamamen_tamam(), "sürümü bilinmeyen tahta yeşil değil");
         let r = t.rapor("x");
         assert!(r.contains("TANINMIYOR"), "{r}");
+    }
+
+    /// `--json`: makine okunur tahta. `yesil` tek ölçüttür ve `sema_gecerli`
+    /// ayrı durur, çünkü "satırlar tamam ama şema tanınmıyor" hâli ayrı bir
+    /// gerçektir — tüketici bunu tahmin etmek zorunda kalmamalı.
+    #[test]
+    fn json_ortak_semayi_ve_yesili_bildirir() {
+        let dizin = gecici("json-ortak");
+        let harness = dizin.join(".harness");
+        std::fs::create_dir_all(&harness).unwrap();
+        yaz(
+            &harness.join("hedefler.json"),
+            r#"{"sema":"archify-hedef/1","misyon":"m","hedefler":[
+                 {"id":"H-1","ad":"a","durum":"tamam","kanit":"k"},
+                 {"id":"H-2","ad":"b","durum":"bekliyor"}
+               ]}"#,
+        );
+
+        let t = Tahta::oku(&dizin).expect("okunmalı");
+        let v: serde_json::Value = serde_json::from_str(&t.json()).expect("geçerli JSON");
+        assert_eq!(v["sema"], SEMA_ETIKETI);
+        assert_eq!(v["sema_gecerli"], true);
+        assert_eq!(v["kaynak"]["tur"], "ortak-sema");
+        assert_eq!(v["yesil"], false, "bekleyen satır varken yeşil değil");
+        assert_eq!(v["sayim"]["toplam"], 2);
+        assert_eq!(v["sayim"]["tamam"], 1);
+        assert_eq!(v["sayim"]["bekliyor"], 1);
+        assert_eq!(v["hedefler"][1]["durum"], "bekliyor");
+        assert_eq!(v["hedefler"][0]["not"], "k", "kanıt not alanına düşer");
+
+        std::fs::remove_dir_all(&dizin).ok();
+    }
+
+    /// Eski şema: `sema` null, kaynak `cevirici`. Tüketici hangi deponun geçtiğini
+    /// alan adından görür, tahmin etmez.
+    #[test]
+    fn json_ceviriciyi_isaretler() {
+        let dizin = gecici("json-ceviri");
+        let harness = dizin.join(".harness");
+        std::fs::create_dir_all(&harness).unwrap();
+        yaz(
+            &harness.join("feature-list.json"),
+            r#"{"features":[{"id":"F1","name":"eski","status":"passing"}]}"#,
+        );
+
+        let t = Tahta::oku(&dizin).expect("okunmalı");
+        let v: serde_json::Value = serde_json::from_str(&t.json()).expect("geçerli JSON");
+        assert!(v["sema"].is_null(), "eski şemada etiket uydurulmaz");
+        assert_eq!(v["kaynak"]["tur"], "cevirici");
+        assert_eq!(
+            v["yesil"], true,
+            "tek satır tamam ve şema tanınıyor (etiketsiz)"
+        );
+        assert_eq!(v["sayim"]["okunamadi"], 0);
+
+        std::fs::remove_dir_all(&dizin).ok();
     }
 
     fn gecici(ad: &str) -> std::path::PathBuf {

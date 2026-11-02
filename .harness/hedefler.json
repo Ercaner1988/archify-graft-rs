@@ -6,7 +6,7 @@
       "id": "H-1",
       "ad": "Ortak şema çekirdeği: .harness/hedefler.json okunur, tanınmayan durum/şema yeşil sayılmaz",
       "durum": "tamam",
-      "kanit": "cargo test -p archify-hedef: 17 sınama; şema sözleşmesi docs/HEDEF_SEMASI.md"
+      "kanit": "cargo test -p archify-hedef: 19 sınama; şema sözleşmesi docs/HEDEF_SEMASI.md"
     },
     {
       "id": "H-2",
@@ -29,9 +29,9 @@
     },
     {
       "id": "H-5",
-      "ad": "hedef --json: makine okunur çıktı (bugün yalnız insan metni ve --ozet)",
-      "durum": "bekliyor",
-      "engel": "docs/AMAC_KATMANI.md §5: ayrı iş olarak kaydedildi, başlanmadı"
+      "ad": "hedef --json: makine okunur çıktı",
+      "durum": "tamam",
+      "kanit": "`hedef . --json` → şema, sema_gecerli, kaynak.tur (ortak-sema|cevirici), yesil, sayim, hedefler[]; --ozet ile birlikte verilirse clap reddeder (çıkış 2). archify-hedef 19 sınama, çalışma ağacı 254 test 0 başarısız"
     },
     {
       "id": "H-6",

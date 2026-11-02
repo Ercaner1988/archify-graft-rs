@@ -172,8 +172,11 @@ enum Commands {
         #[arg(default_value = ".")]
         path: String,
         /// Print only the counts line, not every row
-        #[arg(long)]
+        #[arg(long, conflicts_with = "json")]
         ozet: bool,
+        /// Machine-readable board (schema tag, source, per-goal statuses, `yesil`)
+        #[arg(long)]
+        json: bool,
     },
     /// Start the Model Context Protocol (MCP) JSON-RPC stdio server for AI agents
     Mcp,
@@ -328,10 +331,12 @@ async fn main() -> anyhow::Result<()> {
                 println!("  {:2}. [{:.4}] {}", idx + 1, score, id);
             }
         }
-        Commands::Hedef { path, ozet } => {
+        Commands::Hedef { path, ozet, json } => {
             match archify_hedef::Tahta::oku(&path) {
                 Ok(t) => {
-                    if ozet {
+                    if json {
+                        println!("{}", t.json());
+                    } else if ozet {
                         println!("{}", t.ozet_satiri());
                     } else {
                         print!("{}", t.rapor(&path));
