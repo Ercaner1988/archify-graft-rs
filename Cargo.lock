@@ -218,6 +218,7 @@ dependencies = [
  "archify-delta",
  "archify-egui",
  "archify-geometry",
+ "archify-hedef",
  "archify-ir",
  "archify-render",
  "clap",
@@ -233,6 +234,15 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+]
+
+[[package]]
+name = "archify-hedef"
+version = "0.1.0"
+dependencies = [
+ "graft-i18n",
+ "serde_json",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -1267,6 +1277,7 @@ dependencies = [
  "anyhow",
  "archify-bridge",
  "archify-delta",
+ "archify-hedef",
  "archify-ir",
  "archify-render",
  "graft-model",

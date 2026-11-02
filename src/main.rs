@@ -163,6 +163,16 @@ enum Commands {
         #[arg(long)]
         no_wiring: bool,
     },
+    /// Show a repository's aim board: its `.harness/feature-list.json` normalized into
+    /// one record. Unrecognized status words are reported as "okunamadı", never as green
+    Hedef {
+        /// Repository directory (the one that holds `.harness/`)
+        #[arg(default_value = ".")]
+        path: String,
+        /// Print only the counts line, not every row
+        #[arg(long)]
+        ozet: bool,
+    },
     /// Start the Model Context Protocol (MCP) JSON-RPC stdio server for AI agents
     Mcp,
     /// Launch the interactive pure-Rust desktop Archify studio window
@@ -314,6 +324,25 @@ async fn main() -> anyhow::Result<()> {
             println!("\n🏆 [Results: Top {} Matches]:", limit);
             for (idx, (id, score)) in ranked.iter().take(limit).enumerate() {
                 println!("  {:2}. [{:.4}] {}", idx + 1, score, id);
+            }
+        }
+        Commands::Hedef { path, ozet } => {
+            match archify_hedef::Tahta::oku(&path) {
+                Ok(t) => {
+                    if ozet {
+                        println!("{}", t.ozet_satiri());
+                    } else {
+                        print!("{}", t.rapor(&path));
+                    }
+                    // Ölçülmedi yeşil sayılmaz: okunamayan satır varsa çıkış kodu 1.
+                    if t.okunamayanlar().next().is_some() {
+                        std::process::exit(1);
+                    }
+                }
+                Err(h) => {
+                    eprintln!("{h}");
+                    std::process::exit(1);
+                }
             }
         }
         Commands::Diagram {

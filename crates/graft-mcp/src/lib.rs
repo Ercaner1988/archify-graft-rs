@@ -159,6 +159,11 @@ impl McpServer {
                             .unwrap_or(".cache/graft-graph.bin");
                         ToolHandler::execute_check_freshness(path, cache)
                     }
+                    "graft_hedef" => {
+                        let path = args.get("path").and_then(|p| p.as_str()).unwrap_or(".");
+                        let ozet = args.get("ozet").and_then(|o| o.as_bool()).unwrap_or(false);
+                        ToolHandler::execute_hedef(path, ozet)
+                    }
                     "archify_render_diagram" => {
                         let graph_guard = self.graph.lock().await;
                         ToolHandler::execute_render_diagram(&args, graph_guard.as_ref())

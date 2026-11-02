@@ -104,6 +104,17 @@ impl ToolHandler {
                     }
                 },
                 {
+                    "name": "graft_hedef",
+                    "description": "A repository's aim board: its `.harness/feature-list.json` normalized into one record (mission + goals). Unrecognized status words and rows without a status are reported as unread and make the call an error — an unmeasured goal is never counted as green.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "path": { "type": "string", "description": "Repository directory that holds `.harness/`; defaults to the server's working directory" },
+                            "ozet": { "type": "boolean", "description": "Return only the one-line counts summary, not the whole board" }
+                        }
+                    }
+                },
+                {
                     "name": "archify_render_diagram",
                     "description": "Generate an Archify architecture, sequence, dataflow, or delta diagram with neon lighting and write it to disk. Returns the written path and a short summary, not the raw diagram markup — write `output` ending in `.html` for a self-contained, pannable/zoomable viewer, or `.svg` for the raw static image.",
                     "inputSchema": {
@@ -232,6 +243,36 @@ impl ToolHandler {
             Err(e) => {
                 json!({ "isError": true, "content": [{ "type": "text", "text": e.to_string() }] })
             }
+        }
+    }
+
+    /// Amaç tahtası (`graft_hedef`): deponun `.harness/feature-list.json` beyanını
+    /// tek kayda çevirir. `kapi`nın kuralı burada da geçerli — **ölçülmedi yeşil
+    /// sayılmaz**: tanınmayan durum sözcüğü ya da durumsuz satır varsa yanıt
+    /// `isError` işaretlenir ki ajan tahtayı "hepsi tamam" diye okumasın.
+    pub fn execute_hedef(path: &str, ozet: bool) -> Value {
+        match archify_hedef::Tahta::oku(path) {
+            Ok(t) => {
+                let govde = if ozet { t.ozet_satiri() } else { t.rapor(path) };
+                let okunamayan = t.okunamayanlar().count();
+                if okunamayan == 0 {
+                    json!({ "content": [{ "type": "text", "text": govde }] })
+                } else {
+                    json!({
+                        "isError": true,
+                        "content": [{
+                            "type": "text",
+                            "text": format!(
+                                "{govde}\nUYARI: {okunamayan} satır okunamadı — yeşil sayılmadı."
+                            )
+                        }]
+                    })
+                }
+            }
+            Err(h) => json!({
+                "isError": true,
+                "content": [{ "type": "text", "text": format!("{h}") }]
+            }),
         }
     }
 

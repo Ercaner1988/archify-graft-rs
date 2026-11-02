@@ -1,0 +1,14 @@
+[package]
+name = "archify-hedef"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Amaç katmanı: depoların hedef beyanını tek bir kayda çevirir; okunamayanı yeşil saymaz"
+
+[dependencies]
+serde_json.workspace = true
+thiserror.workspace = true
+# Durum sözcüklerini katlamak için deponun kendi Türkçe-güvenli katlaması
+# (`fold_tr`): `I`, `İ`, `ı` tek biçime iner. Çıplak `to_lowercase` burada
+# `İ`yi iki karaktere açar ve `KISMİ` gibi bir sözcük tanınmaz kalırdı.
+graft-i18n = { path = "../graft-i18n" }

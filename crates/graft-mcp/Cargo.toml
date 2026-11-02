@@ -12,6 +12,7 @@ archify-ir = { path = "../archify-ir" }
 archify-bridge = { path = "../archify-bridge" }
 archify-render = { path = "../archify-render" }
 archify-delta = { path = "../archify-delta" }
+archify-hedef = { path = "../archify-hedef" }
 tokio.workspace = true
 serde.workspace = true
 serde_json.workspace = true
