@@ -113,6 +113,13 @@ ama "her depoyu şimdi düzeltelim" demek de tahtayı aylarca bekletir. C, bugü
 çalışır ve yanlış okumayı görünür kılar (kural: *ölçülmedi asla yeşil
 sayılmaz* — `kapi`nın kendi ilkesi).
 
+**Uygulama (2026-11-02, `5d2434e`):** C'nin **çevirici yarısı** yazıldı:
+`archify-hedef` crate'i + `hedef` alt komutu + `graft_hedef` MCP aracı. C'nin
+ikinci yarısı — depoya uyarı bırakma — yok; bugün tahta okunamayan satırı
+raporluyor ve çıkış/isError ile bildiriyor, ama depoya hiçbir şey yazmıyor.
+A'nın (depo tarafı ortak şema) yapılıp yapılmayacağı hâlâ Ercan'ın kararı.
+Ölçüm: 9 depoda koşuldu, 8'i okundu; `archify-graft-rs` deposunun kendi beyanı yok.
+
 ## 5. Bu notun sınırı
 
 - Tahtanın görsel biçimi (panel mi, ayrı pencere mi, egui stüdyosunun içinde mi)
