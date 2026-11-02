@@ -48,7 +48,7 @@ Archify-Graft merges the deterministic code graph and personalized PageRank inte
 - `archify-bridge`: AST-to-Architecture, Sequence call tracer, and Dataflow pipeline compiler.
 - `archify-render`: Preset-aware Neon SVG / HTML export with Arabic RTL support and delta diff legend.
 - `archify-delta`: Diff engine comparing before/after diagrams (Added/Removed/Modified/Unchanged).
-- `archify-hedef`: Aim layer — normalizes a repository's `.harness/feature-list.json` into one board record (mission + goals); an unrecognized status word or a missing status is reported as unread, never counted as green.
+- `archify-hedef`: Aim layer — reads a repository's `.harness/hedefler.json` (shared `archify-hedef/1` schema, see `docs/HEDEF_SEMASI.md`), falling back to the older `.harness/feature-list.json` and marking it as translated; an unrecognized status word, an unknown schema tag, or a missing status is reported as unread, never counted as green.
 
 ### Interactive Desktop Studio & Integration
 - `archify-egui-paint`: Multi-pass neon bloom painter, glow shaders, and connection arc drawing.
@@ -85,7 +85,7 @@ cargo run --features gui -- gui
 # Start MCP server for AI agents
 cargo run -- mcp
 
-# Show a repository's aim board (.harness/feature-list.json normalized); --ozet = counts only
+# Show a repository's aim board (.harness/hedefler.json, shared schema); --ozet = counts only
 cargo run -- hedef . --ozet
 ```
 

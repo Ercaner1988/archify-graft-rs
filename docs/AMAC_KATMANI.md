@@ -113,12 +113,22 @@ ama "her depoyu şimdi düzeltelim" demek de tahtayı aylarca bekletir. C, bugü
 çalışır ve yanlış okumayı görünür kılar (kural: *ölçülmedi asla yeşil
 sayılmaz* — `kapi`nın kendi ilkesi).
 
-**Uygulama (2026-11-02, `5d2434e`):** C'nin **çevirici yarısı** yazıldı:
-`archify-hedef` crate'i + `hedef` alt komutu + `graft_hedef` MCP aracı. C'nin
-ikinci yarısı — depoya uyarı bırakma — yok; bugün tahta okunamayan satırı
-raporluyor ve çıkış/isError ile bildiriyor, ama depoya hiçbir şey yazmıyor.
-A'nın (depo tarafı ortak şema) yapılıp yapılmayacağı hâlâ Ercan'ın kararı.
-Ölçüm: 9 depoda koşuldu, 8'i okundu; `archify-graft-rs` deposunun kendi beyanı yok.
+**Karar (Ercan, 2026-11-02): A.** Depo tarafı. Her depo niyetini ortak şemayla
+yazar (`.harness/hedefler.json`, etiket `archify-hedef/1`); tahta tahmin etmez.
+Sözleşme: `docs/HEDEF_SEMASI.md`.
+
+**Uygulama (2026-11-02):**
+
+- `5d2434e` — çevirici: `archify-hedef` crate'i + `hedef` alt komutu + `graft_hedef`
+  MCP aracı. Okunamayan satır `okunamadı` olur, çıkış kodu 1 / `isError`.
+- bu commit — A: tahta önce `.harness/hedefler.json` okur, yalnız yoksa eski
+  `feature-list.json`'a düşer ve onu rapor `çevirici (eski şema)` diye
+  **işaretler**. Bozuk ortak şema eskiye düşmez (maskelenme yasak). Tanınmayan
+  şema etiketi tahtayı yeşil saydırmaz. `archify-graft-rs` kendi beyanını yazdı:
+  10 hedef — 5 tamam, 1 devam (depoların geçişi), 3 bekliyor, 1 ertelendi.
+
+Geçiş durumu bugün **1/9 depo** (bu depo). Diğer sekiz depo hâlâ eski şemada ve
+tahta onları çevirici diye işaretliyor — eksikliği gösteren veri budur, gizlenmiyor.
 
 ## 5. Bu notun sınırı
 

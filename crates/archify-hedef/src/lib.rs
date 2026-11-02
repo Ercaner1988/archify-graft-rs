@@ -83,11 +83,48 @@ pub struct Hedef {
     pub not: Option<String>,
 }
 
+/// Ortak şemanın etiketi. Depo kendi beyanına bunu yazar (bkz. `docs/HEDEF_SEMASI.md`).
+pub const SEMA_ETIKETI: &str = "archify-hedef/1";
+
+/// Beyan hangi dosyadan okundu.
+///
+/// A politikası (2026-11-02, Ercan): her depo niyetini **ortak şemayla** yazar.
+/// Geçiş bitene kadar eski `feature-list.json` da çeviriciyle okunur; ikisini
+/// raporda ayırmak, hangi deponun ortak şemaya geçtiğini gösteren veridir.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Kaynak {
+    /// `.harness/hedefler.json` — depo kendi niyetini ortak şemayla yazmış.
+    OrtakSema(PathBuf),
+    /// `.harness/feature-list.json` — deponun kendi şeması, çeviriciyle okundu.
+    Ceviri(PathBuf),
+}
+
+impl Kaynak {
+    /// Kısa etiket (rapor için).
+    pub fn etiket(&self) -> &'static str {
+        match self {
+            Self::OrtakSema(_) => "ortak şema",
+            Self::Ceviri(_) => "çevirici (eski şema)",
+        }
+    }
+
+    /// Dosya yolu.
+    pub fn yol(&self) -> &Path {
+        match self {
+            Self::OrtakSema(p) | Self::Ceviri(p) => p,
+        }
+    }
+}
+
 /// Bir deponun amaç beyanı.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Tahta {
     pub misyon: Option<String>,
     pub hedefler: Vec<Hedef>,
+    /// Beyanda yazılı şema etiketi (`sema` alanı). `None` = eski şema.
+    pub sema: Option<String>,
+    /// Beyanın okunduğu dosya. `cozumle` (bellekten) için `None`.
+    pub kaynak: Option<Kaynak>,
 }
 
 /// Okuma hatası. Hepsi "bu depo beyan etmiyor" sınıfındadır, panik değil.
@@ -99,6 +136,10 @@ pub enum Hata {
         #[source]
         kaynak: std::io::Error,
     },
+    #[error(
+        "hedef beyanı yok ({dizin}): ne `.harness/hedefler.json` (ortak şema) ne `.harness/feature-list.json` (eski şema) var"
+    )]
+    BeyanYok { dizin: PathBuf },
     #[error("hedef beyanı geçerli JSON değil ({yol}): {kaynak}")]
     Cozulemedi {
         yol: PathBuf,
@@ -114,14 +155,46 @@ pub enum Hata {
 }
 
 impl Tahta {
-    /// `<dizin>/.harness/feature-list.json` dosyasını okur.
+    /// Deponun hedef beyanını okur.
+    ///
+    /// Sıra: önce `.harness/hedefler.json` (ortak şema, A politikası), yoksa
+    /// `.harness/feature-list.json` (eski şema, çevirici). Var olan ortak şema
+    /// dosyası bozuksa **eski dosyaya düşülmez** — bozuk beyan sessizce eski
+    /// veriyle maskelenmemeli.
     pub fn oku(dizin: impl AsRef<Path>) -> Result<Self, Hata> {
-        let yol = dizin.as_ref().join(".harness").join("feature-list.json");
-        let metin = std::fs::read_to_string(&yol).map_err(|kaynak| Hata::Okunamadi {
-            yol: yol.clone(),
-            kaynak,
-        })?;
-        Self::cozumle_beyan(&metin, &yol)
+        let kok = dizin.as_ref().join(".harness");
+        let ortak = kok.join("hedefler.json");
+        let eski = kok.join("feature-list.json");
+
+        let (metin, kaynak) = match std::fs::read_to_string(&ortak) {
+            Ok(m) => (m, Kaynak::OrtakSema(ortak)),
+            Err(k) if k.kind() == std::io::ErrorKind::NotFound => {
+                match std::fs::read_to_string(&eski) {
+                    Ok(m) => (m, Kaynak::Ceviri(eski)),
+                    Err(k2) if k2.kind() == std::io::ErrorKind::NotFound => {
+                        return Err(Hata::BeyanYok {
+                            dizin: dizin.as_ref().to_path_buf(),
+                        })
+                    }
+                    Err(k2) => {
+                        return Err(Hata::Okunamadi {
+                            yol: eski,
+                            kaynak: k2,
+                        })
+                    }
+                }
+            }
+            Err(k) => {
+                return Err(Hata::Okunamadi {
+                    yol: ortak,
+                    kaynak: k,
+                })
+            }
+        };
+
+        let mut tahta = Self::cozumle_beyan(&metin, kaynak.yol())?;
+        tahta.kaynak = Some(kaynak);
+        Ok(tahta)
     }
 
     /// Beyan metnini çözer. `yol` yalnız hata iletisinde görünür.
@@ -148,6 +221,7 @@ impl Tahta {
         };
 
         let misyon = metin_alan(&["mission", "misyon", "gorev", "görev", "plan"]);
+        let sema = metin_alan(&["sema", "şema", "schema"]);
         let dizi = nesne
             .get("features")
             .or_else(|| nesne.get("hedefler"))
@@ -201,7 +275,12 @@ impl Tahta {
             });
         }
 
-        Ok(Self { misyon, hedefler })
+        Ok(Self {
+            misyon,
+            hedefler,
+            sema,
+            kaynak: None,
+        })
     }
 
     /// Durum başına sayı. Sıra `Durum`'un tanım sırasıdır.
@@ -214,9 +293,17 @@ impl Tahta {
     }
 
     /// Bütün satırlar tanındı ve hepsi `Tamam` mı? Tahtanın tek yeşil ölçütü budur;
-    /// eksik veri yeşil sayılmaz.
+    /// eksik veri yeşil sayılmaz. Tanınmayan **şema etiketi** de yeşili bozar:
+    /// sürümü bilinmeyen bir dosyanın satırlarını "tamam" saymak tahmin olurdu.
     pub fn tamamen_tamam(&self) -> bool {
-        !self.hedefler.is_empty() && self.sayim()[Durum::Tamam as usize] == self.hedefler.len()
+        !self.hedefler.is_empty()
+            && self.sema_gecerli()
+            && self.sayim()[Durum::Tamam as usize] == self.hedefler.len()
+    }
+
+    /// Şema etiketi ya hiç yazılmamış (eski şema, çevirici okur) ya da bizimki.
+    pub fn sema_gecerli(&self) -> bool {
+        self.sema.as_deref().is_none_or(|s| s == SEMA_ETIKETI)
     }
 
     /// Okunamayan satırlar: tanınmayan durum sözcüğü ya da hiç durum yazılmamış.
@@ -252,6 +339,18 @@ impl Tahta {
         let mut c = String::new();
         let s = self.sayim();
         c.push_str(&format!("amaç tahtası — {kaynak}\n"));
+        if let Some(k) = &self.kaynak {
+            c.push_str(&format!("kaynak: {} — {}\n", k.yol().display(), k.etiket()));
+        }
+        if let Some(sema) = &self.sema {
+            if self.sema_gecerli() {
+                c.push_str(&format!("şema: {sema}\n"));
+            } else {
+                c.push_str(&format!(
+                    "şema: {sema} — TANINMIYOR (beklenen {SEMA_ETIKETI}); tahta yeşil sayılmaz\n"
+                ));
+            }
+        }
         if let Some(m) = &self.misyon {
             c.push_str(&format!("misyon: {m}\n"));
         }
@@ -444,5 +543,111 @@ mod tests {
         .expect("çözülmeli");
         assert_eq!(t.sayim(), [1, 0, 1, 0, 1, 0]);
         assert!(t.rapor("x").contains("hedefler: 3 (1 tamam"));
+    }
+
+    /// A politikası: depo niyetini `.harness/hedefler.json` ile ortak şemada
+    /// yazar. Bu dosya eski `feature-list.json`'ı **gölgeler** — yoksa aynı depo
+    /// iki gerçeği taşır ve hangisinin geçerli olduğu tahmine kalır.
+    #[test]
+    fn ortak_sema_dosyasi_eski_dosyayi_golgede_birakir() {
+        let dizin = gecici("oncelik");
+        let harness = dizin.join(".harness");
+        std::fs::create_dir_all(&harness).unwrap();
+        yaz(
+            &harness.join("feature-list.json"),
+            r#"{"features":[{"id":"ESKI","name":"eski","status":"pending"}]}"#,
+        );
+        yaz(
+            &harness.join("hedefler.json"),
+            r#"{"sema":"archify-hedef/1","misyon":"yeni","hedefler":[
+                 {"id":"H-1","ad":"ortak","durum":"tamam","kanit":"ölçüldü"}
+               ]}"#,
+        );
+
+        let t = Tahta::oku(&dizin).expect("okunmalı");
+        assert_eq!(t.hedefler.len(), 1, "eski dosyadan satır sızmamalı");
+        assert_eq!(t.hedefler[0].id, "H-1");
+        assert_eq!(t.sema.as_deref(), Some(SEMA_ETIKETI));
+        assert!(matches!(t.kaynak, Some(Kaynak::OrtakSema(_))));
+        assert!(t.tamamen_tamam());
+        let r = t.rapor("depo");
+        assert!(r.contains("ortak şema"), "kaynak raporda görünmeli: {r}");
+
+        std::fs::remove_dir_all(&dizin).ok();
+    }
+
+    /// Geçiş bitmemiş depo: yalnız eski dosya var. Tahta onu okumalı ama
+    /// kaynağı "çevirici" diye **işaretlemeli** — eksikliği gösteren veri budur.
+    #[test]
+    fn eski_sema_cevirici_diye_isaretlenir() {
+        let dizin = gecici("ceviri");
+        let harness = dizin.join(".harness");
+        std::fs::create_dir_all(&harness).unwrap();
+        yaz(
+            &harness.join("feature-list.json"),
+            r#"{"features":[{"id":"F1","name":"eski","status":"passing"}]}"#,
+        );
+
+        let t = Tahta::oku(&dizin).expect("okunmalı");
+        assert!(matches!(t.kaynak, Some(Kaynak::Ceviri(_))));
+        assert!(t.rapor("depo").contains("çevirici"));
+        assert!(t.sema.is_none(), "eski şemada etiket yok; uydurulmamalı");
+
+        std::fs::remove_dir_all(&dizin).ok();
+    }
+
+    /// Bozuk ortak şema eski dosyaya düşmemeli: yoksa bozuk beyan sessizce
+    /// eski veriyle maskelenir ve tahta yanlış şeyi "güncel" sanır.
+    #[test]
+    fn bozuk_ortak_sema_eski_dosyaya_dusmez() {
+        let dizin = gecici("bozuk");
+        let harness = dizin.join(".harness");
+        std::fs::create_dir_all(&harness).unwrap();
+        yaz(
+            &harness.join("feature-list.json"),
+            r#"{"features":[{"id":"F1","name":"eski","status":"passing"}]}"#,
+        );
+        yaz(&harness.join("hedefler.json"), "{\"sema\": ");
+
+        let h = Tahta::oku(&dizin).unwrap_err();
+        assert!(matches!(h, Hata::Cozulemedi { .. }), "{h}");
+
+        std::fs::remove_dir_all(&dizin).ok();
+    }
+
+    /// Hiç beyan yok: hata iki yolu da adıyla söylemeli.
+    #[test]
+    fn beyan_yoksa_iki_yol_da_adlandirilir() {
+        let dizin = gecici("yok");
+        std::fs::create_dir_all(dizin.join(".harness")).unwrap();
+        let h = Tahta::oku(&dizin).unwrap_err();
+        let m = h.to_string();
+        assert!(m.contains("hedefler.json"), "{m}");
+        assert!(m.contains("feature-list.json"), "{m}");
+        std::fs::remove_dir_all(&dizin).ok();
+    }
+
+    /// Tanınmayan şema etiketi: satırlar okunur ama tahta yeşil sayılmaz.
+    #[test]
+    fn taninmayan_sema_etiketi_yesili_bozar() {
+        let t = Tahta::cozumle(
+            r#"{"sema":"archify-hedef/99","hedefler":[{"id":"H-1","ad":"a","durum":"tamam"}]}"#,
+        )
+        .expect("çözülmeli");
+        assert_eq!(t.sayim()[0], 1, "satır tamam olarak okunur");
+        assert!(!t.tamamen_tamam(), "sürümü bilinmeyen tahta yeşil değil");
+        let r = t.rapor("x");
+        assert!(r.contains("TANINMIYOR"), "{r}");
+    }
+
+    fn gecici(ad: &str) -> std::path::PathBuf {
+        let d = std::env::temp_dir().join(format!("agr-hedef-{ad}-{}", std::process::id()));
+        std::fs::remove_dir_all(&d).ok();
+        std::fs::create_dir_all(&d).unwrap();
+        d
+    }
+
+    fn yaz(yol: &Path, metin: &str) {
+        std::fs::write(yol, metin).unwrap();
     }
 }

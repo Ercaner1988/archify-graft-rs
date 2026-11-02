@@ -1,0 +1,66 @@
+{
+  "sema": "archify-hedef/1",
+  "misyon": "Ajanlar için ortak kod zeminini (Graft) ve o zeminin üstünde tek bir amaç tahtasını (Archify) sağlamak: dağınık hedef beyanlarını tek kayda çevirip ölçülmeyeni yeşil saymamak.",
+  "hedefler": [
+    {
+      "id": "H-1",
+      "ad": "Ortak şema çekirdeği: .harness/hedefler.json okunur, tanınmayan durum/şema yeşil sayılmaz",
+      "durum": "tamam",
+      "kanit": "cargo test -p archify-hedef: 17 sınama; şema sözleşmesi docs/HEDEF_SEMASI.md"
+    },
+    {
+      "id": "H-2",
+      "ad": "hedef alt komutu ve graft_hedef MCP aracı",
+      "durum": "tamam",
+      "kanit": "tests/mcp_roundtrip.rs toplu sınama; cargo test --workspace: 247 geçti, 0 başarısız"
+    },
+    {
+      "id": "H-3",
+      "ad": "Sekiz deponun ortak şemaya geçişi",
+      "durum": "devam",
+      "kanit": "1/9 depo ortak şemada (bu depo); diğerleri hâlâ .harness/feature-list.json, tahta onları 'çevirici (eski şema)' diye işaretliyor"
+    },
+    {
+      "id": "H-4",
+      "ad": "Amaç tahtasının görsel paneli (egui stüdyosu içinde)",
+      "durum": "bekliyor",
+      "engel": "Şema kesinleşmeden biçim tartışılmadı: docs/AMAC_KATMANI.md §5"
+    },
+    {
+      "id": "H-5",
+      "ad": "hedef --json: makine okunur çıktı (bugün yalnız insan metni ve --ozet)",
+      "durum": "bekliyor",
+      "engel": "docs/AMAC_KATMANI.md §5: ayrı iş olarak kaydedildi, başlanmadı"
+    },
+    {
+      "id": "H-6",
+      "ad": "Kurulu MCP ikilisinin (mcp-tools/archify-graft) güncel sürümle değiştirilmesi",
+      "durum": "bekliyor",
+      "engel": "10 archify-graft-cli süreci dosyayı kilitliyor; yeni ikili .cargo/bin içinde hazır"
+    },
+    {
+      "id": "H-7",
+      "ad": "CodSpeed sürekli başarım ölçümü",
+      "durum": "ertelendi",
+      "engel": "GitHub Actions ödeme sınırı; benches/ dört takım hazır ama rapor üretilemiyor"
+    },
+    {
+      "id": "H-8",
+      "ad": "Çok dilli AST, çağrı kenarları ve BM25 + GraphRank zemin katmanı",
+      "durum": "tamam",
+      "kanit": "cargo test --workspace: 247 geçti, 0 başarısız; kapi yeşil 9 / kırmızı 0"
+    },
+    {
+      "id": "H-9",
+      "ad": "Sandık başına 1500 satır sınırı",
+      "durum": "tamam",
+      "kanit": "altın-kapi satır ölçümü: kırmızı yok (25 sandık)"
+    },
+    {
+      "id": "H-10",
+      "ad": "Etkileşimli masaüstü stüdyosu (egui + wgpu)",
+      "durum": "tamam",
+      "kanit": "cargo check --all-targets --features gui: 0 (altın-kapi boyutu: onyuz)"
+    }
+  ]
+}
