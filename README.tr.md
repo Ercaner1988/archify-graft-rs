@@ -17,7 +17,7 @@ Archify-Graft; **Graft**'ın deterministik AST kod grafı ve Kişiselleştirilmi
 3. **Üç Dilli Zeka (TR / AR / EN):** Türkçe (noktalı/noktasız ı/i güvenliği), Arapça (hareke/tashkeel temizleme, Elif normalizasyonu, tam RTL desteği) ve İngilizce (camelCase/snake_case) normalizasyon ve belirteçleme.
 4. **Çoklu Dil AST Çıkarımı:** Rust, JavaScript/TypeScript, Python, Go, Java ve C/C++ için gövde taramalı sembol ve çağrı kenarı çıkarımı.
 5. **Sıfır-Kopya İkili Depolama:** `rkyv 0.8` ile ultra hızlı ikili serileştirme ve kanonik varint çerçeveleme.
-6. **24 Mikro-Derme Mimarisi:** Altın-kapı 1500 kod satırı kuralına tam uyumlu, temiz boru hatlarıyla birbirine bağlı 24 derme.
+6. **Mikro-Derme Mimarisi:** Altın-kapı 1500 kod satırı kuralına tam uyumlu 25 çalışma alanı paketi — 24 kütüphane dermesi ve kök `archify-graft-cli` ikilisi.
 7. **5 Diyagram Türü & Delta Analizi:** Mimari (Architecture), Sıralama (Sequence), Veri Akışı (Dataflow), Yaşam Döngüsü (Lifecycle), İş Akışı (Workflow) diyagramları ve önce/sonra delta diff karşılaştırması.
 8. **İnteraktif Stüdyo & GPU Neon Aydınlatma:** `egui` ve `wgpu` (DirectX 12 / Vulkan / Metal) ile donanım hızlandırmalı çok katmanlı additive neon parlama (`NeonPainter`) ve bağımsız SVG/HTML ihracı.
 9. **Yazar Destekli Hikaye Adımları (Story Beats):** Mimariyi adım adım gezen interaktif tur ve animasyonlu rota sunumu.
@@ -25,7 +25,7 @@ Archify-Graft; **Graft**'ın deterministik AST kod grafı ve Kişiselleştirilmi
 
 ---
 
-## Çalışma Alanı Dermeleri (24 Derme)
+## Çalışma Alanı Dermeleri (25 Paket)
 
 ### Donanım ve Çekirdek Model
 - `lowlevel-sys`: Doğrudan DMA G/Ç, önbellek satır tespiti, çekirdek ilgisi ve TSC sayacı.
@@ -52,6 +52,7 @@ Archify-Graft; **Graft**'ın deterministik AST kod grafı ve Kişiselleştirilmi
 - `archify-bridge`: AST'den Mimari, Sıralama ve Veri Akışı diyagram derleyicisi.
 - `archify-render`: 4 önayarlı Neon SVG / HTML ihracı, Arapça RTL ve delta lejantı.
 - `archify-delta`: İki diyagram arasındaki farkları (eklenen, silinen, değişen) hesaplayan diff motoru.
+- `archify-hedef`: Amaç katmanı — deponun `.harness/hedefler.json` beyanını (ortak `archify-hedef/1` şeması, bkz. `docs/HEDEF_SEMASI.md`) tek kayda çevirir; şema yoksa eski `.harness/feature-list.json`'ı çeviriciyle okur ve bunu işaretler. Tanınmayan durum sözcüğü, bilinmeyen şema etiketi ya da durumsuz satır "okunamadı" sayılır, asla yeşile yuvarlanmaz.
 
 ### Masaüstü Arayüzü ve Entegrasyon
 - `archify-egui-paint`: Çok geçişli neon ışıma boyayıcısı, parlama gölgelendiricileri ve bağlantı yayları.
@@ -63,7 +64,7 @@ Archify-Graft; **Graft**'ın deterministik AST kod grafı ve Kişiselleştirilmi
 
 ## Hızlı Başlangıç
 
-```powershell
+```bash
 # Kod tabanını artımlı doğrudan DMA ile indeksleme
 cargo run -- index .
 
@@ -87,6 +88,11 @@ cargo run --features gui -- gui
 
 # Yapay zeka ajanları için MCP sunucusunu başlatma
 cargo run -- mcp
+
+# Deponun amaç tahtasını gösterme (.harness/hedefler.json, ortak şema); --ozet = yalnız sayımlar
+cargo run -- hedef . --ozet
+# Makine okunur tahta: şema, kaynak (ortak-sema|cevirici), hedef durumları, yesil
+cargo run -- hedef . --json
 
 # Tüm çalışma alanı testlerini koşturma
 cargo test --workspace --all-targets

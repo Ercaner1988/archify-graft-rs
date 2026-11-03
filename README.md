@@ -13,7 +13,7 @@ Archify-Graft merges the deterministic code graph and personalized PageRank inte
 - **Trilingual Intelligence:** First-class tokenizer and normalizer for **Arabic**, **Turkish**, and **English**.
 - **Multi-Language AST Support:** Deep body-scanning and call edge extraction for **Rust**, **JavaScript/TypeScript**, **Python**, **Go**, **Java**, and **C/C++**.
 - **Zero-Copy Persistence:** Lightning-fast serialization using **rkyv** with pinned wire contracts for cross-engine interoperability.
-- **Micro-Crate Architecture:** 24 decoupled micro-crates strictly complying with the 1500 LOC per crate constraint.
+- **Micro-Crate Architecture:** 24 decoupled micro-crates strictly complying with the 1500 LOC per crate constraint, plus the root `archify-graft-cli` binary (25 workspace packages).
 - **5 Diagram Types & Delta Engine:** Architecture, Sequence, Dataflow, Lifecycle, Workflow diagrams + before/after delta diff analysis.
 - **Interactive Studio & Neon Aesthetics:** Hardware GPU-accelerated neon bloom rendering in `egui` via **wgpu** (DirectX 12 / Vulkan / Metal) and self-contained SVG export.
 - **Authored Story Beats:** Step-through architectural storytelling and multi-phase tour playback.

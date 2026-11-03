@@ -246,10 +246,12 @@ impl ToolHandler {
         }
     }
 
-    /// Amaç tahtası (`graft_hedef`): deponun `.harness/feature-list.json` beyanını
-    /// tek kayda çevirir. `kapi`nın kuralı burada da geçerli — **ölçülmedi yeşil
-    /// sayılmaz**: tanınmayan durum sözcüğü ya da durumsuz satır varsa yanıt
-    /// `isError` işaretlenir ki ajan tahtayı "hepsi tamam" diye okumasın.
+    /// Amaç tahtası (`graft_hedef`): deponun `.harness/hedefler.json` beyanını
+    /// (`archify-hedef/1` ortak şeması) tek kayda çevirir; şema yoksa eski
+    /// `.harness/feature-list.json`'ı çeviriciyle okur ve bunu raporda işaretler.
+    /// `kapi`nın kuralı burada da geçerli — **ölçülmedi yeşil sayılmaz**:
+    /// tanınmayan durum sözcüğü, bilinmeyen şema etiketi ya da durumsuz satır
+    /// varsa yanıt `isError` işaretlenir ki ajan tahtayı "hepsi tamam" diye okumasın.
     pub fn execute_hedef(path: &str, ozet: bool) -> Value {
         match archify_hedef::Tahta::oku(path) {
             Ok(t) => {

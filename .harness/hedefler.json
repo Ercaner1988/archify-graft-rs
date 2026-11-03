@@ -12,13 +12,13 @@
       "id": "H-2",
       "ad": "hedef alt komutu ve graft_hedef MCP aracı",
       "durum": "tamam",
-      "kanit": "tests/mcp_roundtrip.rs toplu sınama; cargo test --workspace: 247 geçti, 0 başarısız"
+      "kanit": "tests/mcp_roundtrip.rs toplu sınama; cargo test --workspace --locked -j 2: 58 sınama ikilisi, 254 geçti, 0 başarısız, çıkış 0 (2026-11-03 ölçümü)"
     },
     {
       "id": "H-3",
-      "ad": "Sekiz deponun ortak şemaya geçişi",
+      "ad": "On bir deponun ortak şemaya geçişi",
       "durum": "devam",
-      "kanit": "1/9 depo ortak şemada (bu depo); diğerleri hâlâ .harness/feature-list.json, tahta onları 'çevirici (eski şema)' diye işaretliyor",
+      "kanit": "9/11 depo ortak şemada (archify-graft-rs, altin-kapi, el-Fihrist, kesfuzzunun, kunye, logseq-tepsi, Nazar, oturum-ozeti, wbc-rs); kalan okf ve pasli-beyin'in etkin oturumu var. Ayrıntı: docs/HEDEF_GECIS_TALIMATI.md",
       "engel": "Her depo kendi niyetini kendi oturumunda yazmalı; mekanik çeviri şemayı döndürür ama niyeti yazmaz (A'nın ruhuna aykırı)"
     },
     {
@@ -49,7 +49,7 @@
       "id": "H-8",
       "ad": "Çok dilli AST, çağrı kenarları ve BM25 + GraphRank zemin katmanı",
       "durum": "tamam",
-      "kanit": "cargo test --workspace: 247 geçti, 0 başarısız; kapi yeşil 9 / kırmızı 0"
+      "kanit": "cargo test --workspace --locked -j 2: 58 sınama ikilisi, 254 geçti, 0 başarısız; kapi yeşil 9 / kırmızı 0"
     },
     {
       "id": "H-9",
