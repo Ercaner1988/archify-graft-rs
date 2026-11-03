@@ -15,7 +15,8 @@ daha ilk günde bozar: eski dosyadaki `status: passing` satırları kanıtsız
 "tamam" olarak kopyalanır.
 
 Bu yüzden geçiş **depo başına bir yazım işi**dir ve o depoyu çalışan oturumun
-işidir. Tahta bugün 1/9 gösteriyor; bu bir eksiklik kaydıdır, gizlenmiyor.
+işidir. Tahta bugün 9/11 gösteriyor; kalan iki depo bu bir eksiklik kaydıdır,
+gizlenmiyor.
 
 ## Kime iletilir
 
@@ -48,7 +49,7 @@ görünüyorsa o depo henüz yazmamış.
 
 Aşağıdaki satırlar elle yazılmadı: `archify-graft-cli hedef <depo> --ozet` ve
 `archify-graft-cli hedef <depo>` (kaynak satırı) çıktısından dolduruldu. Sütun 3
-tahtanın kendi hükmüdür — tablodaki 11 depodan **7'si** ortak şemada, 4'ü
+tahtanın kendi hükmüdür — tablodaki 11 depodan **9'u** ortak şemada, 2'si
 henüz değil.
 
 | Depo | Tahta (ortak şema) | Eski `feature-list.json` | Durum |
@@ -60,22 +61,33 @@ henüz değil.
 | logseq-tepsi | **var** — 15 hedef · 7 tamam · 7 kısmi · 1 bekliyor | var (gölgede) | geçti |
 | Nazar | **var** — 9 hedef · 6 tamam · 1 kısmi · 2 devam | var (gölgede) | geçti |
 | oturum-ozeti | **var** — 6 hedef · 4 tamam · 1 kısmi · 1 bekliyor | — | geçti (hiç beyanı yoktu) |
+| wbc-rs | **var** — 29 hedef · 4 tamam · 18 kısmi · 1 bekliyor · 6 ertelendi | var (gölgede) | geçti (03.11) |
+| kunye | **var** — 13 hedef · 10 tamam · 1 kısmi · 2 bekliyor | yok | geçti (03.11, ilk yazım) |
 | okf | yok | var — 13 hedef (7 tamam · 6 ertelendi) | **kaldı** |
 | pasli-beyin | yok | var — 8 hedef (8 tamam) | **kaldı** |
-| wbc-rs | yok | var — 27 hedef (1 tamam · 7 devam · 10 bekliyor · 9 ertelendi) | **kaldı** |
-| kunye | yok | yok | **kaldı** — hiç beyanı yok, ilk yazım |
 
 `okf` ve `pasli-beyin` bu tabloya göre "kaldı" görünüyor ama **bu oturumda
 dokunulmadı**: ikisinde de etkin çalışan bir oturum var, istem Ercan tarafından
-iletilecek. `wbc-rs` ve `kunye` sırada.
+iletilecek.
+
+### `wbc-rs` — neden 18 satır "kısmi"
+
+Tahta ölçümü 2026-11-03'te sandık sandık koşuldu (`cargo test -p <sandık>`):
+37 sandığın 28'i yeşil, 632 sınama geçti / 0 düştü. Yedi sandık derlenmiyor
+(`wbc-panel`, `wbc-maiyet`, `wbc-gorunum`, `wbc-ayrinti`, `wbc-hane`,
+`wbc-komuta`, `wbc-kumanda`), iki sandıkta birer sınama düşüyor
+(`wbc-tarayici`, `wbc-sahne`). Çalışma ağacı commit'siz. Bu yüzden çoğu eski
+`in_progress` satırı `tamam`a yuvarlanmadı: niyet korundu, kanıt ölçümün
+gösterdiği yere kadar yazıldı, engel alanına tam derleme hatası ve dosya:satır
+kondu. `cargo fmt --all --check` de kırmızı (`crates/wbc-app/src/main.rs:485`).
 
 ### Uyarı — "geçti" hükmü bugün yalnız bu makinede geçerli
 
-2026-11-03'te `git check-ignore` ile ölçüldü: `.harness/hedefler.json` yedi
-depodan **altısında `.gitignore` ile yok sayılıyor**; izlenen tek depo
-`archify-graft-rs`. Yani el-Fihrist, kesfuzzunun, altin-kapi, Nazar,
-logseq-tepsi ve oturum-ozeti tahtaları **yalnız yerel diskte** var — klonlayan,
-CI koşucusu ya da başka makinedeki ajan onları görmez.
+2026-11-03'te `git check-ignore` ile ölçüldü: `.harness/hedefler.json` sekiz
+depodan **yedisinde `.gitignore` ile yok sayılıyor**; izlenen iki depo
+`archify-graft-rs` ve `kunye`. Yani el-Fihrist, kesfuzzunun, altin-kapi, Nazar,
+logseq-tepsi, oturum-ozeti ve **wbc-rs** tahtaları **yalnız yerel diskte** var —
+klonlayan, CI koşucusu ya da başka makinedeki ajan onları görmez.
 
 Bu bir kusur mu, tercih mi, ölçülmeden karar verilmez: `.harness/` bu depolarda
 bilerek yok sayılıyor olabilir (çalışma defteri, ürün değil). Ama o hâlde
