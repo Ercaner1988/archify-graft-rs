@@ -1,4 +1,4 @@
-<!-- synced-from: README.md sha256:146005ddcced2c1ac7175dc0a340521817c3f0aede4d8c6da9e06bfeb1752463 -->
+<!-- synced-from: README.md sha256:89744ace434222709035f8ca5fefded916447ecc9b779282fa61bdeeea609be2 -->
 
 # archify-graft-rs — Reference & Operations Manual (CHM Guide)
 
@@ -281,6 +281,19 @@ archify-graft-cli hedef . --ozet
 | `regex` | `1.10` |
 | `eframe` | `{ version = "0.37.0", default-features = false, features = ["default_fonts"] }` |
 | `egui` | `{ version = "0.37.0", features = ["monochrome_emoji_fonts"] }` |
+| `lowlevel-sys` | `{ path = "crates/lowlevel-sys" }` |
+| `graft-model` | `{ path = "crates/graft-model" }` |
+| `graft-i18n` | `{ path = "crates/graft-i18n" }` |
+| `graft-parser` | `{ path = "crates/graft-parser" }` |
+| `graft-search` | `{ path = "crates/graft-search" }` |
+| `archify-ir` | `{ path = "crates/archify-ir" }` |
+| `archify-geometry` | `{ path = "crates/archify-geometry" }` |
+| `archify-bridge` | `{ path = "crates/archify-bridge" }` |
+| `archify-render` | `{ path = "crates/archify-render" }` |
+| `archify-delta` | `{ path = "crates/archify-delta" }` |
+| `archify-hedef` | `{ path = "crates/archify-hedef" }` |
+| `archify-egui` | `{ path = "crates/archify-egui", optional = true }` |
+| `graft-mcp` | `{ path = "crates/graft-mcp" }` |
 <!-- kapi-belge:bagimliliklar:end -->
 
 ---
