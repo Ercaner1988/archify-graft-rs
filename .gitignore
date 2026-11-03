@@ -6,3 +6,4 @@
 *.svg
 .DS_Store
 Thumbs.db
+!docs/*.svg

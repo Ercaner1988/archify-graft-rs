@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -16 1085.8 724" width="1085.8" height="724" role="img" data-preset="editorial" data-theme="auto">
+
+<title>Archify-Graft Veri Akışı</title>
+<desc>Archify-Graft Veri Akışı · 11 bileşen · 14 bağlantı</desc>
+<style>
+svg{--bg:#181611;--grid:#39342a;--text:#f4eddf;--muted:#b9ae9b;--dim:#776e60;--faint:#9d917e;--mask:#231f18;--panel:rgba(35,31,24,0.961);--lane-stroke:#726957;--arrow:#948978;--arrow-emphasis:#dd6b3d;--region-fill:rgba(170,119,49,0.078);--region-stroke:#d8ad68;--frontend-fill:rgba(43,133,142,0.161);--frontend-stroke:#7fc6c7;--backend-fill:rgba(63,132,92,0.161);--backend-stroke:#8fc29e;--database-fill:rgba(117,91,141,0.169);--database-stroke:#c0a4d0;--cloud-fill:rgba(170,119,49,0.161);--cloud-stroke:#d8ad68;--security-fill:rgba(157,69,65,0.169);--security-stroke:#df9085;--messagebus-fill:rgba(174,79,42,0.161);--messagebus-stroke:#df946f;--external-fill:rgba(126,115,96,0.18);--external-stroke:#b8ad99;--e-default:#948978;--l-default:#b9ae9b;--e-emphasis:#dd6b3d;--l-emphasis:#8fc29e;--e-security:#df9085;--l-security:#df9085;--e-dashed:#c0a4d0;--l-dashed:#df946f;--e-dotted:#948978;--l-dotted:#b9ae9b;background:var(--bg);font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', monospace}
+svg[data-theme="light"]{--bg:#f2eee5;--grid:#d8d0c2;--text:#242018;--muted:#6f6658;--dim:#a09788;--faint:#817767;--mask:#fbf8f1;--panel:rgba(251,248,241,0.969);--lane-stroke:#b8aa94;--arrow:#8a806f;--arrow-emphasis:#bb4c23;--region-fill:rgba(157,103,31,0.047);--region-stroke:#9a671f;--frontend-fill:rgba(31,117,126,0.09);--frontend-stroke:#287e84;--backend-fill:rgba(42,119,75,0.09);--backend-stroke:#397b53;--database-fill:rgba(105,75,130,0.09);--database-stroke:#765d86;--cloud-fill:rgba(157,103,31,0.102);--cloud-stroke:#9a671f;--security-fill:rgba(153,58,52,0.09);--security-stroke:#9e463f;--messagebus-fill:rgba(182,70,27,0.09);--messagebus-stroke:#ad4b25;--external-fill:rgba(101,91,75,0.09);--external-stroke:#746b5e;--e-default:#8a806f;--l-default:#6f6658;--e-emphasis:#bb4c23;--l-emphasis:#397b53;--e-security:#9e463f;--l-security:#9e463f;--e-dashed:#765d86;--l-dashed:#ad4b25;--e-dotted:#8a806f;--l-dotted:#6f6658;}
+@media (prefers-color-scheme:light){svg:not([data-theme="dark"]):not([data-theme="light"]){--bg:#f2eee5;--grid:#d8d0c2;--text:#242018;--muted:#6f6658;--dim:#a09788;--faint:#817767;--mask:#fbf8f1;--panel:rgba(251,248,241,0.969);--lane-stroke:#b8aa94;--arrow:#8a806f;--arrow-emphasis:#bb4c23;--region-fill:rgba(157,103,31,0.047);--region-stroke:#9a671f;--frontend-fill:rgba(31,117,126,0.09);--frontend-stroke:#287e84;--backend-fill:rgba(42,119,75,0.09);--backend-stroke:#397b53;--database-fill:rgba(105,75,130,0.09);--database-stroke:#765d86;--cloud-fill:rgba(157,103,31,0.102);--cloud-stroke:#9a671f;--security-fill:rgba(153,58,52,0.09);--security-stroke:#9e463f;--messagebus-fill:rgba(182,70,27,0.09);--messagebus-stroke:#ad4b25;--external-fill:rgba(101,91,75,0.09);--external-stroke:#746b5e;--e-default:#8a806f;--l-default:#6f6658;--e-emphasis:#bb4c23;--l-emphasis:#397b53;--e-security:#9e463f;--l-security:#9e463f;--e-dashed:#765d86;--l-dashed:#ad4b25;--e-dotted:#8a806f;--l-dotted:#6f6658;}}
+.bg{fill:var(--bg)}
+.grid-line{fill:none;stroke:var(--grid);stroke-width:.5;opacity:0.48;stroke-dasharray:1 4}
+.mask{fill:var(--mask)}
+.region-frame{fill:var(--region-fill);stroke:var(--region-stroke);stroke-width:1;stroke-dasharray:9 4}
+.t-primary{fill:var(--text)}.t-muted{fill:var(--muted)}.t-dim{fill:var(--dim)}.t-region{fill:var(--region-stroke);font-weight:600}
+.t-title{fill:var(--text);font-weight:700;font-family:Georgia, 'Times New Roman', serif}
+.c-frontend{fill:var(--frontend-fill);stroke:var(--frontend-stroke);stroke-width:1.5}.i-frontend{color:var(--frontend-stroke)}.sw-frontend{fill:var(--frontend-fill);stroke:var(--frontend-stroke);stroke-width:1}
+.c-backend{fill:var(--backend-fill);stroke:var(--backend-stroke);stroke-width:1.5}.i-backend{color:var(--backend-stroke)}.sw-backend{fill:var(--backend-fill);stroke:var(--backend-stroke);stroke-width:1}
+.c-database{fill:var(--database-fill);stroke:var(--database-stroke);stroke-width:1.5}.i-database{color:var(--database-stroke)}.sw-database{fill:var(--database-fill);stroke:var(--database-stroke);stroke-width:1}
+.c-cloud{fill:var(--cloud-fill);stroke:var(--cloud-stroke);stroke-width:1.5}.i-cloud{color:var(--cloud-stroke)}.sw-cloud{fill:var(--cloud-fill);stroke:var(--cloud-stroke);stroke-width:1}
+.c-security{fill:var(--security-fill);stroke:var(--security-stroke);stroke-width:1.5}.i-security{color:var(--security-stroke)}.sw-security{fill:var(--security-fill);stroke:var(--security-stroke);stroke-width:1}
+.c-messagebus{fill:var(--messagebus-fill);stroke:var(--messagebus-stroke);stroke-width:1.5}.i-messagebus{color:var(--messagebus-stroke)}.sw-messagebus{fill:var(--messagebus-fill);stroke:var(--messagebus-stroke);stroke-width:1}
+.c-external{fill:var(--external-fill);stroke:var(--external-stroke);stroke-width:1.5}.i-external{color:var(--external-stroke)}.sw-external{fill:var(--external-fill);stroke:var(--external-stroke);stroke-width:1}
+.sigil{fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;opacity:.76}.tag{fill:currentColor}
+.a-default{fill:none;stroke:var(--e-default);stroke-width:1.5;stroke-linecap:butt}.m-default{fill:var(--e-default)}.l-default{fill:var(--l-default)}
+.a-emphasis{fill:none;stroke:var(--e-emphasis);stroke-width:1.8;stroke-linecap:butt}.m-emphasis{fill:var(--e-emphasis)}.l-emphasis{fill:var(--l-emphasis)}
+.a-security{fill:none;stroke:var(--e-security);stroke-width:1.5;stroke-dasharray:5 5;stroke-linecap:butt}.m-security{fill:var(--e-security)}.l-security{fill:var(--l-security)}
+.a-dashed{fill:none;stroke:var(--e-dashed);stroke-width:1.5;stroke-dasharray:4 4;stroke-linecap:butt}.m-dashed{fill:var(--e-dashed)}.l-dashed{fill:var(--l-dashed)}
+.a-dotted{fill:none;stroke:var(--e-dotted);stroke-width:1.4;stroke-dasharray:1.5 4;stroke-linecap:butt}.m-dotted{fill:var(--e-dotted)}.l-dotted{fill:var(--l-dotted)}
+.s-added{fill:rgba(34,197,94,.14);stroke:#22c55e;stroke-width:1.8}.a-st-added{fill:none;stroke:#22c55e;stroke-width:1.8}.m-st-added{fill:#22c55e}.l-st-added{fill:#22c55e}.sw-st-added{fill:#22c55e}
+.s-removed{fill:rgba(244,63,94,.10);stroke:#f43f5e;stroke-width:1.8;stroke-dasharray:7 5}.a-st-removed{fill:none;stroke:#f43f5e;stroke-width:1.8;stroke-dasharray:7 5}.m-st-removed{fill:#f43f5e}.l-st-removed{fill:#f43f5e}.sw-st-removed{fill:#f43f5e}
+.s-modified{fill:rgba(245,158,11,.14);stroke:#f59e0b;stroke-width:1.8}.a-st-modified{fill:none;stroke:#f59e0b;stroke-width:1.8}.m-st-modified{fill:#f59e0b}.l-st-modified{fill:#f59e0b}.sw-st-modified{fill:#f59e0b}
+.s-unchanged{fill:rgba(71,85,105,.12);stroke:#475569;stroke-width:1.8}.a-st-unchanged{fill:none;stroke:#475569;stroke-width:1.8}.m-st-unchanged{fill:#475569}.l-st-unchanged{fill:#475569}.sw-st-unchanged{fill:#475569}
+[data-node-id],[data-edge-from]{transition:opacity .18s ease,filter .18s ease}
+.node{cursor:pointer;outline:none}.node:is(:hover,:focus-visible){filter:drop-shadow(0 2px 2px color-mix(in srgb,var(--text) 18%,transparent))}
+svg:has(#n0:is(:hover,:focus-visible)) .node:not(#n0):not(#n5):not(#n6):not(#n5),svg:has(#n0:is(:hover,:focus-visible)) .edge:not(#e0):not(#e1):not(#e2),svg:has(#n0:is(:hover,:focus-visible)) .lbl:not(#l0):not(#l1):not(#l2){opacity:.2}
+svg:has(#n1:is(:hover,:focus-visible)) .node:not(#n1):not(#n5):not(#n5),svg:has(#n1:is(:hover,:focus-visible)) .edge:not(#e3):not(#e4),svg:has(#n1:is(:hover,:focus-visible)) .lbl:not(#l3):not(#l4){opacity:.2}
+svg:has(#n2:is(:hover,:focus-visible)) .node:not(#n2):not(#n7),svg:has(#n2:is(:hover,:focus-visible)) .edge:not(#e5),svg:has(#n2:is(:hover,:focus-visible)) .lbl:not(#l5){opacity:.2}
+svg:has(#n3:is(:hover,:focus-visible)) .node:not(#n3):not(#n7),svg:has(#n3:is(:hover,:focus-visible)) .edge:not(#e6),svg:has(#n3:is(:hover,:focus-visible)) .lbl:not(#l6){opacity:.2}
+svg:has(#n4:is(:hover,:focus-visible)) .node:not(#n4):not(#n8),svg:has(#n4:is(:hover,:focus-visible)) .edge:not(#e7),svg:has(#n4:is(:hover,:focus-visible)) .lbl:not(#l7){opacity:.2}
+svg:has(#n5:is(:hover,:focus-visible)) .node:not(#n5):not(#n0):not(#n0):not(#n1):not(#n1):not(#n8):not(#n7),svg:has(#n5:is(:hover,:focus-visible)) .edge:not(#e0):not(#e2):not(#e3):not(#e4):not(#e12):not(#e13),svg:has(#n5:is(:hover,:focus-visible)) .lbl:not(#l0):not(#l2):not(#l3):not(#l4):not(#l12):not(#l13){opacity:.2}
+svg:has(#n6:is(:hover,:focus-visible)) .node:not(#n6):not(#n0):not(#n9):not(#n9),svg:has(#n6:is(:hover,:focus-visible)) .edge:not(#e1):not(#e8):not(#e10),svg:has(#n6:is(:hover,:focus-visible)) .lbl:not(#l1):not(#l8):not(#l10){opacity:.2}
+svg:has(#n7:is(:hover,:focus-visible)) .node:not(#n7):not(#n2):not(#n3):not(#n10):not(#n10):not(#n5),svg:has(#n7:is(:hover,:focus-visible)) .edge:not(#e5):not(#e6):not(#e9):not(#e11):not(#e13),svg:has(#n7:is(:hover,:focus-visible)) .lbl:not(#l5):not(#l6):not(#l9):not(#l11):not(#l13){opacity:.2}
+svg:has(#n8:is(:hover,:focus-visible)) .node:not(#n8):not(#n4):not(#n5),svg:has(#n8:is(:hover,:focus-visible)) .edge:not(#e7):not(#e12),svg:has(#n8:is(:hover,:focus-visible)) .lbl:not(#l7):not(#l12){opacity:.2}
+svg:has(#n9:is(:hover,:focus-visible)) .node:not(#n9):not(#n6):not(#n6),svg:has(#n9:is(:hover,:focus-visible)) .edge:not(#e8):not(#e10),svg:has(#n9:is(:hover,:focus-visible)) .lbl:not(#l8):not(#l10){opacity:.2}
+svg:has(#n10:is(:hover,:focus-visible)) .node:not(#n10):not(#n7):not(#n7),svg:has(#n10:is(:hover,:focus-visible)) .edge:not(#e9):not(#e11),svg:has(#n10:is(:hover,:focus-visible)) .lbl:not(#l9):not(#l11){opacity:.2}
+.node:focus-visible .box{stroke-width:2.4}
+@keyframes edge-flow{0%{stroke-dasharray:10 8;stroke-dashoffset:54;opacity:.42}88%{stroke-dasharray:10 8;stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:1}}
+@keyframes node-pulse{0%,72%,100%{filter:none}18%,36%{filter:drop-shadow(0 0 8px var(--arrow-emphasis))}}
+@keyframes edge-dash{to{stroke-dashoffset:-12}}
+.edge path{animation:edge-flow 2.4s linear 1 backwards;animation-delay:calc(var(--step,0)*160ms)}
+.edge.flow path{stroke-dasharray:6 6;animation:edge-dash 1.2s linear infinite}
+.node{animation:node-pulse 3.6s ease-in-out 1 backwards;animation-delay:calc(var(--step,0)*160ms)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<defs>
+<pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path class="grid-line" d="M 40 0 L 0 0 0 40"/></pattern>
+<marker id="m-default" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-default" points="0 0, 10 3.5, 0 7"/></marker>
+<marker id="m-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-emphasis" points="0 0, 10 3.5, 0 7"/></marker>
+<marker id="m-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-security" points="0 0, 10 3.5, 0 7"/></marker>
+<marker id="m-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-dashed" points="0 0, 10 3.5, 0 7"/></marker>
+<marker id="m-dotted" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-dotted" points="0 0, 10 3.5, 0 7"/></marker>
+</defs>
+<rect class="bg" x="0" y="-16" width="1085.8" height="724" fill="#181611"/>
+<rect x="0" y="-16" width="1085.8" height="724" fill="url(#grid)"/>
+<text class="t-title" x="40" y="18" font-size="20" text-anchor="start">Archify-Graft Veri Akışı</text>
+<text class="t-muted" x="40" y="36" font-size="11" text-anchor="start">Veri akışı · 5 veri dosyası · 4 işlev</text>
+<g class="edge" id="e0" data-edge-id="e0" data-edge-from=".\src\main.rs:main" data-edge-to="artifact:hashes.bin" data-edge-label="yazar" style="--step:0"><path class="a-default" d="M 339.6 285 L 200 285 Q 192 285 192 277 L 192 111 Q 192 105 186 105 L 180 105" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e1" data-edge-id="e1" data-edge-from="artifact:hashes.bin" data-edge-to=".\crates\graft-search\src\lib.rs:GraphStorage::index_or_refresh" data-edge-label="okur" style="--step:1"><path class="a-default" d="M 180 119 L 315.6 119 Q 323.6 119 323.6 127 L 323.6 390 Q 323.6 398 331.6 398 L 339.6 398" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e2" data-edge-id="e2" data-edge-from="artifact:hashes.bin" data-edge-to=".\src\main.rs:main" data-edge-label="okur" style="--step:2"><path class="a-default" d="M 180 119 L 315.6 119 Q 323.6 119 323.6 127 L 323.6 291 Q 323.6 299 331.6 299 L 339.6 299" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e3" data-edge-id="e3" data-edge-from=".\src\main.rs:main" data-edge-to="artifact:graft-hashes.bin" data-edge-label="yazar" style="--step:3"><path class="a-default" d="M 479.6 299 L 645.6 299 Q 653.6 299 653.6 291 L 653.6 231 Q 653.6 225 659.6 225 L 665.6 225" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e4" data-edge-id="e4" data-edge-from="artifact:graft-hashes.bin" data-edge-to=".\src\main.rs:main" data-edge-label="okur" style="--step:4"><path class="a-default" d="M 665.6 239 L 499.6 239 Q 491.6 239 491.6 247 L 491.6 279 Q 491.6 285 485.6 285 L 479.6 285" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e5" data-edge-id="e5" data-edge-from="artifact:feature-list.json" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku" data-edge-label="okur" style="--step:5"><path class="a-default" d="M 180.2 232 L 607.6 232 Q 615.6 232 615.6 240 L 615.6 440 Q 615.6 448 623.6 448 L 665.6 448" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e6" data-edge-id="e6" data-edge-from="artifact:hedefler.json" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku" data-edge-label="okur" style="--step:6"><path class="a-default" d="M 180 472 L 665.6 472" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e7" data-edge-id="e7" data-edge-from=".\src\main.rs:write_wiring_meta" data-edge-to="artifact:wiring.bin" data-edge-label="yazar" style="--step:7"><path class="a-default" d="M 805.8 352 L 905.8 352" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e8" data-edge-id="e8" data-edge-from=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_index" data-edge-to=".\crates\graft-search\src\lib.rs:GraphStorage::index_or_refresh" data-edge-label="çağırır" style="--step:8"><path class="a-default" d="M 239.6 352 L 323.6 352 Q 331.6 352 331.6 360 L 331.6 408 Q 331.6 412 335.6 412 L 339.6 412" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e9" data-edge-id="e9" data-edge-from=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_hedef" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku" data-edge-label="çağırır" style="--step:9"><path class="a-default" d="M 239.6 592 L 645.6 592 Q 653.6 592 653.6 584 L 653.6 489.5 Q 653.6 483.5 659.6 483.5 L 665.6 483.5" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e10" data-edge-id="e10" data-edge-from=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_index" data-edge-to=".\crates\graft-search\src\lib.rs:GraphStorage::index_or_refresh" data-edge-label="çağırır" style="--step:10"><path class="a-default" d="M 239.6 352 L 323.6 352 Q 331.6 352 331.6 360 L 331.6 422 Q 331.6 426 335.6 426 L 339.6 426" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e11" data-edge-id="e11" data-edge-from=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_hedef" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku" data-edge-label="çağırır" style="--step:11"><path class="a-default" d="M 239.6 592 L 645.6 592 Q 653.6 592 653.6 584 L 653.6 501 Q 653.6 495 659.6 495 L 665.6 495" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e12" data-edge-id="e12" data-edge-from=".\src\main.rs:main" data-edge-to=".\src\main.rs:write_wiring_meta" data-edge-label="çağırır" style="--step:12"><path class="a-default" d="M 479.6 299 L 645.6 299 Q 653.6 299 653.6 307 L 653.6 346 Q 653.6 352 659.6 352 L 665.6 352" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e13" data-edge-id="e13" data-edge-from=".\src\main.rs:main" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku" data-edge-label="çağırır" style="--step:12"><path class="a-default" d="M 479.6 299 L 645.6 299 Q 653.6 299 653.6 307 L 653.6 454.5 Q 653.6 460.5 659.6 460.5 L 665.6 460.5" marker-end="url(#m-default)"/></g>
+<g id="n0" class="node" data-node-id="artifact:hashes.bin" data-node-label="hashes.bin" data-node-kind="database" data-node-sublabel="1 yazar · 2 okuyucu" tabindex="0" role="button" aria-pressed="false" aria-label="hashes.bin · 1 yazar · 2 okuyucu" style="--step:0">
+<title>hashes.bin · 1 yazar · 2 okuyucu</title>
+<rect class="mask" x="40" y="80" width="140" height="64" rx="6"/><rect class="box c-database" x="40" y="80" width="140" height="64" rx="6"/>
+<g class="sigil i-database" transform="translate(46 86) scale(.6875)"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></g>
+<text class="t-primary" x="110" y="110.7" font-size="11" font-weight="600" text-anchor="middle">hashes.bin</text>
+<text class="t-muted" data-detail="context" x="110" y="128" font-size="9" text-anchor="middle">1 yazar · 2 okuyucu</text>
+</g>
+<g id="n1" class="node" data-node-id="artifact:graft-hashes.bin" data-node-label="graft-hashes.bin" data-node-kind="database" data-node-sublabel="1 yazar · 1 okuyucu" tabindex="0" role="button" aria-pressed="false" aria-label="graft-hashes.bin · 1 yazar · 1 okuyucu" style="--step:1">
+<title>graft-hashes.bin · 1 yazar · 1 okuyucu</title>
+<rect class="mask" x="665.6" y="200" width="140" height="64" rx="6"/><rect class="box c-database" x="665.6" y="200" width="140" height="64" rx="6"/>
+<g class="sigil i-database" transform="translate(671.6 206) scale(.6875)"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></g>
+<text class="t-primary" x="735.6" y="230.7" font-size="11" font-weight="600" text-anchor="middle">graft-hashes.bin</text>
+<text class="t-muted" data-detail="context" x="735.6" y="247.9" font-size="9" text-anchor="middle">1 yazar · 1 okuyucu</text>
+</g>
+<g id="n2" class="node" data-node-id="artifact:feature-list.json" data-node-label="feature-list.json" data-node-kind="database" data-node-sublabel="0 yazar · 1 okuyucu" tabindex="0" role="button" aria-pressed="false" aria-label="feature-list.json · 0 yazar · 1 okuyucu" style="--step:2">
+<title>feature-list.json · 0 yazar · 1 okuyucu</title>
+<rect class="mask" x="40" y="200" width="140.2" height="64" rx="6"/><rect class="box c-database" x="40" y="200" width="140.2" height="64" rx="6"/>
+<g class="sigil i-database" transform="translate(46 206) scale(.6875)"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></g>
+<text class="t-primary" x="110.1" y="230.7" font-size="11" font-weight="600" text-anchor="middle">feature-list.json</text>
+<text class="t-muted" data-detail="context" x="110.1" y="247.9" font-size="9" text-anchor="middle">0 yazar · 1 okuyucu</text>
+</g>
+<g id="n3" class="node" data-node-id="artifact:hedefler.json" data-node-label="hedefler.json" data-node-kind="database" data-node-sublabel="0 yazar · 1 okuyucu" tabindex="0" role="button" aria-pressed="false" aria-label="hedefler.json · 0 yazar · 1 okuyucu" style="--step:3">
+<title>hedefler.json · 0 yazar · 1 okuyucu</title>
+<rect class="mask" x="40" y="440" width="140" height="64" rx="6"/><rect class="box c-database" x="40" y="440" width="140" height="64" rx="6"/>
+<g class="sigil i-database" transform="translate(46 446) scale(.6875)"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></g>
+<text class="t-primary" x="110" y="470.7" font-size="11" font-weight="600" text-anchor="middle">hedefler.json</text>
+<text class="t-muted" data-detail="context" x="110" y="487.9" font-size="9" text-anchor="middle">0 yazar · 1 okuyucu</text>
+</g>
+<g id="n4" class="node" data-node-id="artifact:wiring.bin" data-node-label="wiring.bin" data-node-kind="database" data-node-sublabel="1 yazar · 0 okuyucu" tabindex="0" role="button" aria-pressed="false" aria-label="wiring.bin · 1 yazar · 0 okuyucu" style="--step:4">
+<title>wiring.bin · 1 yazar · 0 okuyucu</title>
+<rect class="mask" x="905.8" y="320" width="140" height="64" rx="6"/><rect class="box c-database" x="905.8" y="320" width="140" height="64" rx="6"/>
+<g class="sigil i-database" transform="translate(911.8 326) scale(.6875)"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></g>
+<text class="t-primary" x="975.8" y="350.7" font-size="11" font-weight="600" text-anchor="middle">wiring.bin</text>
+<text class="t-muted" data-detail="context" x="975.8" y="367.9" font-size="9" text-anchor="middle">1 yazar · 0 okuyucu</text>
+</g>
+<g id="n5" class="node" data-node-id=".\src\main.rs:main" data-node-label="main" data-node-kind="frontend" data-node-sublabel="archify-graft-cli · main.rs" tabindex="0" role="button" aria-pressed="false" aria-label="main · archify-graft-cli · main.rs" style="--step:5">
+<title>main · archify-graft-cli · main.rs</title>
+<rect class="mask" x="339.6" y="260" width="140" height="64" rx="6"/><rect class="box c-frontend" x="339.6" y="260" width="140" height="64" rx="6"/>
+<g class="sigil i-frontend" transform="translate(345.6 266) scale(.6875)"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M1.5 6h13"/></g>
+<text class="t-primary" x="409.6" y="290.7" font-size="11" font-weight="600" text-anchor="middle">main</text>
+<text class="t-muted" data-detail="context" x="409.6" y="307.5" font-size="7.6" text-anchor="middle">archify-graft-cli · main.rs</text>
+</g>
+<g id="n6" class="node" data-node-id=".\crates\graft-search\src\lib.rs:GraphStorage::index_or_refresh" data-node-label="GraphStorage::index_or_refresh" data-node-kind="backend" data-node-sublabel="graft-search · lib.rs" tabindex="0" role="button" aria-pressed="false" aria-label="GraphStorage::index_or_refresh · graft-search · lib.rs" style="--step:6">
+<title>GraphStorage::index_or_refresh · graft-search · lib.rs</title>
+<rect class="mask" x="339.6" y="380" width="226" height="64" rx="6"/><rect class="box c-backend" x="339.6" y="380" width="226" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(345.6 386) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="452.6" y="410.7" font-size="11" font-weight="600" text-anchor="middle">GraphStorage::index_or_refresh</text>
+<text class="t-muted" data-detail="context" x="452.6" y="427.9" font-size="9" text-anchor="middle">graft-search · lib.rs</text>
+</g>
+<g id="n7" class="node" data-node-id=".\crates\archify-hedef\src\lib.rs:Tahta::oku" data-node-label="Tahta::oku" data-node-kind="backend" data-node-sublabel="archify-hedef · lib.rs" tabindex="0" role="button" aria-pressed="false" aria-label="Tahta::oku · archify-hedef · lib.rs" style="--step:7">
+<title>Tahta::oku · archify-hedef · lib.rs</title>
+<rect class="mask" x="665.6" y="440" width="140" height="64" rx="6"/><rect class="box c-backend" x="665.6" y="440" width="140" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(671.6 446) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="735.6" y="470.7" font-size="11" font-weight="600" text-anchor="middle">Tahta::oku</text>
+<text class="t-muted" data-detail="context" x="735.6" y="487.9" font-size="9" text-anchor="middle">archify-hedef · lib.rs</text>
+</g>
+<g id="n8" class="node" data-node-id=".\src\main.rs:write_wiring_meta" data-node-label="write_wiring_meta" data-node-kind="frontend" data-node-sublabel="archify-graft-cli · main.rs" tabindex="0" role="button" aria-pressed="false" aria-label="write_wiring_meta · archify-graft-cli · main.rs" style="--step:8">
+<title>write_wiring_meta · archify-graft-cli · main.rs</title>
+<rect class="mask" x="665.6" y="320" width="140.2" height="64" rx="6"/><rect class="box c-frontend" x="665.6" y="320" width="140.2" height="64" rx="6"/>
+<g class="sigil i-frontend" transform="translate(671.6 326) scale(.6875)"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M1.5 6h13"/></g>
+<text class="t-primary" x="735.7" y="350.7" font-size="11" font-weight="600" text-anchor="middle">write_wiring_meta</text>
+<text class="t-muted" data-detail="context" x="735.7" y="367.5" font-size="7.6" text-anchor="middle">archify-graft-cli · main.rs</text>
+</g>
+<g id="n9" class="node" data-node-id=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_index" data-node-label="ToolHandler::execute_index" data-node-kind="backend" data-node-sublabel="graft-mcp · handlers.rs" tabindex="0" role="button" aria-pressed="false" aria-label="ToolHandler::execute_index · graft-mcp · handlers.rs" style="--step:9">
+<title>ToolHandler::execute_index · graft-mcp · handlers.rs</title>
+<rect class="mask" x="40" y="320" width="199.6" height="64" rx="6"/><rect class="box c-backend" x="40" y="320" width="199.6" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(46 326) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="139.8" y="350.7" font-size="11" font-weight="600" text-anchor="middle">ToolHandler::execute_index</text>
+<text class="t-muted" data-detail="context" x="139.8" y="367.9" font-size="9" text-anchor="middle">graft-mcp · handlers.rs</text>
+</g>
+<g id="n10" class="node" data-node-id=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_hedef" data-node-label="ToolHandler::execute_hedef" data-node-kind="backend" data-node-sublabel="graft-mcp · handlers.rs" tabindex="0" role="button" aria-pressed="false" aria-label="ToolHandler::execute_hedef · graft-mcp · handlers.rs" style="--step:10">
+<title>ToolHandler::execute_hedef · graft-mcp · handlers.rs</title>
+<rect class="mask" x="40" y="560" width="199.6" height="64" rx="6"/><rect class="box c-backend" x="40" y="560" width="199.6" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(46 566) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="139.8" y="590.7" font-size="11" font-weight="600" text-anchor="middle">ToolHandler::execute_hedef</text>
+<text class="t-muted" data-detail="context" x="139.8" y="608" font-size="9" text-anchor="middle">graft-mcp · handlers.rs</text>
+</g>
+<g class="lbl" id="l0" data-detail="context" data-edge-from=".\src\main.rs:main" data-edge-to="artifact:hashes.bin"><rect class="mask" x="175" y="161" width="34" height="14" rx="3"/><text class="l-default" x="192" y="171.2" font-size="8" text-anchor="middle">yazar</text></g>
+<g class="lbl" id="l1" data-detail="context" data-edge-from="artifact:hashes.bin" data-edge-to=".\crates\graft-search\src\lib.rs:GraphStorage::index_or_refresh"><rect class="mask" x="308.6" y="209.6" width="30" height="14" rx="3"/><text class="l-default" x="323.6" y="219.8" font-size="8" text-anchor="middle">okur</text></g>
+<g class="lbl" id="l2" data-detail="context" data-edge-from="artifact:hashes.bin" data-edge-to=".\src\main.rs:main"><rect class="mask" x="308.6" y="175" width="30" height="14" rx="3"/><text class="l-default" x="323.6" y="185.2" font-size="8" text-anchor="middle">okur</text></g>
+<g class="lbl" id="l3" data-detail="context" data-edge-from=".\src\main.rs:main" data-edge-to="artifact:graft-hashes.bin"><rect class="mask" x="636.6" y="266.1" width="34" height="14" rx="3"/><text class="l-default" x="653.6" y="276.3" font-size="8" text-anchor="middle">yazar</text></g>
+<g class="lbl" id="l4" data-detail="context" data-edge-from="artifact:graft-hashes.bin" data-edge-to=".\src\main.rs:main"><rect class="mask" x="563.6" y="243" width="30" height="14" rx="3"/><text class="l-default" x="578.6" y="253.2" font-size="8" text-anchor="middle">okur</text></g>
+<g class="lbl" id="l5" data-detail="context" data-edge-from="artifact:feature-list.json" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku"><rect class="mask" x="600.6" y="333" width="30" height="14" rx="3"/><text class="l-default" x="615.6" y="343.2" font-size="8" text-anchor="middle">okur</text></g>
+<g class="lbl" id="l6" data-detail="context" data-edge-from="artifact:hedefler.json" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku"><rect class="mask" x="407.8" y="454" width="30" height="14" rx="3"/><text class="l-default" x="422.8" y="464.2" font-size="8" text-anchor="middle">okur</text></g>
+<g class="lbl" id="l7" data-detail="context" data-edge-from=".\src\main.rs:write_wiring_meta" data-edge-to="artifact:wiring.bin"><rect class="mask" x="838.8" y="334" width="34" height="14" rx="3"/><text class="l-default" x="855.8" y="344.2" font-size="8" text-anchor="middle">yazar</text></g>
+<g class="lbl" id="l8" data-detail="context" data-edge-from=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_index" data-edge-to=".\crates\graft-search\src\lib.rs:GraphStorage::index_or_refresh"><rect class="mask" x="263.8" y="334" width="43.6" height="14" rx="3"/><text class="l-default" x="285.6" y="344.2" font-size="8" text-anchor="middle">çağırır</text></g>
+<g class="lbl" id="l9" data-detail="context" data-edge-from=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_hedef" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku"><rect class="mask" x="631.8" y="530.8" width="43.6" height="14" rx="3"/><text class="l-default" x="653.6" y="541" font-size="8" text-anchor="middle">çağırır</text></g>
+<g class="lbl" id="l10" data-detail="context" data-edge-from=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_index" data-edge-to=".\crates\graft-search\src\lib.rs:GraphStorage::index_or_refresh"><rect class="mask" x="263.8" y="356" width="43.6" height="14" rx="3"/><text class="l-default" x="285.6" y="366.2" font-size="8" text-anchor="middle">çağırır</text></g>
+<g class="lbl" id="l11" data-detail="context" data-edge-from=".\crates\graft-mcp\src\handlers.rs:ToolHandler::execute_hedef" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku"><rect class="mask" x="424.8" y="574" width="43.6" height="14" rx="3"/><text class="l-default" x="446.6" y="584.2" font-size="8" text-anchor="middle">çağırır</text></g>
+<g class="lbl" id="l12" data-detail="context" data-edge-from=".\src\main.rs:main" data-edge-to=".\src\main.rs:write_wiring_meta"><rect class="mask" x="544.8" y="281" width="43.6" height="14" rx="3"/><text class="l-default" x="566.6" y="291.2" font-size="8" text-anchor="middle">çağırır</text></g>
+<g class="lbl" id="l13" data-detail="context" data-edge-from=".\src\main.rs:main" data-edge-to=".\crates\archify-hedef\src\lib.rs:Tahta::oku"><rect class="mask" x="631.8" y="397" width="43.6" height="14" rx="3"/><text class="l-default" x="653.6" y="407.2" font-size="8" text-anchor="middle">çağırır</text></g>
+<g class="legend">
+<g class="legend-item" data-legend-kind="frontend" style="cursor:pointer"><rect class="sw-frontend" x="40" y="677" width="16" height="10" rx="2.5"/><text class="t-primary" x="62" y="686" font-size="10" text-anchor="start">Arayüz</text>
+<text class="t-dim" x="106" y="686" font-size="8" font-weight="700" text-anchor="start">2</text>
+</g>
+<g class="legend-item" data-legend-kind="backend" style="cursor:pointer"><rect class="sw-backend" x="144" y="677" width="16" height="10" rx="2.5"/><text class="t-primary" x="166" y="686" font-size="10" text-anchor="start">Çekirdek</text>
+<text class="t-dim" x="222" y="686" font-size="8" font-weight="700" text-anchor="start">4</text>
+</g>
+<g class="legend-item" data-legend-kind="database" style="cursor:pointer"><rect class="sw-database" x="260" y="677" width="16" height="10" rx="2.5"/><text class="t-primary" x="282" y="686" font-size="10" text-anchor="start">Depolama</text>
+<text class="t-dim" x="338" y="686" font-size="8" font-weight="700" text-anchor="start">5</text>
+</g>
+</g>
+</svg>

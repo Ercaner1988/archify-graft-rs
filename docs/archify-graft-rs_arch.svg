@@ -1,0 +1,397 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 14 1416 904" width="1416" height="904" role="img" data-preset="editorial" data-theme="auto">
+
+<title>Archify-Graft Mimari Haritası</title>
+<desc>Archify-Graft Mimari Haritası · 25 bileşen · 65 bağlantı</desc>
+<style>
+svg{--bg:#181611;--grid:#39342a;--text:#f4eddf;--muted:#b9ae9b;--dim:#776e60;--faint:#9d917e;--mask:#231f18;--panel:rgba(35,31,24,0.961);--lane-stroke:#726957;--arrow:#948978;--arrow-emphasis:#dd6b3d;--region-fill:rgba(170,119,49,0.078);--region-stroke:#d8ad68;--frontend-fill:rgba(43,133,142,0.161);--frontend-stroke:#7fc6c7;--backend-fill:rgba(63,132,92,0.161);--backend-stroke:#8fc29e;--database-fill:rgba(117,91,141,0.169);--database-stroke:#c0a4d0;--cloud-fill:rgba(170,119,49,0.161);--cloud-stroke:#d8ad68;--security-fill:rgba(157,69,65,0.169);--security-stroke:#df9085;--messagebus-fill:rgba(174,79,42,0.161);--messagebus-stroke:#df946f;--external-fill:rgba(126,115,96,0.18);--external-stroke:#b8ad99;--e-default:#948978;--l-default:#b9ae9b;--e-emphasis:#dd6b3d;--l-emphasis:#8fc29e;--e-security:#df9085;--l-security:#df9085;--e-dashed:#c0a4d0;--l-dashed:#df946f;--e-dotted:#948978;--l-dotted:#b9ae9b;background:var(--bg);font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', monospace}
+svg[data-theme="light"]{--bg:#f2eee5;--grid:#d8d0c2;--text:#242018;--muted:#6f6658;--dim:#a09788;--faint:#817767;--mask:#fbf8f1;--panel:rgba(251,248,241,0.969);--lane-stroke:#b8aa94;--arrow:#8a806f;--arrow-emphasis:#bb4c23;--region-fill:rgba(157,103,31,0.047);--region-stroke:#9a671f;--frontend-fill:rgba(31,117,126,0.09);--frontend-stroke:#287e84;--backend-fill:rgba(42,119,75,0.09);--backend-stroke:#397b53;--database-fill:rgba(105,75,130,0.09);--database-stroke:#765d86;--cloud-fill:rgba(157,103,31,0.102);--cloud-stroke:#9a671f;--security-fill:rgba(153,58,52,0.09);--security-stroke:#9e463f;--messagebus-fill:rgba(182,70,27,0.09);--messagebus-stroke:#ad4b25;--external-fill:rgba(101,91,75,0.09);--external-stroke:#746b5e;--e-default:#8a806f;--l-default:#6f6658;--e-emphasis:#bb4c23;--l-emphasis:#397b53;--e-security:#9e463f;--l-security:#9e463f;--e-dashed:#765d86;--l-dashed:#ad4b25;--e-dotted:#8a806f;--l-dotted:#6f6658;}
+@media (prefers-color-scheme:light){svg:not([data-theme="dark"]):not([data-theme="light"]){--bg:#f2eee5;--grid:#d8d0c2;--text:#242018;--muted:#6f6658;--dim:#a09788;--faint:#817767;--mask:#fbf8f1;--panel:rgba(251,248,241,0.969);--lane-stroke:#b8aa94;--arrow:#8a806f;--arrow-emphasis:#bb4c23;--region-fill:rgba(157,103,31,0.047);--region-stroke:#9a671f;--frontend-fill:rgba(31,117,126,0.09);--frontend-stroke:#287e84;--backend-fill:rgba(42,119,75,0.09);--backend-stroke:#397b53;--database-fill:rgba(105,75,130,0.09);--database-stroke:#765d86;--cloud-fill:rgba(157,103,31,0.102);--cloud-stroke:#9a671f;--security-fill:rgba(153,58,52,0.09);--security-stroke:#9e463f;--messagebus-fill:rgba(182,70,27,0.09);--messagebus-stroke:#ad4b25;--external-fill:rgba(101,91,75,0.09);--external-stroke:#746b5e;--e-default:#8a806f;--l-default:#6f6658;--e-emphasis:#bb4c23;--l-emphasis:#397b53;--e-security:#9e463f;--l-security:#9e463f;--e-dashed:#765d86;--l-dashed:#ad4b25;--e-dotted:#8a806f;--l-dotted:#6f6658;}}
+.bg{fill:var(--bg)}
+.grid-line{fill:none;stroke:var(--grid);stroke-width:.5;opacity:0.48;stroke-dasharray:1 4}
+.mask{fill:var(--mask)}
+.region-frame{fill:var(--region-fill);stroke:var(--region-stroke);stroke-width:1;stroke-dasharray:9 4}
+.t-primary{fill:var(--text)}.t-muted{fill:var(--muted)}.t-dim{fill:var(--dim)}.t-region{fill:var(--region-stroke);font-weight:600}
+.t-title{fill:var(--text);font-weight:700;font-family:Georgia, 'Times New Roman', serif}
+.c-frontend{fill:var(--frontend-fill);stroke:var(--frontend-stroke);stroke-width:1.5}.i-frontend{color:var(--frontend-stroke)}.sw-frontend{fill:var(--frontend-fill);stroke:var(--frontend-stroke);stroke-width:1}
+.c-backend{fill:var(--backend-fill);stroke:var(--backend-stroke);stroke-width:1.5}.i-backend{color:var(--backend-stroke)}.sw-backend{fill:var(--backend-fill);stroke:var(--backend-stroke);stroke-width:1}
+.c-database{fill:var(--database-fill);stroke:var(--database-stroke);stroke-width:1.5}.i-database{color:var(--database-stroke)}.sw-database{fill:var(--database-fill);stroke:var(--database-stroke);stroke-width:1}
+.c-cloud{fill:var(--cloud-fill);stroke:var(--cloud-stroke);stroke-width:1.5}.i-cloud{color:var(--cloud-stroke)}.sw-cloud{fill:var(--cloud-fill);stroke:var(--cloud-stroke);stroke-width:1}
+.c-security{fill:var(--security-fill);stroke:var(--security-stroke);stroke-width:1.5}.i-security{color:var(--security-stroke)}.sw-security{fill:var(--security-fill);stroke:var(--security-stroke);stroke-width:1}
+.c-messagebus{fill:var(--messagebus-fill);stroke:var(--messagebus-stroke);stroke-width:1.5}.i-messagebus{color:var(--messagebus-stroke)}.sw-messagebus{fill:var(--messagebus-fill);stroke:var(--messagebus-stroke);stroke-width:1}
+.c-external{fill:var(--external-fill);stroke:var(--external-stroke);stroke-width:1.5}.i-external{color:var(--external-stroke)}.sw-external{fill:var(--external-fill);stroke:var(--external-stroke);stroke-width:1}
+.sigil{fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;opacity:.76}.tag{fill:currentColor}
+.a-default{fill:none;stroke:var(--e-default);stroke-width:1.5;stroke-linecap:butt}.m-default{fill:var(--e-default)}.l-default{fill:var(--l-default)}
+.a-emphasis{fill:none;stroke:var(--e-emphasis);stroke-width:1.8;stroke-linecap:butt}.m-emphasis{fill:var(--e-emphasis)}.l-emphasis{fill:var(--l-emphasis)}
+.a-security{fill:none;stroke:var(--e-security);stroke-width:1.5;stroke-dasharray:5 5;stroke-linecap:butt}.m-security{fill:var(--e-security)}.l-security{fill:var(--l-security)}
+.a-dashed{fill:none;stroke:var(--e-dashed);stroke-width:1.5;stroke-dasharray:4 4;stroke-linecap:butt}.m-dashed{fill:var(--e-dashed)}.l-dashed{fill:var(--l-dashed)}
+.a-dotted{fill:none;stroke:var(--e-dotted);stroke-width:1.4;stroke-dasharray:1.5 4;stroke-linecap:butt}.m-dotted{fill:var(--e-dotted)}.l-dotted{fill:var(--l-dotted)}
+.s-added{fill:rgba(34,197,94,.14);stroke:#22c55e;stroke-width:1.8}.a-st-added{fill:none;stroke:#22c55e;stroke-width:1.8}.m-st-added{fill:#22c55e}.l-st-added{fill:#22c55e}.sw-st-added{fill:#22c55e}
+.s-removed{fill:rgba(244,63,94,.10);stroke:#f43f5e;stroke-width:1.8;stroke-dasharray:7 5}.a-st-removed{fill:none;stroke:#f43f5e;stroke-width:1.8;stroke-dasharray:7 5}.m-st-removed{fill:#f43f5e}.l-st-removed{fill:#f43f5e}.sw-st-removed{fill:#f43f5e}
+.s-modified{fill:rgba(245,158,11,.14);stroke:#f59e0b;stroke-width:1.8}.a-st-modified{fill:none;stroke:#f59e0b;stroke-width:1.8}.m-st-modified{fill:#f59e0b}.l-st-modified{fill:#f59e0b}.sw-st-modified{fill:#f59e0b}
+.s-unchanged{fill:rgba(71,85,105,.12);stroke:#475569;stroke-width:1.8}.a-st-unchanged{fill:none;stroke:#475569;stroke-width:1.8}.m-st-unchanged{fill:#475569}.l-st-unchanged{fill:#475569}.sw-st-unchanged{fill:#475569}
+[data-node-id],[data-edge-from]{transition:opacity .18s ease,filter .18s ease}
+.node{cursor:pointer;outline:none}.node:is(:hover,:focus-visible){filter:drop-shadow(0 2px 2px color-mix(in srgb,var(--text) 18%,transparent))}
+svg:has(#n0:is(:hover,:focus-visible)) .node:not(#n0):not(#n1):not(#n6):not(#n7):not(#n17):not(#n2):not(#n22):not(#n24),svg:has(#n0:is(:hover,:focus-visible)) .edge:not(#e0):not(#e1):not(#e2):not(#e3):not(#e8):not(#e43):not(#e57),svg:has(#n0:is(:hover,:focus-visible)) .lbl:not(#l0):not(#l1):not(#l2):not(#l3):not(#l8):not(#l43):not(#l57){opacity:.2}
+svg:has(#n1:is(:hover,:focus-visible)) .node:not(#n1):not(#n0):not(#n6):not(#n13):not(#n14):not(#n17),svg:has(#n1:is(:hover,:focus-visible)) .edge:not(#e0):not(#e4):not(#e5):not(#e6):not(#e7),svg:has(#n1:is(:hover,:focus-visible)) .lbl:not(#l0):not(#l4):not(#l5):not(#l6):not(#l7){opacity:.2}
+svg:has(#n2:is(:hover,:focus-visible)) .node:not(#n2):not(#n0):not(#n6):not(#n17):not(#n22):not(#n24),svg:has(#n2:is(:hover,:focus-visible)) .edge:not(#e8):not(#e9):not(#e10):not(#e44):not(#e58),svg:has(#n2:is(:hover,:focus-visible)) .lbl:not(#l8):not(#l9):not(#l10):not(#l44):not(#l58){opacity:.2}
+svg:has(#n3:is(:hover,:focus-visible)) .node:not(#n3):not(#n4):not(#n6):not(#n8):not(#n10):not(#n11):not(#n12):not(#n22),svg:has(#n3:is(:hover,:focus-visible)) .edge:not(#e11):not(#e12):not(#e13):not(#e14):not(#e15):not(#e16):not(#e45),svg:has(#n3:is(:hover,:focus-visible)) .lbl:not(#l11):not(#l12):not(#l13):not(#l14):not(#l15):not(#l16):not(#l45){opacity:.2}
+svg:has(#n4:is(:hover,:focus-visible)) .node:not(#n4):not(#n3):not(#n6):not(#n8):not(#n10):not(#n11):not(#n12),svg:has(#n4:is(:hover,:focus-visible)) .edge:not(#e11):not(#e17):not(#e18):not(#e19):not(#e20):not(#e21),svg:has(#n4:is(:hover,:focus-visible)) .lbl:not(#l11):not(#l17):not(#l18):not(#l19):not(#l20):not(#l21){opacity:.2}
+svg:has(#n5:is(:hover,:focus-visible)) .node:not(#n5):not(#n6):not(#n22),svg:has(#n5:is(:hover,:focus-visible)) .edge:not(#e22):not(#e46),svg:has(#n5:is(:hover,:focus-visible)) .lbl:not(#l22):not(#l46){opacity:.2}
+svg:has(#n6:is(:hover,:focus-visible)) .node:not(#n6):not(#n0):not(#n1):not(#n2):not(#n3):not(#n4):not(#n5):not(#n9):not(#n11):not(#n12):not(#n22):not(#n24),svg:has(#n6:is(:hover,:focus-visible)) .edge:not(#e1):not(#e4):not(#e9):not(#e12):not(#e17):not(#e22):not(#e23):not(#e27):not(#e30):not(#e47):not(#e59),svg:has(#n6:is(:hover,:focus-visible)) .lbl:not(#l1):not(#l4):not(#l9):not(#l12):not(#l17):not(#l22):not(#l23):not(#l27):not(#l30):not(#l47):not(#l59){opacity:.2}
+svg:has(#n7:is(:hover,:focus-visible)) .node:not(#n7):not(#n0),svg:has(#n7:is(:hover,:focus-visible)) .edge:not(#e2),svg:has(#n7:is(:hover,:focus-visible)) .lbl:not(#l2){opacity:.2}
+svg:has(#n8:is(:hover,:focus-visible)) .node:not(#n8):not(#n3):not(#n4),svg:has(#n8:is(:hover,:focus-visible)) .edge:not(#e13):not(#e18),svg:has(#n8:is(:hover,:focus-visible)) .lbl:not(#l13):not(#l18){opacity:.2}
+svg:has(#n9:is(:hover,:focus-visible)) .node:not(#n9):not(#n6):not(#n10):not(#n11):not(#n12):not(#n22):not(#n24),svg:has(#n9:is(:hover,:focus-visible)) .edge:not(#e23):not(#e24):not(#e25):not(#e26):not(#e48):not(#e60),svg:has(#n9:is(:hover,:focus-visible)) .lbl:not(#l23):not(#l24):not(#l25):not(#l26):not(#l48):not(#l60){opacity:.2}
+svg:has(#n10:is(:hover,:focus-visible)) .node:not(#n10):not(#n3):not(#n4):not(#n9):not(#n11),svg:has(#n10:is(:hover,:focus-visible)) .edge:not(#e14):not(#e19):not(#e24):not(#e28),svg:has(#n10:is(:hover,:focus-visible)) .lbl:not(#l14):not(#l19):not(#l24):not(#l28){opacity:.2}
+svg:has(#n11:is(:hover,:focus-visible)) .node:not(#n11):not(#n3):not(#n4):not(#n9):not(#n6):not(#n10):not(#n12),svg:has(#n11:is(:hover,:focus-visible)) .edge:not(#e15):not(#e20):not(#e25):not(#e27):not(#e28):not(#e29),svg:has(#n11:is(:hover,:focus-visible)) .lbl:not(#l15):not(#l20):not(#l25):not(#l27):not(#l28):not(#l29){opacity:.2}
+svg:has(#n12:is(:hover,:focus-visible)) .node:not(#n12):not(#n3):not(#n4):not(#n9):not(#n11):not(#n6),svg:has(#n12:is(:hover,:focus-visible)) .edge:not(#e16):not(#e21):not(#e26):not(#e29):not(#e30),svg:has(#n12:is(:hover,:focus-visible)) .lbl:not(#l16):not(#l21):not(#l26):not(#l29):not(#l30){opacity:.2}
+svg:has(#n13:is(:hover,:focus-visible)) .node:not(#n13):not(#n1):not(#n18),svg:has(#n13:is(:hover,:focus-visible)) .edge:not(#e5):not(#e34),svg:has(#n13:is(:hover,:focus-visible)) .lbl:not(#l5):not(#l34){opacity:.2}
+svg:has(#n14:is(:hover,:focus-visible)) .node:not(#n14):not(#n1):not(#n20):not(#n22):not(#n23),svg:has(#n14:is(:hover,:focus-visible)) .edge:not(#e6):not(#e40):not(#e49):not(#e56),svg:has(#n14:is(:hover,:focus-visible)) .lbl:not(#l6):not(#l40):not(#l49):not(#l56){opacity:.2}
+svg:has(#n15:is(:hover,:focus-visible)) .node:not(#n15):not(#n17):not(#n16):not(#n18),svg:has(#n15:is(:hover,:focus-visible)) .edge:not(#e31):not(#e32):not(#e35),svg:has(#n15:is(:hover,:focus-visible)) .lbl:not(#l31):not(#l32):not(#l35){opacity:.2}
+svg:has(#n16:is(:hover,:focus-visible)) .node:not(#n16):not(#n15):not(#n17):not(#n18),svg:has(#n16:is(:hover,:focus-visible)) .edge:not(#e32):not(#e33):not(#e36),svg:has(#n16:is(:hover,:focus-visible)) .lbl:not(#l32):not(#l33):not(#l36){opacity:.2}
+svg:has(#n17:is(:hover,:focus-visible)) .node:not(#n17):not(#n0):not(#n1):not(#n2):not(#n15):not(#n16):not(#n18):not(#n20):not(#n22):not(#n24),svg:has(#n17:is(:hover,:focus-visible)) .edge:not(#e3):not(#e7):not(#e10):not(#e31):not(#e33):not(#e37):not(#e41):not(#e50):not(#e61),svg:has(#n17:is(:hover,:focus-visible)) .lbl:not(#l3):not(#l7):not(#l10):not(#l31):not(#l33):not(#l37):not(#l41):not(#l50):not(#l61){opacity:.2}
+svg:has(#n18:is(:hover,:focus-visible)) .node:not(#n18):not(#n13):not(#n15):not(#n16):not(#n17):not(#n19):not(#n21):not(#n20):not(#n22):not(#n24),svg:has(#n18:is(:hover,:focus-visible)) .edge:not(#e34):not(#e35):not(#e36):not(#e37):not(#e38):not(#e39):not(#e42):not(#e51):not(#e62),svg:has(#n18:is(:hover,:focus-visible)) .lbl:not(#l34):not(#l35):not(#l36):not(#l37):not(#l38):not(#l39):not(#l42):not(#l51):not(#l62){opacity:.2}
+svg:has(#n19:is(:hover,:focus-visible)) .node:not(#n19):not(#n18),svg:has(#n19:is(:hover,:focus-visible)) .edge:not(#e38),svg:has(#n19:is(:hover,:focus-visible)) .lbl:not(#l38){opacity:.2}
+svg:has(#n20:is(:hover,:focus-visible)) .node:not(#n20):not(#n14):not(#n17):not(#n18):not(#n22):not(#n24),svg:has(#n20:is(:hover,:focus-visible)) .edge:not(#e40):not(#e41):not(#e42):not(#e52):not(#e63),svg:has(#n20:is(:hover,:focus-visible)) .lbl:not(#l40):not(#l41):not(#l42):not(#l52):not(#l63){opacity:.2}
+svg:has(#n21:is(:hover,:focus-visible)) .node:not(#n21):not(#n18):not(#n22),svg:has(#n21:is(:hover,:focus-visible)) .edge:not(#e39):not(#e53),svg:has(#n21:is(:hover,:focus-visible)) .lbl:not(#l39):not(#l53){opacity:.2}
+svg:has(#n22:is(:hover,:focus-visible)) .node:not(#n22):not(#n0):not(#n2):not(#n3):not(#n5):not(#n6):not(#n9):not(#n14):not(#n17):not(#n18):not(#n20):not(#n21):not(#n23):not(#n24),svg:has(#n22:is(:hover,:focus-visible)) .edge:not(#e43):not(#e44):not(#e45):not(#e46):not(#e47):not(#e48):not(#e49):not(#e50):not(#e51):not(#e52):not(#e53):not(#e54):not(#e55),svg:has(#n22:is(:hover,:focus-visible)) .lbl:not(#l43):not(#l44):not(#l45):not(#l46):not(#l47):not(#l48):not(#l49):not(#l50):not(#l51):not(#l52):not(#l53):not(#l54):not(#l55){opacity:.2}
+svg:has(#n23:is(:hover,:focus-visible)) .node:not(#n23):not(#n22):not(#n14):not(#n24),svg:has(#n23:is(:hover,:focus-visible)) .edge:not(#e54):not(#e56):not(#e64),svg:has(#n23:is(:hover,:focus-visible)) .lbl:not(#l54):not(#l56):not(#l64){opacity:.2}
+svg:has(#n24:is(:hover,:focus-visible)) .node:not(#n24):not(#n22):not(#n0):not(#n2):not(#n6):not(#n9):not(#n17):not(#n18):not(#n20):not(#n23),svg:has(#n24:is(:hover,:focus-visible)) .edge:not(#e55):not(#e57):not(#e58):not(#e59):not(#e60):not(#e61):not(#e62):not(#e63):not(#e64),svg:has(#n24:is(:hover,:focus-visible)) .lbl:not(#l55):not(#l57):not(#l58):not(#l59):not(#l60):not(#l61):not(#l62):not(#l63):not(#l64){opacity:.2}
+.node:focus-visible .box{stroke-width:2.4}
+@keyframes edge-flow{0%{stroke-dasharray:10 8;stroke-dashoffset:54;opacity:.42}88%{stroke-dasharray:10 8;stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:1}}
+@keyframes node-pulse{0%,72%,100%{filter:none}18%,36%{filter:drop-shadow(0 0 8px var(--arrow-emphasis))}}
+@keyframes edge-dash{to{stroke-dashoffset:-12}}
+.edge path{animation:edge-flow 2.4s linear 1 backwards;animation-delay:calc(var(--step,0)*160ms)}
+.edge.flow path{stroke-dasharray:6 6;animation:edge-dash 1.2s linear infinite}
+.node{animation:node-pulse 3.6s ease-in-out 1 backwards;animation-delay:calc(var(--step,0)*160ms)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<defs>
+<pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path class="grid-line" d="M 40 0 L 0 0 0 40"/></pattern>
+<marker id="m-default" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-default" points="0 0, 10 3.5, 0 7"/></marker>
+<marker id="m-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-emphasis" points="0 0, 10 3.5, 0 7"/></marker>
+<marker id="m-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-security" points="0 0, 10 3.5, 0 7"/></marker>
+<marker id="m-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-dashed" points="0 0, 10 3.5, 0 7"/></marker>
+<marker id="m-dotted" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon class="m-dotted" points="0 0, 10 3.5, 0 7"/></marker>
+</defs>
+<rect class="bg" x="0" y="14" width="1416" height="904" fill="#181611"/>
+<rect x="0" y="14" width="1416" height="904" fill="url(#grid)"/>
+<text class="t-title" x="40" y="48" font-size="20" text-anchor="start">Archify-Graft Mimari Haritası</text>
+<text class="t-muted" x="40" y="66" font-size="11" text-anchor="start">Cargo bağımlılıklarından üretildi · 25/25 sandık · 65 bağ</text>
+<g class="region" data-region-id="."><rect class="region-frame" x="40" y="110" width="1336" height="724" rx="12"/></g>
+<g class="edge" id="e0" data-edge-id="e0" data-edge-from="archify-bridge" data-edge-to="archify-crates" data-edge-label="kullanır ×3" style="--step:0"><path class="a-default" d="M 1072 518 L 1152 518 Q 1160 518 1160 510 L 1160 483 Q 1160 477 1166 477 L 1172 477" marker-end="url(#m-default)"/></g>
+<g class="edge flow" id="e1" data-edge-id="e1" data-edge-from="archify-bridge" data-edge-to="archify-ir" data-edge-label="kullanır ×36" style="--step:1"><path class="a-default" d="M 896 511 L 532 511 Q 524 511 524 503 L 524 485 Q 524 477 516 477 L 348 477 Q 340 477 340 469 L 340 405 Q 340 397 332 397 L 244 397" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e2" data-edge-id="e2" data-edge-from="archify-bridge" data-edge-to="archify-layout" data-edge-label="kullanır ×1" style="--step:2"><path class="a-default" d="M 1072 518 L 1152 518 Q 1160 518 1160 526 L 1160 560 Q 1160 566 1166 566 L 1172 566" marker-end="url(#m-default)"/></g>
+<g class="edge flow" id="e3" data-edge-id="e3" data-edge-from="archify-bridge" data-edge-to="graft-model" data-edge-label="kullanır ×24" style="--step:3"><path class="a-default" d="M 896 511 L 532 511 Q 524 511 524 519 L 524 598.2 Q 524 600.2 522 600.2 L 520 600.2" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e4" data-edge-id="e4" data-edge-from="archify-crates" data-edge-to="archify-ir" data-edge-label="kullanır ×2" style="--step:4"><path class="a-default" d="M 1172 463 L 808 463 Q 800 463 800 455 L 800 431 Q 800 423 792 423 L 532 423 Q 524 423 524 415 L 524 394 Q 524 386 516 386 L 342.2 386 Q 340 386 340 388.2 L 340 388.2 Q 340 390.5 337.8 390.5 L 244 390.5" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e5" data-edge-id="e5" data-edge-from="archify-crates" data-edge-to="graft-cargo" data-edge-label="kullanır ×4" style="--step:5"><path class="a-default" d="M 1172 463 L 816 463 Q 808 463 808 471 L 808 510 Q 808 518 800 518 L 624 518 Q 616 518 616 526 L 616 551 Q 616 559 608 559 L 244 559" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e6" data-edge-id="e6" data-edge-from="archify-crates" data-edge-to="graft-i18n" data-edge-label="kullanır ×1" style="--step:6"><path class="a-default" d="M 1172 463 L 808 463 Q 800 463 800 455 L 800 431 Q 800 423 792 423 L 618 423 Q 610 423 610 431 L 610 448 Q 610 456 602 456 L 244 456" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e7" data-edge-id="e7" data-edge-from="archify-crates" data-edge-to="graft-model" data-edge-label="kullanır ×6" style="--step:7"><path class="a-default" d="M 1172 463 L 816 463 Q 808 463 808 471 L 808 510 Q 808 518 800 518 L 624 518 Q 616 518 616 526 L 616 582 Q 616 590 608 590 L 520 590" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e8" data-edge-id="e8" data-edge-from="archify-delta" data-edge-to="archify-bridge" data-edge-label="kullanır ×1" style="--step:8"><path class="a-default" d="M 796 566 L 872 566 Q 880 566 880 558 L 880 547 Q 880 539 888 539 L 896 539" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e9" data-edge-id="e9" data-edge-from="archify-delta" data-edge-to="archify-ir" data-edge-label="kullanır ×11" style="--step:9"><path class="a-default" d="M 620 566 L 302 566 Q 294 566 294 558 L 294 485 Q 294 477 286 477 L 260 477 Q 252 477 252 469 L 252 426 Q 252 418 244 418 L 169 418 Q 163 418 163 412 L 163 406" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e10" data-edge-id="e10" data-edge-from="archify-delta" data-edge-to="graft-model" data-edge-label="kullanır ×1" style="--step:10"><path class="a-default" d="M 620 566 L 540 566 Q 532 566 532 574 L 532 603.4 Q 532 609.4 526 609.4 L 520 609.4" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e11" data-edge-id="e11" data-edge-from="archify-egui" data-edge-to="archify-egui-paint" data-edge-label="kullanır ×12" style="--step:11"><path class="a-default" d="M 520 326 L 596 326 Q 604 326 604 318 L 604 279 Q 604 271 612 271 L 620 271" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e12" data-edge-id="e12" data-edge-from="archify-egui" data-edge-to="archify-ir" data-edge-label="kullanır ×10" style="--step:12"><path class="a-default" d="M 344 333 L 256 333 Q 248 333 248 341 L 248 362.1 Q 248 364.1 246 364.1 L 244 364.1" marker-end="url(#m-default)"/></g>
+<g class="edge flow" id="e13" data-edge-id="e13" data-edge-from="archify-egui" data-edge-to="archify-motion" data-edge-label="kullanır ×22" style="--step:12"><path class="a-default" d="M 520 326 L 872.5 326 Q 876 326 876 329.5 L 876 329.5 Q 876 333 879.5 333 L 896 333" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e14" data-edge-id="e14" data-edge-from="archify-egui" data-edge-to="archify-route" data-edge-label="bağımlı" style="--step:12"><path class="a-default" d="M 520 326 L 838 326 Q 846 326 846 318 L 846 183 Q 846 175 854 175 L 1172 175" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e15" data-edge-id="e15" data-edge-from="archify-egui" data-edge-to="archify-scene" data-edge-label="kullanır ×6" style="--step:12"><path class="a-default" d="M 520 326 L 838 326 Q 846 326 846 334 L 846 407 Q 846 415 854 415 L 896 415" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e16" data-edge-id="e16" data-edge-from="archify-egui" data-edge-to="archify-style" data-edge-label="kullanır ×8" style="--step:12"><path class="a-default" d="M 520 326 L 838 326 Q 846 326 846 318 L 846 274 Q 846 266 854 266 L 1172 266" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e17" data-edge-id="e17" data-edge-from="archify-egui-paint" data-edge-to="archify-ir" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 620 285 L 264 285 Q 256 285 256 293 L 256 344 Q 256 350 250 350 L 244 350" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e18" data-edge-id="e18" data-edge-from="archify-egui-paint" data-edge-to="archify-motion" data-edge-label="kullanır ×5" style="--step:12"><path class="a-default" d="M 796 278 L 876 278 Q 884 278 884 286 L 884 313 Q 884 319 890 319 L 896 319" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e19" data-edge-id="e19" data-edge-from="archify-egui-paint" data-edge-to="archify-route" data-edge-label="kullanır ×4" style="--step:12"><path class="a-default" d="M 796 278 L 1114 278 Q 1122 278 1122 270 L 1122 169 Q 1122 161 1130 161 L 1172 161" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e20" data-edge-id="e20" data-edge-from="archify-egui-paint" data-edge-to="archify-scene" data-edge-label="kullanır ×6" style="--step:12"><path class="a-default" d="M 796 278 L 876 278 Q 884 278 884 286 L 884 395 Q 884 401 890 401 L 896 401" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e21" data-edge-id="e21" data-edge-from="archify-egui-paint" data-edge-to="archify-style" data-edge-label="kullanır ×9" style="--step:12"><path class="a-default" d="M 796 278 L 1114 278 Q 1122 278 1122 270 L 1122 263 Q 1122 255 1130 255 L 1172 255" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e22" data-edge-id="e22" data-edge-from="archify-geometry" data-edge-to="archify-ir" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 344 429 L 268 429 Q 260 429 260 421 L 260 385.3 Q 260 377.3 252 377.3 L 244 377.3" marker-end="url(#m-default)"/></g>
+<g class="edge flow" id="e23" data-edge-id="e23" data-edge-from="archify-render" data-edge-to="archify-ir" data-edge-label="kullanır ×31" style="--step:12"><path class="a-default" d="M 620 374 L 329.6 374 Q 328 374 328 372.4 L 328 372.4 Q 328 370.7 326.4 370.7 L 244 370.7" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e24" data-edge-id="e24" data-edge-from="archify-render" data-edge-to="archify-route" data-edge-label="kullanır ×6" style="--step:12"><path class="a-default" d="M 796 374 L 1076 374 Q 1084 374 1084 366 L 1084 197 Q 1084 189 1092 189 L 1172 189" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e25" data-edge-id="e25" data-edge-from="archify-render" data-edge-to="archify-scene" data-edge-label="kullanır ×9" style="--step:12"><path class="a-default" d="M 796 374 L 884 374 Q 892 374 892 382 L 892 427 Q 892 429 894 429 L 896 429" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e26" data-edge-id="e26" data-edge-from="archify-render" data-edge-to="archify-style" data-edge-label="kullanır ×18" style="--step:12"><path class="a-default" d="M 796 374 L 1114 374 Q 1122 374 1122 366 L 1122 286 Q 1122 278 1130 278 L 1172 278" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e27" data-edge-id="e27" data-edge-from="archify-scene" data-edge-to="archify-ir" data-edge-label="kullanır ×18" style="--step:12"><path class="a-default" d="M 896 443 L 806 443 Q 800 443 800 437 L 800 437 Q 800 431 794 431 L 626 431 Q 618 431 618 423 L 618 391.9 Q 618 383.9 610 383.9 L 244 383.9" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e28" data-edge-id="e28" data-edge-from="archify-scene" data-edge-to="archify-route" data-edge-label="kullanır ×12" style="--step:12"><path class="a-default" d="M 1072 422 L 1152 422 Q 1160 422 1160 414 L 1160 209 Q 1160 203 1166 203 L 1172 203" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e29" data-edge-id="e29" data-edge-from="archify-scene" data-edge-to="archify-style" data-edge-label="kullanır ×7" style="--step:12"><path class="a-default" d="M 1072 422 L 1152 422 Q 1160 422 1160 414 L 1160 307 Q 1160 301 1166 301 L 1172 301" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e30" data-edge-id="e30" data-edge-from="archify-style" data-edge-to="archify-ir" data-edge-label="kullanır ×3" style="--step:12"><path class="a-default" d="M 1172 290 L 816 290 Q 808 290 808 298 L 808 315.8 Q 808 323.8 800 323.8 L 620 323.8 Q 612 323.8 612 331.8 L 612 356.1 Q 612 364.1 604 364.1 L 267.3 364.1 Q 264 364.1 264 360.8 L 264 360.8 Q 264 357.5 260.7 357.5 L 244 357.5" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e31" data-edge-id="e31" data-edge-from="graft-langs" data-edge-to="graft-model" data-edge-label="kullanır ×7" style="--step:12"><path class="a-default" d="M 244 648 L 324 648 Q 332 648 332 640 L 332 620 Q 332 614 338 614 L 344 614" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e32" data-edge-id="e32" data-edge-from="graft-langs-link" data-edge-to="graft-langs" data-edge-label="kullanır ×5" style="--step:12"><path class="a-default" d="M 1172 765 L 264 765 Q 256 765 256 757 L 256 682 Q 256 676 250 676 L 244 676" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e33" data-edge-id="e33" data-edge-from="graft-langs-link" data-edge-to="graft-model" data-edge-label="kullanır ×6" style="--step:12"><path class="a-default" d="M 1172 765 L 574 765 Q 566 765 566 757 L 566 645 Q 566 637 558 637 L 520 637" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e34" data-edge-id="e34" data-edge-from="graft-parser" data-edge-to="graft-cargo" data-edge-label="kullanır ×8" style="--step:12"><path class="a-default" d="M 896 621 L 532 621 Q 524 621 524 613 L 524 581 Q 524 573 516 573 L 244 573" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e35" data-edge-id="e35" data-edge-from="graft-parser" data-edge-to="graft-langs" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 896 621 L 532 621 Q 524 621 524 629 L 524 654 Q 524 662 516 662 L 244 662" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e36" data-edge-id="e36" data-edge-from="graft-parser" data-edge-to="graft-langs-link" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 1072 614 L 1152 614 Q 1160 614 1160 622 L 1160 745 Q 1160 751 1166 751 L 1172 751" marker-end="url(#m-default)"/></g>
+<g class="edge flow" id="e37" data-edge-id="e37" data-edge-from="graft-parser" data-edge-to="graft-model" data-edge-label="kullanır ×47" style="--step:12"><path class="a-default" d="M 896 621 L 605.2 621 Q 604 621 604 619.8 L 604 619.8 Q 604 618.6 602.8 618.6 L 520 618.6" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e38" data-edge-id="e38" data-edge-from="graft-parser" data-edge-to="graft-rust" data-edge-label="kullanır ×4" style="--step:12"><path class="a-default" d="M 1072 614 L 1152 614 Q 1160 614 1160 622 L 1160 656 Q 1160 662 1166 662 L 1172 662" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e39" data-edge-id="e39" data-edge-from="graft-parser" data-edge-to="lowlevel-sys" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 1072 614 L 1114 614 Q 1122 614 1122 606 L 1122 389 Q 1122 381 1130 381 L 1172 381" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e40" data-edge-id="e40" data-edge-from="graft-search" data-edge-to="graft-i18n" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 620 676 L 264 676 Q 256 676 256 668 L 256 490 Q 256 484 250 484 L 244 484" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e41" data-edge-id="e41" data-edge-from="graft-search" data-edge-to="graft-model" data-edge-label="kullanır ×7" style="--step:12"><path class="a-default" d="M 620 676 L 540 676 Q 532 676 532 668 L 532 633.8 Q 532 627.8 526 627.8 L 520 627.8" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e42" data-edge-id="e42" data-edge-from="graft-search" data-edge-to="graft-parser" data-edge-label="kullanır ×3" style="--step:12"><path class="a-default" d="M 796 662 L 876 662 Q 884 662 884 654 L 884 641 Q 884 635 890 635 L 896 635" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e43" data-edge-id="e43" data-edge-from="archify-graft-cli" data-edge-to="archify-bridge" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 244 278 L 608 278 Q 616 278 616 286 L 616 307.8 Q 616 315.8 624 315.8 L 808 315.8 Q 816 315.8 816 323.8 L 816 421 Q 816 429 824 429 L 880 429 Q 888 429 888 437 L 888 493 Q 888 497 892 497 L 896 497" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e44" data-edge-id="e44" data-edge-from="archify-graft-cli" data-edge-to="archify-delta" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 244 278 L 532 278 Q 540 278 540 286 L 540 544 Q 540 552 548 552 L 620 552" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e45" data-edge-id="e45" data-edge-from="archify-graft-cli" data-edge-to="archify-egui" data-edge-label="kullanır ×2" style="--step:12"><path class="a-dashed" d="M 244 278 L 328 278 Q 336 278 336 286 L 336 315 Q 336 319 340 319 L 344 319" marker-end="url(#m-dashed)"/></g>
+<g class="edge" id="e46" data-edge-id="e46" data-edge-from="archify-graft-cli" data-edge-to="archify-geometry" data-edge-label="bağımlı" style="--step:12"><path class="a-default" d="M 244 278 L 328 278 Q 336 278 336 286 L 336 411 Q 336 415 340 415 L 344 415" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e47" data-edge-id="e47" data-edge-from="archify-graft-cli" data-edge-to="archify-ir" data-edge-label="bağımlı" style="--step:12"><path class="a-default" d="M 156 310 L 156 342" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e48" data-edge-id="e48" data-edge-from="archify-graft-cli" data-edge-to="archify-render" data-edge-label="kullanır ×3" style="--step:12"><path class="a-default" d="M 244 278 L 562 278 Q 570 278 570 286 L 570 352 Q 570 360 578 360 L 620 360" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e49" data-edge-id="e49" data-edge-from="archify-graft-cli" data-edge-to="graft-i18n" data-edge-label="bağımlı" style="--step:12"><path class="a-default" d="M 156 310 L 156 325 Q 156 333 148 333 L 72 333 Q 64 333 64 341 L 64 415.5 Q 64 423.5 72 423.5 L 148.8 423.5 Q 156 423.5 156 430.8 L 156 438" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e50" data-edge-id="e50" data-edge-from="archify-graft-cli" data-edge-to="graft-model" data-edge-label="kullanır ×3" style="--step:12"><path class="a-default" d="M 156 310 L 156 322 Q 156 330 164 330 L 328 330 Q 336 330 336 338 L 336 562 Q 336 570 344 570 L 419 570 Q 425 570 425 576 L 425 582" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e51" data-edge-id="e51" data-edge-from="archify-graft-cli" data-edge-to="graft-parser" data-edge-label="kullanır ×3" style="--step:12"><path class="a-default" d="M 244 278 L 608 278 Q 616 278 616 286 L 616 307.8 Q 616 315.8 624 315.8 L 808 315.8 Q 816 315.8 816 323.8 L 816 421 Q 816 429 824 429 L 880 429 Q 888 429 888 437 L 888 589 Q 888 593 892 593 L 896 593" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e52" data-edge-id="e52" data-edge-from="archify-graft-cli" data-edge-to="graft-search" data-edge-label="kullanır ×7" style="--step:12"><path class="a-default" d="M 244 278 L 328 278 Q 336 278 336 286 L 336 554 Q 336 562 344 562 L 566 562 Q 574 562 574 570 L 574 640 Q 574 648 582 648 L 620 648" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e53" data-edge-id="e53" data-edge-from="archify-graft-cli" data-edge-to="lowlevel-sys" data-edge-label="kullanır ×3" style="--step:12"><path class="a-default" d="M 244 278 L 608 278 Q 616 278 616 286 L 616 307.8 Q 616 315.8 624 315.8 L 808 315.8 Q 816 315.8 816 323.8 L 816 359 Q 816 367 824 367 L 1172 367" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e54" data-edge-id="e54" data-edge-from="archify-graft-cli" data-edge-to="archify-hedef" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 244 278 L 532 278 Q 540 278 540 286 L 540 448 Q 540 456 548 456 L 620 456" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e55" data-edge-id="e55" data-edge-from="archify-graft-cli" data-edge-to="graft-mcp" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 244 278 L 328 278 Q 336 278 336 286 L 336 507 Q 336 511 340 511 L 344 511" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e56" data-edge-id="e56" data-edge-from="archify-hedef" data-edge-to="graft-i18n" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 620 470 L 244 470" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e57" data-edge-id="e57" data-edge-from="graft-mcp" data-edge-to="archify-bridge" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 520 518 L 608.5 518 Q 612 518 612 521.5 L 612 521.5 Q 612 525 615.5 525 L 896 525" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e58" data-edge-id="e58" data-edge-from="graft-mcp" data-edge-to="archify-delta" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 520 518 L 604 518 Q 612 518 612 526 L 612 576 Q 612 580 616 580 L 620 580" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e59" data-edge-id="e59" data-edge-from="graft-mcp" data-edge-to="archify-ir" data-edge-label="bağımlı" style="--step:12"><path class="a-default" d="M 344 525 L 256 525 Q 248 525 248 517 L 248 439.5 Q 248 431.5 240 431.5 L 157 431.5 Q 149 431.5 149 423.5 L 149 406" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e60" data-edge-id="e60" data-edge-from="graft-mcp" data-edge-to="archify-render" data-edge-label="kullanır ×3" style="--step:12"><path class="a-default" d="M 520 518 L 600 518 Q 608 518 608 510 L 608 394 Q 608 388 614 388 L 620 388" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e61" data-edge-id="e61" data-edge-from="graft-mcp" data-edge-to="graft-model" data-edge-label="kullanır ×6" style="--step:12"><path class="a-default" d="M 432 550 L 432 566.5 Q 432 570 435.5 570 L 435.5 570 Q 439 570 439 573.5 L 439 582" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e62" data-edge-id="e62" data-edge-from="graft-mcp" data-edge-to="graft-parser" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 520 518 L 604 518 Q 612 518 612 526 L 612 599 Q 612 607 620 607 L 896 607" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e63" data-edge-id="e63" data-edge-from="graft-mcp" data-edge-to="graft-search" data-edge-label="kullanır ×8" style="--step:12"><path class="a-default" d="M 520 518 L 604 518 Q 612 518 612 526 L 612 658 Q 612 662 616 662 L 620 662" marker-end="url(#m-default)"/></g>
+<g class="edge" id="e64" data-edge-id="e64" data-edge-from="graft-mcp" data-edge-to="archify-hedef" data-edge-label="kullanır ×1" style="--step:12"><path class="a-default" d="M 520 518 L 600 518 Q 608 518 608 510 L 608 490 Q 608 484 614 484 L 620 484" marker-end="url(#m-default)"/></g>
+<g id="n0" class="node" data-node-id="archify-bridge" data-node-label="archify-bridge" data-node-kind="backend" data-node-sublabel="kütüphane · 1283 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-bridge · kütüphane · 1283 satır · ." style="--step:0">
+<title>archify-bridge · kütüphane · 1283 satır · .</title>
+<rect class="mask" x="896" y="486" width="176" height="64" rx="6"/><rect class="box c-backend" x="896" y="486" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(902 492) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="984" y="516.7" font-size="11" font-weight="600" text-anchor="middle">archify-bridge</text>
+<text class="t-muted" data-detail="context" x="984" y="534" font-size="9" text-anchor="middle">kütüphane · 1283 satır</text>
+</g>
+<g id="n1" class="node" data-node-id="archify-crates" data-node-label="archify-crates" data-node-kind="backend" data-node-sublabel="kütüphane · 435 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-crates · kütüphane · 435 satır · ." style="--step:1">
+<title>archify-crates · kütüphane · 435 satır · .</title>
+<rect class="mask" x="1172" y="438" width="176" height="64" rx="6"/><rect class="box c-backend" x="1172" y="438" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(1178 444) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="1260" y="468.7" font-size="11" font-weight="600" text-anchor="middle">archify-crates</text>
+<text class="t-muted" data-detail="context" x="1260" y="485.9" font-size="9" text-anchor="middle">kütüphane · 435 satır</text>
+</g>
+<g id="n2" class="node" data-node-id="archify-delta" data-node-label="archify-delta" data-node-kind="backend" data-node-sublabel="kütüphane · 107 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-delta · kütüphane · 107 satır · ." style="--step:2">
+<title>archify-delta · kütüphane · 107 satır · .</title>
+<rect class="mask" x="620" y="534" width="176" height="64" rx="6"/><rect class="box c-backend" x="620" y="534" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(626 540) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="708" y="564.7" font-size="11" font-weight="600" text-anchor="middle">archify-delta</text>
+<text class="t-muted" data-detail="context" x="708" y="582" font-size="9" text-anchor="middle">kütüphane · 107 satır</text>
+</g>
+<g id="n3" class="node" data-node-id="archify-egui" data-node-label="archify-egui" data-node-kind="frontend" data-node-sublabel="kütüphane · 1450 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-egui · kütüphane · 1450 satır · ." style="--step:3">
+<title>archify-egui · kütüphane · 1450 satır · .</title>
+<rect class="mask" x="344" y="294" width="176" height="64" rx="6"/><rect class="box c-frontend" x="344" y="294" width="176" height="64" rx="6"/>
+<g class="sigil i-frontend" transform="translate(350 300) scale(.6875)"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M1.5 6h13"/></g>
+<text class="t-primary" x="432" y="324.7" font-size="11" font-weight="600" text-anchor="middle">archify-egui</text>
+<text class="t-muted" data-detail="context" x="432" y="341.9" font-size="9" text-anchor="middle">kütüphane · 1450 satır</text>
+</g>
+<g id="n4" class="node" data-node-id="archify-egui-paint" data-node-label="archify-egui-paint" data-node-kind="frontend" data-node-sublabel="kütüphane · 515 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-egui-paint · kütüphane · 515 satır · ." style="--step:4">
+<title>archify-egui-paint · kütüphane · 515 satır · .</title>
+<rect class="mask" x="620" y="246" width="176" height="64" rx="6"/><rect class="box c-frontend" x="620" y="246" width="176" height="64" rx="6"/>
+<g class="sigil i-frontend" transform="translate(626 252) scale(.6875)"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M1.5 6h13"/></g>
+<text class="t-primary" x="708" y="276.7" font-size="11" font-weight="600" text-anchor="middle">archify-egui-paint</text>
+<text class="t-muted" data-detail="context" x="708" y="293.9" font-size="9" text-anchor="middle">kütüphane · 515 satır</text>
+</g>
+<g id="n5" class="node" data-node-id="archify-geometry" data-node-label="archify-geometry" data-node-kind="backend" data-node-sublabel="kütüphane · 46 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-geometry · kütüphane · 46 satır · ." style="--step:5">
+<title>archify-geometry · kütüphane · 46 satır · .</title>
+<rect class="mask" x="344" y="390" width="176" height="64" rx="6"/><rect class="box c-backend" x="344" y="390" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(350 396) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="432" y="420.7" font-size="11" font-weight="600" text-anchor="middle">archify-geometry</text>
+<text class="t-muted" data-detail="context" x="432" y="437.9" font-size="9" text-anchor="middle">kütüphane · 46 satır</text>
+</g>
+<g id="n6" class="node" data-node-id="archify-ir" data-node-label="archify-ir" data-node-kind="backend" data-node-sublabel="kütüphane · 211 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-ir · kütüphane · 211 satır · ." style="--step:6">
+<title>archify-ir · kütüphane · 211 satır · .</title>
+<rect class="mask" x="68" y="342" width="176" height="64" rx="6"/><rect class="box c-backend" x="68" y="342" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(74 348) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="156" y="372.7" font-size="11" font-weight="600" text-anchor="middle">archify-ir</text>
+<text class="t-muted" data-detail="context" x="156" y="389.9" font-size="9" text-anchor="middle">kütüphane · 211 satır</text>
+</g>
+<g id="n7" class="node" data-node-id="archify-layout" data-node-label="archify-layout" data-node-kind="backend" data-node-sublabel="kütüphane · 312 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-layout · kütüphane · 312 satır · ." style="--step:7">
+<title>archify-layout · kütüphane · 312 satır · .</title>
+<rect class="mask" x="1172" y="534" width="176" height="64" rx="6"/><rect class="box c-backend" x="1172" y="534" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(1178 540) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="1260" y="564.7" font-size="11" font-weight="600" text-anchor="middle">archify-layout</text>
+<text class="t-muted" data-detail="context" x="1260" y="582" font-size="9" text-anchor="middle">kütüphane · 312 satır</text>
+</g>
+<g id="n8" class="node" data-node-id="archify-motion" data-node-label="archify-motion" data-node-kind="backend" data-node-sublabel="kütüphane · 771 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-motion · kütüphane · 771 satır · ." style="--step:8">
+<title>archify-motion · kütüphane · 771 satır · .</title>
+<rect class="mask" x="896" y="294" width="176" height="64" rx="6"/><rect class="box c-backend" x="896" y="294" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(902 300) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="984" y="324.7" font-size="11" font-weight="600" text-anchor="middle">archify-motion</text>
+<text class="t-muted" data-detail="context" x="984" y="341.9" font-size="9" text-anchor="middle">kütüphane · 771 satır</text>
+</g>
+<g id="n9" class="node" data-node-id="archify-render" data-node-label="archify-render" data-node-kind="backend" data-node-sublabel="kütüphane · 923 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-render · kütüphane · 923 satır · ." style="--step:9">
+<title>archify-render · kütüphane · 923 satır · .</title>
+<rect class="mask" x="620" y="342" width="176" height="64" rx="6"/><rect class="box c-backend" x="620" y="342" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(626 348) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="708" y="372.7" font-size="11" font-weight="600" text-anchor="middle">archify-render</text>
+<text class="t-muted" data-detail="context" x="708" y="389.9" font-size="9" text-anchor="middle">kütüphane · 923 satır</text>
+</g>
+<g id="n10" class="node" data-node-id="archify-route" data-node-label="archify-route" data-node-kind="backend" data-node-sublabel="kütüphane · 1349 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-route · kütüphane · 1349 satır · ." style="--step:10">
+<title>archify-route · kütüphane · 1349 satır · .</title>
+<rect class="mask" x="1172" y="150" width="176" height="64" rx="6"/><rect class="box c-backend" x="1172" y="150" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(1178 156) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="1260" y="180.7" font-size="11" font-weight="600" text-anchor="middle">archify-route</text>
+<text class="t-muted" data-detail="context" x="1260" y="197.9" font-size="9" text-anchor="middle">kütüphane · 1349 satır</text>
+</g>
+<g id="n11" class="node" data-node-id="archify-scene" data-node-label="archify-scene" data-node-kind="backend" data-node-sublabel="kütüphane · 828 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-scene · kütüphane · 828 satır · ." style="--step:11">
+<title>archify-scene · kütüphane · 828 satır · .</title>
+<rect class="mask" x="896" y="390" width="176" height="64" rx="6"/><rect class="box c-backend" x="896" y="390" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(902 396) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="984" y="420.7" font-size="11" font-weight="600" text-anchor="middle">archify-scene</text>
+<text class="t-muted" data-detail="context" x="984" y="437.9" font-size="9" text-anchor="middle">kütüphane · 828 satır</text>
+</g>
+<g id="n12" class="node" data-node-id="archify-style" data-node-label="archify-style" data-node-kind="backend" data-node-sublabel="kütüphane · 690 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-style · kütüphane · 690 satır · ." style="--step:12">
+<title>archify-style · kütüphane · 690 satır · .</title>
+<rect class="mask" x="1172" y="246" width="176" height="64" rx="6"/><rect class="box c-backend" x="1172" y="246" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(1178 252) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="1260" y="276.7" font-size="11" font-weight="600" text-anchor="middle">archify-style</text>
+<text class="t-muted" data-detail="context" x="1260" y="293.9" font-size="9" text-anchor="middle">kütüphane · 690 satır</text>
+</g>
+<g id="n13" class="node" data-node-id="graft-cargo" data-node-label="graft-cargo" data-node-kind="backend" data-node-sublabel="kütüphane · 305 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="graft-cargo · kütüphane · 305 satır · ." style="--step:12">
+<title>graft-cargo · kütüphane · 305 satır · .</title>
+<rect class="mask" x="68" y="534" width="176" height="64" rx="6"/><rect class="box c-backend" x="68" y="534" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(74 540) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="156" y="564.7" font-size="11" font-weight="600" text-anchor="middle">graft-cargo</text>
+<text class="t-muted" data-detail="context" x="156" y="582" font-size="9" text-anchor="middle">kütüphane · 305 satır</text>
+</g>
+<g id="n14" class="node" data-node-id="graft-i18n" data-node-label="graft-i18n" data-node-kind="backend" data-node-sublabel="kütüphane · 107 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="graft-i18n · kütüphane · 107 satır · ." style="--step:12">
+<title>graft-i18n · kütüphane · 107 satır · .</title>
+<rect class="mask" x="68" y="438" width="176" height="64" rx="6"/><rect class="box c-backend" x="68" y="438" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(74 444) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="156" y="468.7" font-size="11" font-weight="600" text-anchor="middle">graft-i18n</text>
+<text class="t-muted" data-detail="context" x="156" y="485.9" font-size="9" text-anchor="middle">kütüphane · 107 satır</text>
+</g>
+<g id="n15" class="node" data-node-id="graft-langs" data-node-label="graft-langs" data-node-kind="backend" data-node-sublabel="kütüphane · 1205 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="graft-langs · kütüphane · 1205 satır · ." style="--step:12">
+<title>graft-langs · kütüphane · 1205 satır · .</title>
+<rect class="mask" x="68" y="630" width="176" height="64" rx="6"/><rect class="box c-backend" x="68" y="630" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(74 636) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="156" y="660.7" font-size="11" font-weight="600" text-anchor="middle">graft-langs</text>
+<text class="t-muted" data-detail="context" x="156" y="678" font-size="9" text-anchor="middle">kütüphane · 1205 satır</text>
+</g>
+<g id="n16" class="node" data-node-id="graft-langs-link" data-node-label="graft-langs-link" data-node-kind="backend" data-node-sublabel="kütüphane · 539 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="graft-langs-link · kütüphane · 539 satır · ." style="--step:12">
+<title>graft-langs-link · kütüphane · 539 satır · .</title>
+<rect class="mask" x="1172" y="726" width="176" height="64" rx="6"/><rect class="box c-backend" x="1172" y="726" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(1178 732) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="1260" y="756.7" font-size="11" font-weight="600" text-anchor="middle">graft-langs-link</text>
+<text class="t-muted" data-detail="context" x="1260" y="774" font-size="9" text-anchor="middle">kütüphane · 539 satır</text>
+</g>
+<g id="n17" class="node" data-node-id="graft-model" data-node-label="graft-model" data-node-kind="backend" data-node-sublabel="kütüphane · 220 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="graft-model · kütüphane · 220 satır · ." style="--step:12">
+<title>graft-model · kütüphane · 220 satır · .</title>
+<rect class="mask" x="344" y="582" width="176" height="64" rx="6"/><rect class="box c-backend" x="344" y="582" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(350 588) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="432" y="612.7" font-size="11" font-weight="600" text-anchor="middle">graft-model</text>
+<text class="t-muted" data-detail="context" x="432" y="630" font-size="9" text-anchor="middle">kütüphane · 220 satır</text>
+</g>
+<g id="n18" class="node" data-node-id="graft-parser" data-node-label="graft-parser" data-node-kind="backend" data-node-sublabel="kütüphane · 1431 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="graft-parser · kütüphane · 1431 satır · ." style="--step:12">
+<title>graft-parser · kütüphane · 1431 satır · .</title>
+<rect class="mask" x="896" y="582" width="176" height="64" rx="6"/><rect class="box c-backend" x="896" y="582" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(902 588) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="984" y="612.7" font-size="11" font-weight="600" text-anchor="middle">graft-parser</text>
+<text class="t-muted" data-detail="context" x="984" y="630" font-size="9" text-anchor="middle">kütüphane · 1431 satır</text>
+</g>
+<g id="n19" class="node" data-node-id="graft-rust" data-node-label="graft-rust" data-node-kind="backend" data-node-sublabel="kütüphane · 691 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="graft-rust · kütüphane · 691 satır · ." style="--step:12">
+<title>graft-rust · kütüphane · 691 satır · .</title>
+<rect class="mask" x="1172" y="630" width="176" height="64" rx="6"/><rect class="box c-backend" x="1172" y="630" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(1178 636) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="1260" y="660.7" font-size="11" font-weight="600" text-anchor="middle">graft-rust</text>
+<text class="t-muted" data-detail="context" x="1260" y="678" font-size="9" text-anchor="middle">kütüphane · 691 satır</text>
+</g>
+<g id="n20" class="node" data-node-id="graft-search" data-node-label="graft-search" data-node-kind="backend" data-node-sublabel="kütüphane · 411 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="graft-search · kütüphane · 411 satır · ." style="--step:12">
+<title>graft-search · kütüphane · 411 satır · .</title>
+<rect class="mask" x="620" y="630" width="176" height="64" rx="6"/><rect class="box c-backend" x="620" y="630" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(626 636) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="708" y="660.7" font-size="11" font-weight="600" text-anchor="middle">graft-search</text>
+<text class="t-muted" data-detail="context" x="708" y="678" font-size="9" text-anchor="middle">kütüphane · 411 satır</text>
+</g>
+<g id="n21" class="node" data-node-id="lowlevel-sys" data-node-label="lowlevel-sys" data-node-kind="backend" data-node-sublabel="kütüphane · 238 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="lowlevel-sys · kütüphane · 238 satır · ." style="--step:12">
+<title>lowlevel-sys · kütüphane · 238 satır · .</title>
+<rect class="mask" x="1172" y="342" width="176" height="64" rx="6"/><rect class="box c-backend" x="1172" y="342" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(1178 348) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="1260" y="372.7" font-size="11" font-weight="600" text-anchor="middle">lowlevel-sys</text>
+<text class="t-muted" data-detail="context" x="1260" y="389.9" font-size="9" text-anchor="middle">kütüphane · 238 satır</text>
+</g>
+<g id="n22" class="node" data-node-id="archify-graft-cli" data-node-label="archify-graft-cli" data-node-kind="frontend" data-node-sublabel="ikili · 512 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-graft-cli · ikili · 512 satır · ." style="--step:12">
+<title>archify-graft-cli · ikili · 512 satır · .</title>
+<rect class="mask" x="68" y="246" width="176" height="64" rx="6"/><rect class="box c-frontend" x="68" y="246" width="176" height="64" rx="6"/>
+<g class="sigil i-frontend" transform="translate(74 252) scale(.6875)"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M1.5 6h13"/></g>
+<text class="t-primary" x="156" y="276.7" font-size="11" font-weight="600" text-anchor="middle">archify-graft-cli</text>
+<text class="t-muted" data-detail="context" x="156" y="293.9" font-size="9" text-anchor="middle">ikili · 512 satır</text>
+</g>
+<g id="n23" class="node" data-node-id="archify-hedef" data-node-label="archify-hedef" data-node-kind="backend" data-node-sublabel="kütüphane · 341 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="archify-hedef · kütüphane · 341 satır · ." style="--step:12">
+<title>archify-hedef · kütüphane · 341 satır · .</title>
+<rect class="mask" x="620" y="438" width="176" height="64" rx="6"/><rect class="box c-backend" x="620" y="438" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(626 444) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="708" y="468.7" font-size="11" font-weight="600" text-anchor="middle">archify-hedef</text>
+<text class="t-muted" data-detail="context" x="708" y="485.9" font-size="9" text-anchor="middle">kütüphane · 341 satır</text>
+</g>
+<g id="n24" class="node" data-node-id="graft-mcp" data-node-label="graft-mcp" data-node-kind="backend" data-node-sublabel="kütüphane · 527 satır" data-node-context="." tabindex="0" role="button" aria-pressed="false" aria-label="graft-mcp · kütüphane · 527 satır · ." style="--step:12">
+<title>graft-mcp · kütüphane · 527 satır · .</title>
+<rect class="mask" x="344" y="486" width="176" height="64" rx="6"/><rect class="box c-backend" x="344" y="486" width="176" height="64" rx="6"/>
+<g class="sigil i-backend" transform="translate(350 492) scale(.6875)"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5"/></g>
+<text class="t-primary" x="432" y="516.7" font-size="11" font-weight="600" text-anchor="middle">graft-mcp</text>
+<text class="t-muted" data-detail="context" x="432" y="534" font-size="9" text-anchor="middle">kütüphane · 527 satır</text>
+</g>
+<g class="lbl" id="l0" data-detail="context" data-edge-from="archify-bridge" data-edge-to="archify-crates"><rect class="mask" x="1084.6" y="500" width="62.8" height="14" rx="3"/><text class="l-default" x="1116" y="510.2" font-size="8" text-anchor="middle">kullanır ×3</text></g>
+<g class="lbl" id="l1" data-detail="context" data-edge-from="archify-bridge" data-edge-to="archify-ir"><rect class="mask" x="398.2" y="459" width="67.6" height="14" rx="3"/><text class="l-default" x="432" y="469.2" font-size="8" text-anchor="middle">kullanır ×36</text></g>
+<g class="lbl" id="l2" data-detail="context" data-edge-from="archify-bridge" data-edge-to="archify-layout"><rect class="mask" x="1093.2" y="535" width="62.8" height="14" rx="3"/><text class="l-default" x="1124.6" y="545.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l3" data-detail="context" data-edge-from="archify-bridge" data-edge-to="graft-model"><rect class="mask" x="528" y="535.2" width="67.6" height="14" rx="3"/><text class="l-default" x="561.8" y="545.4" font-size="8" text-anchor="middle">kullanır ×24</text></g>
+<g class="lbl" id="l4" data-detail="context" data-edge-from="archify-crates" data-edge-to="archify-ir"><rect class="mask" x="954.6" y="467" width="62.8" height="14" rx="3"/><text class="l-default" x="986" y="477.2" font-size="8" text-anchor="middle">kullanır ×2</text></g>
+<g class="lbl" id="l5" data-detail="context" data-edge-from="archify-crates" data-edge-to="graft-cargo"><rect class="mask" x="812" y="483.5" width="62.8" height="14" rx="3"/><text class="l-default" x="843.4" y="493.7" font-size="8" text-anchor="middle">kullanır ×4</text></g>
+<g class="lbl" id="l6" data-detail="context" data-edge-from="archify-crates" data-edge-to="graft-i18n"><rect class="mask" x="543.2" y="432.5" width="62.8" height="14" rx="3"/><text class="l-default" x="574.6" y="442.7" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l7" data-detail="context" data-edge-from="archify-crates" data-edge-to="graft-model"><rect class="mask" x="813" y="445" width="62.8" height="14" rx="3"/><text class="l-default" x="844.4" y="455.2" font-size="8" text-anchor="middle">kullanır ×6</text></g>
+<g class="lbl" id="l8" data-detail="context" data-edge-from="archify-delta" data-edge-to="archify-bridge"><rect class="mask" x="806.6" y="548" width="62.8" height="14" rx="3"/><text class="l-default" x="838" y="558.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l9" data-detail="context" data-edge-from="archify-delta" data-edge-to="archify-ir"><rect class="mask" x="260.2" y="527.8" width="67.6" height="14" rx="3"/><text class="l-default" x="294" y="538" font-size="8" text-anchor="middle">kullanır ×11</text></g>
+<g class="lbl" id="l10" data-detail="context" data-edge-from="archify-delta" data-edge-to="graft-model"><rect class="mask" x="536" y="574.2" width="62.8" height="14" rx="3"/><text class="l-default" x="567.4" y="584.4" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l11" data-detail="context" data-edge-from="archify-egui" data-edge-to="archify-egui-paint"><rect class="mask" x="528.2" y="308" width="67.6" height="14" rx="3"/><text class="l-default" x="562" y="318.2" font-size="8" text-anchor="middle">kullanır ×12</text></g>
+<g class="lbl" id="l12" data-detail="context" data-edge-from="archify-egui" data-edge-to="archify-ir"><rect class="mask" x="262.2" y="315" width="67.6" height="14" rx="3"/><text class="l-default" x="296" y="325.2" font-size="8" text-anchor="middle">kullanır ×10</text></g>
+<g class="lbl" id="l13" data-detail="context" data-edge-from="archify-egui" data-edge-to="archify-motion"><rect class="mask" x="664.2" y="319" width="67.6" height="14" rx="3"/><text class="l-default" x="698" y="329.2" font-size="8" text-anchor="middle">kullanır ×22</text></g>
+<g class="lbl" id="l14" data-detail="context" data-edge-from="archify-egui" data-edge-to="archify-route"><rect class="mask" x="824.2" y="243.5" width="43.6" height="14" rx="3"/><text class="l-default" x="846" y="253.7" font-size="8" text-anchor="middle">bağımlı</text></g>
+<g class="lbl" id="l15" data-detail="context" data-edge-from="archify-egui" data-edge-to="archify-scene"><rect class="mask" x="814.6" y="376.9" width="62.8" height="14" rx="3"/><text class="l-default" x="846" y="387.1" font-size="8" text-anchor="middle">kullanır ×6</text></g>
+<g class="lbl" id="l16" data-detail="context" data-edge-from="archify-egui" data-edge-to="archify-style"><rect class="mask" x="977.6" y="248" width="62.8" height="14" rx="3"/><text class="l-default" x="1009" y="258.2" font-size="8" text-anchor="middle">kullanır ×8</text></g>
+<g class="lbl" id="l17" data-detail="context" data-edge-from="archify-egui-paint" data-edge-to="archify-ir"><rect class="mask" x="260" y="291" width="62.8" height="14" rx="3"/><text class="l-default" x="291.4" y="301.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l18" data-detail="context" data-edge-from="archify-egui-paint" data-edge-to="archify-motion"><rect class="mask" x="817.2" y="291.5" width="62.8" height="14" rx="3"/><text class="l-default" x="848.6" y="301.7" font-size="8" text-anchor="middle">kullanır ×5</text></g>
+<g class="lbl" id="l19" data-detail="context" data-edge-from="archify-egui-paint" data-edge-to="archify-route"><rect class="mask" x="1090.6" y="212.5" width="62.8" height="14" rx="3"/><text class="l-default" x="1122" y="222.7" font-size="8" text-anchor="middle">kullanır ×4</text></g>
+<g class="lbl" id="l20" data-detail="context" data-edge-from="archify-egui-paint" data-edge-to="archify-scene"><rect class="mask" x="817.2" y="351" width="62.8" height="14" rx="3"/><text class="l-default" x="848.6" y="361.2" font-size="8" text-anchor="middle">kullanır ×6</text></g>
+<g class="lbl" id="l21" data-detail="context" data-edge-from="archify-egui-paint" data-edge-to="archify-style"><rect class="mask" x="927.6" y="271" width="62.8" height="14" rx="3"/><text class="l-default" x="959" y="281.2" font-size="8" text-anchor="middle">kullanır ×9</text></g>
+<g class="lbl" id="l22" data-detail="context" data-edge-from="archify-geometry" data-edge-to="archify-ir"><rect class="mask" x="270.6" y="411" width="62.8" height="14" rx="3"/><text class="l-default" x="302" y="421.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l23" data-detail="context" data-edge-from="archify-render" data-edge-to="archify-ir"><rect class="mask" x="440.2" y="367" width="67.6" height="14" rx="3"/><text class="l-default" x="474" y="377.2" font-size="8" text-anchor="middle">kullanır ×31</text></g>
+<g class="lbl" id="l24" data-detail="context" data-edge-from="archify-render" data-edge-to="archify-route"><rect class="mask" x="1052.6" y="246.8" width="62.8" height="14" rx="3"/><text class="l-default" x="1084" y="257" font-size="8" text-anchor="middle">kullanır ×6</text></g>
+<g class="lbl" id="l25" data-detail="context" data-edge-from="archify-render" data-edge-to="archify-scene"><rect class="mask" x="825.2" y="402.8" width="62.8" height="14" rx="3"/><text class="l-default" x="856.6" y="413" font-size="8" text-anchor="middle">kullanır ×9</text></g>
+<g class="lbl" id="l26" data-detail="context" data-edge-from="archify-render" data-edge-to="archify-style"><rect class="mask" x="1088.2" y="319" width="67.6" height="14" rx="3"/><text class="l-default" x="1122" y="329.2" font-size="8" text-anchor="middle">kullanır ×18</text></g>
+<g class="lbl" id="l27" data-detail="context" data-edge-from="archify-scene" data-edge-to="archify-ir"><rect class="mask" x="341.1" y="365.9" width="67.6" height="14" rx="3"/><text class="l-default" x="374.9" y="376.1" font-size="8" text-anchor="middle">kullanır ×18</text></g>
+<g class="lbl" id="l28" data-detail="context" data-edge-from="archify-scene" data-edge-to="archify-route"><rect class="mask" x="1164" y="217.9" width="67.6" height="14" rx="3"/><text class="l-default" x="1197.8" y="228.1" font-size="8" text-anchor="middle">kullanır ×12</text></g>
+<g class="lbl" id="l29" data-detail="context" data-edge-from="archify-scene" data-edge-to="archify-style"><rect class="mask" x="1164" y="318.2" width="62.8" height="14" rx="3"/><text class="l-default" x="1195.4" y="328.4" font-size="8" text-anchor="middle">kullanır ×7</text></g>
+<g class="lbl" id="l30" data-detail="context" data-edge-from="archify-style" data-edge-to="archify-ir"><rect class="mask" x="269" y="346.1" width="62.8" height="14" rx="3"/><text class="l-default" x="300.4" y="356.3" font-size="8" text-anchor="middle">kullanır ×3</text></g>
+<g class="lbl" id="l31" data-detail="context" data-edge-from="graft-langs" data-edge-to="graft-model"><rect class="mask" x="265.2" y="624" width="62.8" height="14" rx="3"/><text class="l-default" x="296.6" y="634.2" font-size="8" text-anchor="middle">kullanır ×7</text></g>
+<g class="lbl" id="l32" data-detail="context" data-edge-from="graft-langs-link" data-edge-to="graft-langs"><rect class="mask" x="682.6" y="747" width="62.8" height="14" rx="3"/><text class="l-default" x="714" y="757.2" font-size="8" text-anchor="middle">kullanır ×5</text></g>
+<g class="lbl" id="l33" data-detail="context" data-edge-from="graft-langs-link" data-edge-to="graft-model"><rect class="mask" x="534.6" y="694" width="62.8" height="14" rx="3"/><text class="l-default" x="566" y="704.2" font-size="8" text-anchor="middle">kullanır ×6</text></g>
+<g class="lbl" id="l34" data-detail="context" data-edge-from="graft-parser" data-edge-to="graft-cargo"><rect class="mask" x="268.6" y="577" width="62.8" height="14" rx="3"/><text class="l-default" x="300" y="587.2" font-size="8" text-anchor="middle">kullanır ×8</text></g>
+<g class="lbl" id="l35" data-detail="context" data-edge-from="graft-parser" data-edge-to="graft-langs"><rect class="mask" x="678.6" y="614" width="62.8" height="14" rx="3"/><text class="l-default" x="710" y="624.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l36" data-detail="context" data-edge-from="graft-parser" data-edge-to="graft-langs-link"><rect class="mask" x="1128.6" y="696" width="62.8" height="14" rx="3"/><text class="l-default" x="1160" y="706.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l37" data-detail="context" data-edge-from="graft-parser" data-edge-to="graft-model"><rect class="mask" x="803.8" y="625" width="67.6" height="14" rx="3"/><text class="l-default" x="837.6" y="635.2" font-size="8" text-anchor="middle">kullanır ×47</text></g>
+<g class="lbl" id="l38" data-detail="context" data-edge-from="graft-parser" data-edge-to="graft-rust"><rect class="mask" x="1084.6" y="596" width="62.8" height="14" rx="3"/><text class="l-default" x="1116" y="606.2" font-size="8" text-anchor="middle">kullanır ×4</text></g>
+<g class="lbl" id="l39" data-detail="context" data-edge-from="graft-parser" data-edge-to="lowlevel-sys"><rect class="mask" x="1090.6" y="560.4" width="62.8" height="14" rx="3"/><text class="l-default" x="1122" y="570.6" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l40" data-detail="context" data-edge-from="graft-search" data-edge-to="graft-i18n"><rect class="mask" x="224.6" y="601.8" width="62.8" height="14" rx="3"/><text class="l-default" x="256" y="612" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l41" data-detail="context" data-edge-from="graft-search" data-edge-to="graft-model"><rect class="mask" x="544.6" y="658" width="62.8" height="14" rx="3"/><text class="l-default" x="576" y="668.2" font-size="8" text-anchor="middle">kullanır ×7</text></g>
+<g class="lbl" id="l42" data-detail="context" data-edge-from="graft-search" data-edge-to="graft-parser"><rect class="mask" x="808.6" y="644" width="62.8" height="14" rx="3"/><text class="l-default" x="840" y="654.2" font-size="8" text-anchor="middle">kullanır ×3</text></g>
+<g class="lbl" id="l43" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="archify-bridge"><rect class="mask" x="398.6" y="260" width="62.8" height="14" rx="3"/><text class="l-default" x="430" y="270.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l44" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="archify-delta"><rect class="mask" x="544" y="408" width="62.8" height="14" rx="3"/><text class="l-default" x="575.4" y="418.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l45" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="archify-egui"><rect class="mask" x="258.6" y="260" width="62.8" height="14" rx="3"/><text class="l-dashed" x="290" y="270.2" font-size="8" text-anchor="middle">kullanır ×2</text></g>
+<g class="lbl" id="l46" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="archify-geometry"><rect class="mask" x="288.4" y="394.3" width="43.6" height="14" rx="3"/><text class="l-default" x="310.2" y="404.5" font-size="8" text-anchor="middle">bağımlı</text></g>
+<g class="lbl" id="l47" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="archify-ir"><rect class="mask" x="134.2" y="319" width="43.6" height="14" rx="3"/><text class="l-default" x="156" y="329.2" font-size="8" text-anchor="middle">bağımlı</text></g>
+<g class="lbl" id="l48" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="archify-render"><rect class="mask" x="326.7" y="260" width="62.8" height="14" rx="3"/><text class="l-default" x="358.1" y="270.2" font-size="8" text-anchor="middle">kullanır ×3</text></g>
+<g class="lbl" id="l49" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="graft-i18n"><rect class="mask" x="88.2" y="315" width="43.6" height="14" rx="3"/><text class="l-default" x="110" y="325.2" font-size="8" text-anchor="middle">bağımlı</text></g>
+<g class="lbl" id="l50" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="graft-model"><rect class="mask" x="187.6" y="312" width="62.8" height="14" rx="3"/><text class="l-default" x="219" y="322.2" font-size="8" text-anchor="middle">kullanır ×3</text></g>
+<g class="lbl" id="l51" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="graft-parser"><rect class="mask" x="510.2" y="260" width="62.8" height="14" rx="3"/><text class="l-default" x="541.6" y="270.2" font-size="8" text-anchor="middle">kullanır ×3</text></g>
+<g class="lbl" id="l52" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="graft-search"><rect class="mask" x="542.6" y="598" width="62.8" height="14" rx="3"/><text class="l-default" x="574" y="608.2" font-size="8" text-anchor="middle">kullanır ×7</text></g>
+<g class="lbl" id="l53" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="lowlevel-sys"><rect class="mask" x="820" y="334.4" width="62.8" height="14" rx="3"/><text class="l-default" x="851.4" y="344.6" font-size="8" text-anchor="middle">kullanır ×3</text></g>
+<g class="lbl" id="l54" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="archify-hedef"><rect class="mask" x="544" y="333.3" width="62.8" height="14" rx="3"/><text class="l-default" x="575.4" y="343.5" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l55" data-detail="context" data-edge-from="archify-graft-cli" data-edge-to="graft-mcp"><rect class="mask" x="269.2" y="457.4" width="62.8" height="14" rx="3"/><text class="l-default" x="300.6" y="467.6" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l56" data-detail="context" data-edge-from="archify-hedef" data-edge-to="graft-i18n"><rect class="mask" x="551" y="463" width="62.8" height="14" rx="3"/><text class="l-default" x="582.4" y="473.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l57" data-detail="context" data-edge-from="graft-mcp" data-edge-to="archify-bridge"><rect class="mask" x="807.8" y="529" width="62.8" height="14" rx="3"/><text class="l-default" x="839.2" y="539.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l58" data-detail="context" data-edge-from="graft-mcp" data-edge-to="archify-delta"><rect class="mask" x="544.2" y="500" width="62.8" height="14" rx="3"/><text class="l-default" x="575.6" y="510.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l59" data-detail="context" data-edge-from="graft-mcp" data-edge-to="archify-ir"><rect class="mask" x="200.4" y="505" width="43.6" height="14" rx="3"/><text class="l-default" x="222.2" y="515.2" font-size="8" text-anchor="middle">bağımlı</text></g>
+<g class="lbl" id="l60" data-detail="context" data-edge-from="graft-mcp" data-edge-to="archify-render"><rect class="mask" x="576.6" y="446" width="62.8" height="14" rx="3"/><text class="l-default" x="608" y="456.2" font-size="8" text-anchor="middle">kullanır ×3</text></g>
+<g class="lbl" id="l61" data-detail="context" data-edge-from="graft-mcp" data-edge-to="graft-model"><rect class="mask" x="400.6" y="553" width="62.8" height="14" rx="3"/><text class="l-default" x="432" y="563.2" font-size="8" text-anchor="middle">kullanır ×6</text></g>
+<g class="lbl" id="l62" data-detail="context" data-edge-from="graft-mcp" data-edge-to="graft-parser"><rect class="mask" x="807.8" y="589" width="62.8" height="14" rx="3"/><text class="l-default" x="839.2" y="599.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="lbl" id="l63" data-detail="context" data-edge-from="graft-mcp" data-edge-to="graft-search"><rect class="mask" x="545.2" y="626.2" width="62.8" height="14" rx="3"/><text class="l-default" x="576.6" y="636.4" font-size="8" text-anchor="middle">kullanır ×8</text></g>
+<g class="lbl" id="l64" data-detail="context" data-edge-from="graft-mcp" data-edge-to="archify-hedef"><rect class="mask" x="532.6" y="511" width="62.8" height="14" rx="3"/><text class="l-default" x="564" y="521.2" font-size="8" text-anchor="middle">kullanır ×1</text></g>
+<g class="region-title" data-region-id="."><rect class="mask" x="50" y="117" width="17.4" height="16" rx="3"/><text class="t-region" x="56" y="128.5" font-size="9">.</text>
+<rect class="mask" x="1234" y="117" width="132" height="16" rx="3"/><text class="t-dim" x="1240" y="128" font-size="8">çalışma alanı · 25 sandık</text>
+</g>
+<g class="legend">
+<g class="legend-item" data-legend-kind="frontend" style="cursor:pointer"><rect class="sw-frontend" x="40" y="887" width="16" height="10" rx="2.5"/><text class="t-primary" x="62" y="896" font-size="10" text-anchor="start">Arayüz</text>
+<text class="t-dim" x="106" y="896" font-size="8" font-weight="700" text-anchor="start">3</text>
+</g>
+<g class="legend-item" data-legend-kind="backend" style="cursor:pointer"><rect class="sw-backend" x="144" y="887" width="16" height="10" rx="2.5"/><text class="t-primary" x="166" y="896" font-size="10" text-anchor="start">Çekirdek</text>
+<text class="t-dim" x="222" y="896" font-size="8" font-weight="700" text-anchor="start">22</text>
+</g>
+</g>
+</svg>

@@ -1,114 +1,304 @@
-# Archify-Graft (Rust)
+# archify-graft-rs — Başvuru ve İşletim El Kitabı (CHM Kılavuzu)
 
-**Unified Pure-Rust Engine: Graft Codebase Intelligence & Archify Architecture Studio**
+<p align="center">
+  <a href="README.md">🇹🇷 Türkçe</a>
+</p>
 
-[![CI](https://github.com/Ercaner1988/archify-graft-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/Ercaner1988/archify-graft-rs/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/Ercaner1988/archify-graft-rs?utm_source=badge)
+<p align="center">
+  <a href="#ne-işe-yarar"><strong>📖 Belgeler</strong></a> • <a href="LICENSE"><strong>⚖️ Lisans</strong></a>
+</p>
 
-Archify-Graft merges the deterministic code graph and personalized PageRank intelligence of **Graft** with the JSON-IR architecture modeling and signature neon visual aesthetics of **Archify**. Built 100% in native Rust, it completely eliminates Node.js, Bun, V8, and Python/uv runtime dependencies.
-
-- **Zero-Runtime Overhead:** Single static binary with zero external runtime dependencies.
-- **Hardware-Deep Direct I/O:** Bypasses OS page cache using sector-aligned direct DMA (`FILE_FLAG_NO_BUFFERING` on Windows, `O_DIRECT` on Linux).
-- **Trilingual Intelligence:** First-class tokenizer and normalizer for **Arabic**, **Turkish**, and **English**.
-- **Multi-Language AST Support:** Deep body-scanning and call edge extraction for **Rust**, **JavaScript/TypeScript**, **Python**, **Go**, **Java**, and **C/C++**.
-- **Zero-Copy Persistence:** Lightning-fast serialization using **rkyv** with pinned wire contracts for cross-engine interoperability.
-- **Micro-Crate Architecture:** 24 decoupled micro-crates strictly complying with the 1500 LOC per crate constraint, plus the root `archify-graft-cli` binary (25 workspace packages).
-- **5 Diagram Types & Delta Engine:** Architecture, Sequence, Dataflow, Lifecycle, Workflow diagrams + before/after delta diff analysis.
-- **Interactive Studio & Neon Aesthetics:** Hardware GPU-accelerated neon bloom rendering in `egui` via **wgpu** (DirectX 12 / Vulkan / Metal) and self-contained SVG export.
-- **Authored Story Beats:** Step-through architectural storytelling and multi-phase tour playback.
-- **Model Context Protocol (MCP):** High-speed native JSON-RPC server for AI agents (Claude Code, Google Antigravity, Cursor).
+> **Archify-Graft:** Kod tabanını indeksleyen, üç dilli (TR/AR/EN) arama yapan ve çağrı grafiğinden neon mimari şemalar üreten saf Rust motoru. Node.js, Bun, V8 ve Python yoktur; tek ikili, tek doğruluk kaynağı.
 
 ---
 
-## Workspace Crates (25 Crates)
+## 📑 İçindekiler ve Sekmeli Dizin (Index & Navigation)
 
-### Hardware & Core Model
-- `lowlevel-sys`: Hardware direct DMA, cache line detection, core affinity, TSC profiling.
-- `graft-model`: Core AST data models (`NodeV1`, `EdgeV1`, `CodeGraph`), rkyv zero-copy serialization, binary varint framing.
-- `graft-i18n`: Trilingual tokenizer with Arabic diacritics stripping, Turkish locale safety, English subwords.
+<details open>
+<summary><strong>[Ağaç Dizinini Daralt / Genişlet]</strong></summary>
 
-### Graft Code Intelligence & Extraction
-- `graft-cargo`: Cargo workspace manifest parser and path-dependency resolver.
-- `graft-rust`: Zero-dependency Rust source code scanner, tokenizer, comment/string masking, and call extractor.
-- `graft-langs`: Multi-language AST item and call extractors (JS/TS, Python, Go, Java, C/C++).
-- `graft-langs-link`: Cross-file call resolution and import linker for multilingual projects.
-- `graft-parser`: Parallel Rayon file scanner, incremental FNV-1a hash index, and AST orchestrator.
-- `graft-search`: Whole-file memory-mapped BM25 index and Personalized GraphRank (PageRank) search.
+- [Ne işe yarar](#ne-işe-yarar)
+  - [Sekmeli Yetenek Kanalları](#sekmeli-yetenek-kanalları)
+- [Mimari](#mimari)
+  - [Vektörel Mimari Şeması](#vektörel-mimari-şeması)
+  - [Veri Akışı Şeması](#veri-akışı-şeması)
+  - [Çalışma Alanı Dermeleri (25 Paket)](#çalışma-alanı-dermeleri-25-paket)
+- [Kurulum](#kurulum)
+- [Örnek kullanım](#örnek-kullanım)
+- [Bağımlılıklar](#bağımlılıklar)
+- [Yenilikler](#yenilikler)
+- [Çapraz Başvurular ve İlgili Belgeler](#çapraz-başvurular-ve-ilgili-belgeler)
 
-### Archify Visualization & Layout
-- `archify-ir`: Strict JSON-IR schema types for 5 diagram types, delta diff models, and story beats.
-- `archify-geometry`: Graph reachability (BFS) and topological route probing (A* shortest path).
-- `archify-style`: Preset palettes (Editorial, Neon, Classic), themes, stroke styling, and text measurement.
-- `archify-route`: Orthogonal edge routing, A* grid pathfinder, edge bus bundling, and lane nudging.
-- `archify-layout`: Hierarchical Sugiyama/layered placement algorithm without third-party dependencies.
-- `archify-motion`: Smooth animation curves (easing, energy beams, camera pan/zoom interpolation, tour steps).
-- `archify-scene`: Spatial scene node builder, layered structure compiler, and tour sequencer.
-- `archify-crates`: Workspace crate-level dependency hierarchy extractor and heuristic role labeling.
-- `archify-bridge`: AST-to-Architecture, Sequence call tracer, and Dataflow pipeline compiler.
-- `archify-render`: Preset-aware Neon SVG / HTML export with Arabic RTL support and delta diff legend.
-- `archify-delta`: Diff engine comparing before/after diagrams (Added/Removed/Modified/Unchanged).
-- `archify-hedef`: Aim layer — reads a repository's `.harness/hedefler.json` (shared `archify-hedef/1` schema, see `docs/HEDEF_SEMASI.md`), falling back to the older `.harness/feature-list.json` and marking it as translated; an unrecognized status word, an unknown schema tag, or a missing status is reported as unread, never counted as green.
-
-### Interactive Desktop Studio & Integration
-- `archify-egui-paint`: Multi-pass neon bloom painter, glow shaders, and connection arc drawing.
-- `archify-egui`: Interactive desktop studio (`egui` + `wgpu` DirectX 12/Vulkan), interactive canvas, search overlay.
-- `graft-mcp`: Asynchronous Model Context Protocol stdio JSON-RPC server for AI coding agents.
-- `archify-graft-cli`: Unified command-line interface orchestrating the entire pipeline.
+</details>
 
 ---
 
-## Quick Start
+## Ne işe yarar
 
-```bash
-# Index codebase incrementally with direct DMA I/O
-cargo run -- index .
+Archify-Graft; **Graft**'ın deterministik AST kod grafını ve kişiselleştirilmiş PageRank (GraphRank) aramasını, **Archify**'ın JSON-IR mimari modellemesi ve imza niteliğindeki neon görselleştirmesiyle tek motorda birleştirir. Yazılım tamamıyla yerel Rust ile derlenir; çalışma zamanında harici yorumlayıcı, sanal makine ya da paket yöneticisi çağırmaz.
 
-# Ask / Search with BM25 + GraphRank (Turkish, Arabic, English)
-cargo run -- ask "direct DMA"
+| Parametre (Stat) | Değer | İşletimsel Rol |
+|---|---|---|
+| **Sistem Tipi** | Rust çalışma alanı (25 paket) | 24 mikro-derme + kök `archify-graft-cli` ikilisi |
+| **Sürüm** | 0.1.0 | `[workspace.package]` beyanı |
+| **Lisans** | MIT | Açık kaynak dağıtım modeli |
+| **Girdi Dilleri** | Rust, JS/TS, Python, Go, Java, C/C++ | Gövde taramalı sembol ve çağrı kenarı çıkarımı |
+| **Arayüz Dilleri** | Türkçe, Arapça, İngilizce | Belirteçleme, normalizasyon, diyagram yerelleştirmesi |
+| **Kalıcılık** | rkyv 0.8 + bellek haritalı ikili | Sıfır-kopya okuma, artımlı FNV-1a indeks |
+| **Ajan Arayüzü** | MCP (JSON-RPC, stdio) | 10 araç: `graft_index`, `graft_ask`, `graft_hedef`, … |
 
-# Generate Neon Architecture Diagram (Turkish)
-cargo run -- diagram --output architecture.svg --title "Sistem Mimarisi" --locale tr
+### Sekmeli Yetenek Kanalları
 
-# Generate Sequence Diagram (Call Trace)
-cargo run -- diagram --type sequence --output sequence.svg --title "Çağrı İzi"
+<details open>
+<summary><strong>1.1 Kod Zekası ve Arama (graft)</strong></summary>
 
-# Generate Dataflow Diagram (Pipelines)
-cargo run -- diagram --type dataflow --output dataflow.svg --title "Veri Akışı"
+- **Artımlı indeks:** Dosya içeriğinin FNV-1a karması tutulur; değişmeyen dosya yeniden ayrıştırılmaz.
+- **Üç dilli belirteçleme:** Arapça harekeler (tashkeel) ve elif varyantları sadeleştirilir; Türkçe `ı/i` ve `İ/I` eşlemesi korunur; İngilizce camelCase/snake_case alt sözcüklere ayrılır.
+- **Sıralama:** BM25 sözcüksel skoru ile kişiselleştirilmiş GraphRank yayılımı birlikte puanlanır; sonuç bildirim (declaration) ve dosya gövdesi olarak ikiye ayrılır.
 
-# Generate Neon Architecture Diagram (Arabic RTL)
-cargo run -- diagram --output architecture-ar.svg --title "استوديو بنية النظام" --locale ar
+</details>
 
-# Launch Interactive GUI Studio (egui + wgpu DirectX 12 / Vulkan canvas)
-cargo run --features gui -- gui
+<details>
+<summary><strong>1.2 Görselleştirme ve Yerleşim (archify)</strong></summary>
 
-# Start MCP server for AI agents
-cargo run -- mcp
+- **5 diyagram türü:** Mimari, Sıralama, Veri Akışı, Yaşam Döngüsü, İş Akışı.
+- **Yerleşim:** Bağımsız Sugiyama katmanlı kutu yerleştirme; dik açılı kenar yönlendirme, A* ızgara bulucu, kenar demetleme.
+- **Çıktı:** Kendi kendine yeten SVG ve HTML; Arapça için RTL yerleşim, delta için lejant.
+- **Delta motoru:** İki diyagram arasındaki eklenen, silinen ve değişen düğüm/kenarları hesaplar.
 
-# Show a repository's aim board (.harness/hedefler.json, shared schema); --ozet = counts only
-cargo run -- hedef . --ozet
-# Machine-readable board: schema tag, source (ortak-sema|cevirici), per-goal statuses, yesil
-cargo run -- hedef . --json
+</details>
+
+<details>
+<summary><strong>1.3 Donanım Katmanı ve Kalıcılık</strong></summary>
+
+- **Doğrudan G/Ç:** Windows'ta `FILE_FLAG_NO_BUFFERING`, Linux'ta `O_DIRECT` ile sektör hizalı (4096 bayt) okuma; işletim sistemi sayfa önbelleği atlanır.
+- **Donanım ölçümü:** Önbellek satırı tespiti, çekirdek ilgisi ve TSC tabanlı döngü sayacı.
+- **Sıfır-kopya:** `rkyv 0.8` ile sabitlenmiş tel sözleşmesi (wire contract); graf bellek haritalı dosyadan yerinde okunur.
+
+</details>
+
+<details>
+<summary><strong>1.4 Amaç Katmanı: <code>hedef</code></strong></summary>
+
+Deponun kendi iddiasını makine okunur hâle getirir. Kaynak önceliği:
+
+1. `.harness/hedefler.json` — ortak `archify-hedef/1` şeması (bkz. `docs/HEDEF_SEMASI.md`).
+2. Yoksa `.harness/feature-list.json` — eski şema, çıktıda `kaynak: "cevirici"` diye **işaretlenir**.
+3. İkisi de yoksa tahta boş döner; uydurma hedef üretilmez.
+
+Tanınmayan durum sözcüğü, bilinmeyen şema etiketi ya da durumsuz satır **okunamadı** sayılır ve yeşile yuvarlanmaz. `--ozet` yalnız sayım verir, `--json` tam kaydı verir.
+
+</details>
+
+---
+
+## Mimari
+
+Aşağıdaki şemalar bu deponun kendi çağrı grafiğinden, `archify-graft` DMA AST çıkarıcısıyla derlenmiştir. Kaynak: `index .` → 8 dosya tarandı, **1276 düğüm ve 2147 kenar**.
+
+### Vektörel Mimari Şeması
+
+<p align="center">
+  <img src="docs/archify-graft-rs_arch.svg" alt="Archify-Graft mimari haritası" width="100%">
+</p>
+
+- 🔍 **[İnteraktif Mimari Görüntüleyici (Pan & Zoom HTML)](docs/archify-graft-rs_arch.html)**: Canlı bileşen ve bağlantı haritası.
+- 🖼️ **[Vektörel Mimari Şeması (SVG)](docs/archify-graft-rs_arch.svg)**: Yüksek çözünürlüklü vektör haritası.
+
+### Veri Akışı Şeması
+
+<p align="center">
+  <img src="docs/archify-graft-rs_dataflow.svg" alt="Archify-Graft veri akışı" width="100%">
+</p>
+
+- 🔍 **[İnteraktif Veri Akışı Görüntüleyici (HTML)](docs/archify-graft-rs_dataflow.html)**: Boru hattının canlı pan/zoom şeması.
+- 🖼️ **[Vektörel Veri Akış Şeması (SVG)](docs/archify-graft-rs_dataflow.svg)**: Vektörel diyagram.
+
+### Çalışma Alanı Dermeleri (25 Paket)
+
+<details open>
+<summary><strong>Donanım ve Çekirdek Model</strong></summary>
+
+- `lowlevel-sys`: Doğrudan DMA G/Ç, önbellek satırı tespiti, çekirdek ilgisi, TSC sayacı.
+- `graft-model`: `NodeV1`, `EdgeV1`, `CodeGraph` modelleri; rkyv sıfır-kopya serileştirme ve varint çerçeveleme.
+- `graft-i18n`: Üç dilli belirteçleyici ve normalleştirici.
+
+</details>
+
+<details>
+<summary><strong>Kod Analizi ve Çıkarım</strong></summary>
+
+- `graft-cargo`: Cargo çalışma alanı bildirimi ayrıştırıcısı ve yol bağımlılığı çözümleyicisi.
+- `graft-rust`: Saf Rust tarayıcı; yorum/dizge maskeleme ve çağrı çıkarımı.
+- `graft-langs`: JS/TS, Python, Go, Java, C/C++ öğe ve çağrı çıkarıcıları.
+- `graft-langs-link`: Diller arası içe aktarma ve çağrı bağlama.
+- `graft-parser`: Rayon tabanlı paralel tarayıcı, artımlı FNV-1a hash indeksi.
+- `graft-search`: Bellek haritalı BM25 indeksi ve kişiselleştirilmiş GraphRank.
+
+</details>
+
+<details>
+<summary><strong>Archify Görselleştirme ve Yerleşim</strong></summary>
+
+- `archify-ir`: 5 diyagram türü, delta modelleri ve hikâye adımları için katı JSON-IR şemaları.
+- `archify-geometry`: BFS erişilebilirliği ve topolojik A* en kısa rota.
+- `archify-style`: Önayar paletler (Editorial, Neon, Classic), temalar, vuruş biçimleri.
+- `archify-route`: Dik açılı kenar yönlendirme, A* ızgara bulucu, demetleme, şerit itme.
+- `archify-layout`: Bağımsız Sugiyama katmanlı yerleştirme.
+- `archify-motion`: Animasyon eğrileri, kamera pan/zoom enterpolasyonu, tur adımları.
+- `archify-scene`: Sahne düğümü üretimi, katmanlı yapı derleme, tur sıralama.
+- `archify-crates`: Derme bağımlılık hiyerarşisi çıkarımı ve rol etiketleme.
+- `archify-bridge`: AST'den Mimari, Sıralama ve Veri Akışı diyagramı derleme.
+- `archify-render`: Neon SVG/HTML ihracı, Arapça RTL, delta lejantı.
+- `archify-delta`: Ekleme/silme/değişiklik diff motoru.
+- `archify-hedef`: Amaç katmanı — `.harness/hedefler.json` (ortak şema) ya da işaretli çevirici.
+
+</details>
+
+<details>
+<summary><strong>Masaüstü Arayüzü ve Entegrasyon</strong></summary>
+
+- `archify-egui-paint`: Çok geçişli neon ışıma boyayıcısı ve bağlantı yayları.
+- `archify-egui`: `egui` + `wgpu` masaüstü stüdyosu, tuval yönetimi, arama katmanı.
+- `graft-mcp`: Ajanlar için asenkron MCP JSON-RPC sunucusu.
+- `archify-graft-cli`: Boru hatlarını yöneten kök komut satırı arayüzü.
+
+</details>
+
+---
+
+## Kurulum
+
+<details open>
+<summary><strong>Sekme A: Kaynaktan İkili Üretme (Tavsiye Edilen)</strong></summary>
+
+```sh
+git clone https://github.com/Ercan1988/archify-graft-rs.git
+cd archify-graft-rs
+cargo build --release --locked
+# İkili: target/release/archify-graft-cli.exe (Windows) / archify-graft-cli (Linux, macOS)
+```
+
+Bu çalışma alanı crates.io'ya yayımlanmadığı için `cargo install --path .` de kullanılabilir; `cargo add` yanıltıcı olurdu.
+
+</details>
+
+<details>
+<summary><strong>Sekme B: GPU Stüdyosu (egui + wgpu)</strong></summary>
+
+```sh
+cargo build --release --locked --features gui
+```
+
+`gui` özelliği `archify-egui` dermesini ve `wgpu` arka ucunu (DirectX 12 / Vulkan / Metal) devreye alır. Varsayılan derlemede arayüz ikiliye girmez.
+
+</details>
+
+<details>
+<summary><strong>Sekme C: MCP Sunucusu Olarak Bağlama</strong></summary>
+
+```sh
+archify-graft-cli mcp
+```
+
+Sunucu stdio üzerinden JSON-RPC konuşur. Yapılandırma örneği:
+
+```json
+{
+  "mcpServers": {
+    "archify-graft": {
+      "command": "archify-graft-cli",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Sekme D: Test ve Kalite Kapısı</strong></summary>
+
+```sh
+cargo test --workspace --locked -j 2
+cargo fmt --all --check
+cargo clippy --workspace --all-targets --locked -j 2 -- -D warnings
+kapi . --guvenilen-kod
+```
+
+Son ölçüm (2026-11-03): **58 sınama ikilisi, 254 geçti, 0 başarısız**; `fmt` ve `clippy` temiz; `kapi` **9 yeşil · 0 kırmızı**.
+
+</details>
+
+---
+
+## Örnek kullanım
+
+| Komut | Sözdizimi Örneği | Açıklama |
+|---|---|---|
+| `index` | `archify-graft-cli index .` | Kod tabanını artımlı DMA taramasıyla indeksler, `.cache/graft-graph.bin` yazar |
+| `ask` | `archify-graft-cli ask "doğrudan DMA"` | TR/AR/EN BM25 + GraphRank araması |
+| `grep` | `archify-graft-cli grep 'fn main'` | İndeks üzerinde düzenli ifade araması; isabetler bildirim/gövde olarak gruplanır |
+| `skeleton` | `archify-graft-cli skeleton src/main.rs` | Tek dosyanın yalnız imzalarını gösterir |
+| `map` | `archify-graft-cli map .` | Bütçelenmiş depo yönelimi: dizin kümeleri, merkezler, sıcak noktalar |
+| `diagram` | `archify-graft-cli diagram -t architecture --output mimari.svg` | Mimari/Sıralama/Veri Akışı/Delta şeması üretir |
+| `check` | `archify-graft-cli check` | İndeks kodun gerisinde kaldıysa kırmızı döner (CI için) |
+| `watch` | `archify-graft-cli watch .` | Değişiklikleri izler, artımlı yeniden indeksler |
+| `hedef` | `archify-graft-cli hedef . --ozet` | Deponun amaç tahtası: yalnız sayımlar |
+| `gui` | `archify-graft-cli gui` | `--features gui` ile derlenmişse interaktif stüdyo |
+| `mcp` | `archify-graft-cli mcp` | Ajanlar için MCP sunucusu (stdio) |
+
+```sh
+# Uçtan uca tipik akış
+archify-graft-cli index .
+archify-graft-cli map . --max-dirs 30
+archify-graft-cli diagram -t architecture --output docs/mimari.svg --title "Sistem Mimarisi" --locale tr
+archify-graft-cli hedef . --ozet
 ```
 
 ---
 
-## Benchmarks
+## Bağımlılıklar
 
-Performance is tracked continuously with [CodSpeed](https://codspeed.io). The suites live in
-`benches/` and cover the hot paths of the engine:
+<!-- kapi-belge:bagimliliklar:start -->
+| Bağımlılık | Bildirilen sürüm |
+|---|---|
+| `serde` | `{ version = "1.0", features = ["derive"] }` |
+| `serde_json` | `1.0` |
+| `rkyv` | `0.8` |
+| `rayon` | `1.10` |
+| `tokio` | `{ version = "1.40", features = ["full"] }` |
+| `memmap2` | `0.9` |
+| `petgraph` | `0.6` |
+| `thiserror` | `1.0` |
+| `anyhow` | `1.0` |
+| `log` | `0.4` |
+| `env_logger` | `0.11` |
+| `clap` | `{ version = "4.5", features = ["derive"] }` |
+| `unicode-normalization` | `0.1` |
+| `regex` | `1.10` |
+| `eframe` | `{ version = "0.37.0", default-features = false, features = ["default_fonts"] }` |
+| `egui` | `{ version = "0.37.0", features = ["monochrome_emoji_fonts"] }` |
+<!-- kapi-belge:bagimliliklar:end -->
 
-- `tokenizer`: trilingual tokenization and character folding (`graft-i18n`).
-- `indexing`: FNV-1a content hashing, AST extraction, call resolution (`graft-parser`).
-- `search`: BM25 index build/scoring and GraphRank propagation (`graft-search`).
-- `diagram`: JSON-IR compilation, neon SVG export, delta diffing, A* routing
-  (`archify-bridge`, `archify-render`, `archify-delta`, `archify-geometry`).
+---
 
-```bash
-# Run locally with divan (walltime, human-readable output)
-cargo bench
+## Yenilikler
 
-# Run through the CodSpeed CPU simulation instrument
-cargo codspeed build --measurement-mode simulation
-codspeed run --mode simulation -- cargo codspeed run
-```
+- **Amaç katmanı (`archify-hedef/1`):** Ortak şema ile depo tahtaları makine okunur hâle geldi; eski `feature-list.json` varsa çevirici devreye girer ve çıktı bunu işaretler.
+- **`hedef` komutu ve `graft_hedef` MCP aracı:** Tahta hem CLI'dan (`--ozet` / `--json`) hem ajan üzerinden okunur.
+- **Belge hizalaması:** README derme sayıları 25 çalışma alanı paketiyle eşitlendi; `powershell` çitleri `bash` oldu.
+- Ayrıntılı sürüm geçmişi: bu depoda `CHANGELOG.md` henüz yok; sürüm notları commit iletilerinde tutulur. Amaç tahtasının güncel hâli `hedef . --ozet` ile okunur.
+
+---
+
+## Çapraz Başvurular ve İlgili Belgeler
+
+- **[Amaç Şeması](docs/HEDEF_SEMASI.md)**: `archify-hedef/1` alanları, durum sözcükleri ve okunamadı kuralı.
+- **[Amaç Katmanı](docs/AMAC_KATMANI.md)**: Tahtanın neden var olduğu ve nasıl okunacağı.
+- **[Hedef Geçiş Talimatı](docs/HEDEF_GECIS_TALIMATI.md)**: Eski şemadan ortak şemaya geçiş adımları (11 depo).
+- **[Vizyon](docs/VIZYON.md)**: Motorun kapsamı ve sınırları.
+- **[Kalite Kapısı Yapılandırması](kapi.toml)**: `kapi` boyutları ve eşikleri.
+- **[Lisans](LICENSE)**: MIT.
+
+<!-- kapi-belge:kaynak=2fa9ec8267879d09 -->
