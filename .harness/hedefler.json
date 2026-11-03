@@ -62,6 +62,12 @@
       "ad": "Etkileşimli masaüstü stüdyosu (egui + wgpu)",
       "durum": "tamam",
       "kanit": "cargo check --all-targets --features gui: 0 (altın-kapi boyutu: onyuz)"
+    },
+    {
+      "id": "H-11",
+      "ad": "Belge vitrini: README AKINCI CHM biçimi, bu deponun kendi çağrı grafiğinden üretilen mimari şemalar ve İngilizce ayna",
+      "durum": "tamam",
+      "kanit": "README.md `evrensel-readme uret --modu chm` ile üretildi (7 bölüm: içindekiler + 6 zorunlu); `denetle` zorunlu bölümler tam, 4 kod bloğu geçerli; bağımlılık tablosu 27 satır kapi-belge tarafından Cargo.toml'dan yazıldı; README.en.md aynı 7 bölümün aynası, ratchet 1 çeviri tam ayna; docs/archify-graft-rs_{arch,dataflow}.{svg,html} `index .` → 8 dosya, 1276 düğüm / 2147 kenar"
     }
   ]
 }
