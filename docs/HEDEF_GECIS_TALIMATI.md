@@ -44,25 +44,45 @@ archify-graft-cli hedef <depo yolu> --ozet
 Çıktıda `kaynak: … — ortak şema` görünüyorsa geçiş tamam; `çevirici (eski şema)`
 görünüyorsa o depo henüz yazmamış.
 
-## Bugünkü durum (2026-11-02)
+## Bugünkü durum (2026-11-03)
 
-| Depo | `.harness/hedefler.json` | `.harness/feature-list.json` |
-|---|---|---|
-| archify-graft-rs | **var** (10 hedef) | — |
-| altin-kapi | yok | var |
-| el-Fihrist | yok | var |
-| kesfuzzunun | yok | var |
-| logseq-tepsi | yok | var |
-| Nazar | yok | var |
-| okf | yok | var |
-| pasli-beyin | yok | var |
-| wbc-rs | yok | var |
+Aşağıdaki satırlar elle yazılmadı: `archify-graft-cli hedef <depo> --ozet` ve
+`archify-graft-cli hedef <depo>` (kaynak satırı) çıktısından dolduruldu. Sütun 3
+tahtanın kendi hükmüdür — tablodaki 11 depodan **7'si** ortak şemada, 4'ü
+henüz değil.
 
-`kunye` ve `oturum-ozeti` depolari hiç beyan taşımıyor — onlar için geçiş
-değil, ilk yazım söz konusu.
+| Depo | Tahta (ortak şema) | Eski `feature-list.json` | Durum |
+|---|---|---|---|
+| archify-graft-rs | **var** — 10 hedef · 8 tamam · 1 devam · 1 bekliyor | — | geçti |
+| altin-kapi | **var** — 10 hedef · 4 tamam · 1 kısmi · 1 devam · 4 bekliyor | var (gölgede) | geçti (03.11) |
+| el-Fihrist | **var** — 13 hedef · 5 tamam · 3 kısmi · 5 bekliyor | var (gölgede) | geçti |
+| kesfuzzunun | **var** — 13 hedef · 9 tamam · 1 kısmi · 3 bekliyor | var (gölgede) | geçti (03.11) |
+| logseq-tepsi | **var** — 15 hedef · 7 tamam · 7 kısmi · 1 bekliyor | var (gölgede) | geçti |
+| Nazar | **var** — 9 hedef · 6 tamam · 1 kısmi · 2 devam | var (gölgede) | geçti |
+| oturum-ozeti | **var** — 6 hedef · 4 tamam · 1 kısmi · 1 bekliyor | — | geçti (hiç beyanı yoktu) |
+| okf | yok | var — 13 hedef (7 tamam · 6 ertelendi) | **kaldı** |
+| pasli-beyin | yok | var — 8 hedef (8 tamam) | **kaldı** |
+| wbc-rs | yok | var — 27 hedef (1 tamam · 7 devam · 10 bekliyor · 9 ertelendi) | **kaldı** |
+| kunye | yok | yok | **kaldı** — hiç beyanı yok, ilk yazım |
 
-## Sıra önerisi
+`okf` ve `pasli-beyin` bu tabloya göre "kaldı" görünüyor ama **bu oturumda
+dokunulmadı**: ikisinde de etkin çalışan bir oturum var, istem Ercan tarafından
+iletilecek. `wbc-rs` ve `kunye` sırada.
 
-En çok kullanılan zeminden başla: `altin-kapi` (kapı her depoda koşuyor),
-sonra `Nazar`, `el-Fihrist`, `kesfuzzunun`. Kalanlar kendi temposunda.
-Sıra bağlayıcı değil; tahta hangi deponun geçtiğini kendisi gösterir.
+### Uyarı — "geçti" hükmü bugün yalnız bu makinede geçerli
+
+2026-11-03'te `git check-ignore` ile ölçüldü: `.harness/hedefler.json` yedi
+depodan **altısında `.gitignore` ile yok sayılıyor**; izlenen tek depo
+`archify-graft-rs`. Yani el-Fihrist, kesfuzzunun, altin-kapi, Nazar,
+logseq-tepsi ve oturum-ozeti tahtaları **yalnız yerel diskte** var — klonlayan,
+CI koşucusu ya da başka makinedeki ajan onları görmez.
+
+Bu bir kusur mu, tercih mi, ölçülmeden karar verilmez: `.harness/` bu depolarda
+bilerek yok sayılıyor olabilir (çalışma defteri, ürün değil). Ama o hâlde
+"geçiş tamam" cümlesi depoyla taşınmıyor demektir ve tabloda bunun yazması
+gerekir. İzlenmesi isteniyorsa her depo önce kendi G0 sızıntı kapısından
+geçirmek zorunda: bugünkü tahtalarda kişisel mutlak yollar var
+(`C:\Users\buzbe\…`), yani `!/​.harness/hedefler.json` istisnası yazmak tek
+başına kapıyı kırmızıya çevirir. Karar Ercan'ın.
+
+
